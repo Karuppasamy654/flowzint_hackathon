@@ -10,6 +10,7 @@ const UserSchema = new mongoose.Schema({
         label: { type: String, default: 'Delhi' }
     },
     skills: [{ type: String }],
+    occupation: { type: String, default: 'student' },
     bloodGroup: { type: String },
     rating: { type: Number, default: 4.5 },
     ratingCount: { type: Number, default: 1 },

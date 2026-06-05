@@ -29,11 +29,11 @@ export function AuthProvider({ children }) {
         return data;
     };
 
-    const register = async (name, email, password, isHelper = false) => {
+    const register = async (name, email, password, isHelper = false, occupation = 'student', skills = []) => {
         const res = await fetch(`${SERVER_URL}/api/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password, isHelper })
+            body: JSON.stringify({ name, email, password, isHelper, occupation, skills })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);

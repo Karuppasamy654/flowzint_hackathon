@@ -13,6 +13,8 @@ export default function LoginModal({ onClose }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isHelper, setIsHelper] = useState(false);
+    const [occupation, setOccupation] = useState('student');
+    const [selectedSpecialties, setSelectedSpecialties] = useState([]);
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -23,7 +25,8 @@ export default function LoginModal({ onClose }) {
 
         try {
             if (isRegister) {
-                const res = await register(name, email, password, isHelper);
+                const specialtiesToSubmit = isHelper ? (selectedSpecialties.length > 0 ? selectedSpecialties : ['general']) : [];
+                const res = await register(name, email, password, isHelper, occupation, specialtiesToSubmit);
                 if (res.user?.isHelper) {
                     navigate('/helper');
                 } else {
@@ -135,17 +138,66 @@ export default function LoginModal({ onClose }) {
                     </div>
 
                     {isRegister && (
-                        <div className="form-checkbox-group">
-                            <input
-                                type="checkbox"
-                                id="isHelperCheck"
-                                checked={isHelper}
-                                onChange={(e) => setIsHelper(e.target.checked)}
-                            />
-                            <label htmlFor="isHelperCheck">
-                                I am registering as a <strong>volunteer helper</strong>
-                            </label>
-                        </div>
+                        <>
+                            <div className="form-input-group">
+                                <label>Occupation Status</label>
+                                <select
+                                    value={occupation}
+                                    onChange={(e) => setOccupation(e.target.value)}
+                                >
+                                    <option value="student">🎓 Student</option>
+                                    <option value="worker">💼 Worker / Professional</option>
+                                </select>
+                            </div>
+
+                            <div className="form-checkbox-group">
+                                <input
+                                    type="checkbox"
+                                    id="isHelperCheck"
+                                    checked={isHelper}
+                                    onChange={(e) => setIsHelper(e.target.checked)}
+                                />
+                                <label htmlFor="isHelperCheck">
+                                    I am registering as a <strong>volunteer helper</strong>
+                                </label>
+                            </div>
+
+                             {isHelper && (
+                                <div className="form-checkboxes-group">
+                                    <label className="checkboxes-label">What types of help can you provide?</label>
+                                    <div className="specialty-grid">
+                                        {[
+                                            { val: 'blood_donation', label: '🩸 Blood Donation' },
+                                            { val: 'medical', label: '🏥 Medical Aid' },
+                                            { val: 'tutoring', label: '📚 Tutoring' },
+                                            { val: 'financial_help', label: '💰 Financial Aid' },
+                                            { val: 'food_supply', label: '🍲 Food Supply' },
+                                            { val: 'shelter', label: '🏠 Shelter' },
+                                            { val: 'transport', label: '🚗 Transport' },
+                                            { val: 'counseling', label: '🧘 Counselling' },
+                                            { val: 'legal_aid', label: '⚖️ Legal Aid' },
+                                            { val: 'general', label: '🤝 General Help' }
+                                        ].map((item) => (
+                                            <div key={item.val} className="specialty-checkbox">
+                                                <input
+                                                    type="checkbox"
+                                                    id={`spec-${item.val}`}
+                                                    checked={selectedSpecialties.includes(item.val)}
+                                                    onChange={(e) => {
+                                                        if (e.target.checked) {
+                                                            setSelectedSpecialties([...selectedSpecialties, item.val]);
+                                                        } else {
+                                                            setSelectedSpecialties(selectedSpecialties.filter(x => x !== item.val));
+                                                        }
+                                                    }}
+                                                />
+                                                <label htmlFor={`spec-${item.val}`}>{item.label}</label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
 
                     <button type="submit" disabled={isLoading} className="btn-primary submit-auth-btn">

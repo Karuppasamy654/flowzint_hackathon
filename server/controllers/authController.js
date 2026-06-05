@@ -8,7 +8,7 @@ const JWT_SECRET = 'acin_secret_key_2024';
 const memoryUsers = []; // Fallback memory store
 
 async function register(req, res) {
-    const { name, email, password, isHelper } = req.body;
+    const { name, email, password, isHelper, occupation, skills } = req.body;
     if (!name || !email || !password) {
         return res.status(400).json({ error: 'All fields are required' });
     }
@@ -28,13 +28,15 @@ async function register(req, res) {
                 email,
                 password: hashedPassword,
                 location: { lat: 28.6139, lng: 77.2090, label: 'Delhi' },
-                isHelper: isHelper || false
+                isHelper: isHelper || false,
+                occupation: occupation || 'student',
+                skills: skills || []
             });
 
             const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
             return res.status(201).json({
                 token,
-                user: { id: user._id, name: user.name, email: user.email, isHelper: user.isHelper || false }
+                user: { id: user._id, name: user.name, email: user.email, isHelper: user.isHelper || false, occupation: user.occupation, skills: user.skills }
             });
         } else {
             // Memory fallback
@@ -50,6 +52,8 @@ async function register(req, res) {
                 password: hashedPassword,
                 location: { lat: 28.6139, lng: 77.2090, label: 'Delhi' },
                 isHelper: isHelper || false,
+                occupation: occupation || 'student',
+                skills: skills || [],
                 createdAt: new Date().toISOString()
             };
             memoryUsers.push(user);
@@ -57,7 +61,7 @@ async function register(req, res) {
             const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
             return res.status(201).json({
                 token,
-                user: { id: user.id, name: user.name, email: user.email, isHelper: user.isHelper || false }
+                user: { id: user.id, name: user.name, email: user.email, isHelper: user.isHelper || false, occupation: user.occupation, skills: user.skills }
             });
         }
     } catch (err) {
