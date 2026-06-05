@@ -1,6 +1,8 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import LoginModal from '../components/LoginModal';
 import './Home.css';
 
 const features = [
@@ -22,10 +24,10 @@ const stats = [
 export default function Home() {
     const navigate = useNavigate();
     const { demoLogin } = useAuth();
+    const [showLogin, setShowLogin] = useState(false);
 
-    const handleGetStarted = async () => {
-        try { await demoLogin(); } catch { }
-        navigate('/dashboard');
+    const handleGetStarted = () => {
+        setShowLogin(true);
     };
 
     const handleDemo = async () => {
@@ -159,6 +161,12 @@ export default function Home() {
             <footer className="home-footer">
                 <p>ACIN — AI-Powered Social Crisis Help Network • Built for FlowZint Hackathon</p>
             </footer>
+
+            <AnimatePresence>
+                {showLogin && (
+                    <LoginModal onClose={() => setShowLogin(false)} />
+                )}
+            </AnimatePresence>
         </div>
     );
 }

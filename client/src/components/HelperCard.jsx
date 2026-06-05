@@ -1,4 +1,6 @@
 import { motion } from 'framer-motion';
+import { useSocket } from '../context/SocketContext';
+import { useAuth } from '../context/AuthContext';
 import './HelperCard.css';
 
 const badgeColors = {
@@ -10,8 +12,34 @@ const badgeColors = {
 };
 
 export default function HelperCard({ helper, index, isExpanded, status }) {
+    const { socket } = useSocket();
+    const { user } = useAuth();
+
     const accepted = status === 'accepted';
     const rejected = status === 'rejected';
+
+    const handleBlock = (e) => {
+        e.stopPropagation();
+        const confirmBlock = window.confirm(`Are you sure you want to block ${helper.name}? They will no longer be matched for your crisis requests.`);
+        if (confirmBlock && socket) {
+            socket.emit('block-user', {
+                userId: user?.id || 'anonymous',
+                blockedUserId: helper.id || helper._id?.toString()
+            });
+        }
+    };
+
+    const handleReport = (e) => {
+        e.stopPropagation();
+        const reason = window.prompt(`Please enter the reason for reporting ${helper.name}:`);
+        if (reason && reason.trim() && socket) {
+            socket.emit('report-user', {
+                reportedUserId: helper.id || helper._id?.toString(),
+                reporterUserId: user?.id || 'anonymous',
+                reason: reason.trim()
+            });
+        }
+    };
 
     return (
         <motion.div
@@ -29,6 +57,9 @@ export default function HelperCard({ helper, index, isExpanded, status }) {
                 <div className="helper-info">
                     <div className="helper-name-row">
                         <span className="helper-name">{helper.name}</span>
+                        {helper.isVerified && (
+                            <span className="verified-badge-tick" title="Verified Volunteer">✔️</span>
+                        )}
                         <span className={`badge ${badgeColors[helper.badge] || 'badge-silver'}`}>
                             {helper.badge}
                         </span>
@@ -116,9 +147,20 @@ export default function HelperCard({ helper, index, isExpanded, status }) {
 
             <div className="helper-footer">
                 <div className="response-prob">
-                    <span className="prob-label">Response Probability</span>
+                    <span className="prob-label">Response Prob</span>
                     <span className="prob-value">{helper.responseProbability || 0}%</span>
                 </div>
+
+                {/* Trust & Safety Actions */}
+                <div className="trust-actions">
+                    <button className="trust-action-btn report" onClick={handleReport} title="Report Helper">
+                        ⚠️ Report
+                    </button>
+                    <button className="trust-action-btn block" onClick={handleBlock} title="Block Helper">
+                        🚫 Block
+                    </button>
+                </div>
+
                 {accepted && (
                     <motion.div
                         className="accepted-badge"

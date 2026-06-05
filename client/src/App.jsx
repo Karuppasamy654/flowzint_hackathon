@@ -3,11 +3,20 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
+import HelperDashboard from './pages/HelperDashboard';
 import './App.css';
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
   if (!user) return <Navigate to="/" />;
+  if (user.isHelper) return <Navigate to="/helper" />;
+  return children;
+}
+
+function HelperRoute({ children }) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/" />;
+  if (!user.isHelper) return <Navigate to="/dashboard" />;
   return children;
 }
 
@@ -22,6 +31,11 @@ function App() {
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
+            } />
+            <Route path="/helper" element={
+              <HelperRoute>
+                <HelperDashboard />
+              </HelperRoute>
             } />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>

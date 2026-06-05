@@ -14,34 +14,35 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 64px;
+    height: 80px;
+    padding: 0 40px;
 }
 
 .navbar-brand {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 18px;
 }
 
 .navbar-logo {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
 }
 
 .logo-icon {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 46px;
+    height: 46px;
     background: var(--gradient-primary);
     border-radius: var(--radius-md);
 }
 
 .logo-text {
-    font-size: 1.4rem;
+    font-size: 1.75rem;
     font-weight: 800;
     letter-spacing: 0.08em;
     background: var(--gradient-primary);
@@ -52,46 +53,46 @@
 
 .navbar-tagline {
     color: var(--text-muted);
-    font-size: 0.8rem;
+    font-size: 0.95rem;
     font-weight: 500;
     letter-spacing: 0.03em;
-    padding-left: 14px;
+    padding-left: 18px;
     border-left: 1px solid var(--border-glass);
 }
 
 .navbar-actions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
 }
 
 .user-info {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .user-avatar {
-    width: 32px;
-    height: 32px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     background: var(--gradient-primary);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 1.05rem;
 }
 
 .user-name {
     color: var(--text-secondary);
-    font-size: 0.88rem;
+    font-size: 1.05rem;
     font-weight: 500;
 }
 
 .btn-sm {
-    padding: 8px 18px !important;
-    font-size: 0.82rem !important;
+    padding: 10px 22px !important;
+    font-size: 0.92rem !important;
 }
 
 @media (max-width: 768px) {

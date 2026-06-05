@@ -3,7 +3,7 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 40px 20px;
+    padding: 60px 40px;
     position: relative;
 }
 
@@ -12,8 +12,8 @@
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 300px;
-    height: 300px;
+    width: 360px;
+    height: 360px;
     background: radial-gradient(circle, rgba(16, 185, 129, 0.15), transparent 70%);
     border-radius: 50%;
     pointer-events: none;
@@ -21,8 +21,8 @@
 
 .success-icon {
     position: relative;
-    font-size: 3rem;
-    margin-bottom: 16px;
+    font-size: 3.5rem;
+    margin-bottom: 20px;
     z-index: 1;
 }
 
@@ -31,17 +31,17 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 80px;
-    height: 80px;
+    width: 96px;
+    height: 96px;
     border-radius: 50%;
     border: 2px solid rgba(16, 185, 129, 0.3);
     animation: success-glow 2s infinite;
 }
 
 .success-title {
-    font-size: 1.8rem;
+    font-size: 2.2rem;
     font-weight: 800;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     background: var(--gradient-success);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -49,27 +49,27 @@
 }
 
 .success-message {
-    font-size: 1rem;
+    font-size: 1.15rem;
     color: var(--text-secondary);
-    margin-bottom: 24px;
-    max-width: 500px;
+    margin-bottom: 32px;
+    max-width: 600px;
     line-height: 1.6;
 }
 
 .success-helper-card {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 20px 28px;
-    margin-bottom: 28px;
+    gap: 20px;
+    padding: 28px 36px;
+    margin-bottom: 36px;
     width: 100%;
-    max-width: 480px;
+    max-width: 560px;
 }
 
 .success-helper-avatar {
-    font-size: 2rem;
-    width: 56px;
-    height: 56px;
+    font-size: 2.4rem;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     background: rgba(16, 185, 129, 0.1);
     display: flex;
@@ -85,16 +85,16 @@
 
 .success-helper-name {
     font-weight: 700;
-    font-size: 1.05rem;
+    font-size: 1.25rem;
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .success-helper-meta {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.78rem;
+    gap: 10px;
+    font-size: 0.9rem;
     color: var(--text-muted);
 }
 
@@ -102,11 +102,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
 }
 
 .eta-label {
-    font-size: 0.65rem;
+    font-size: 0.78rem;
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -114,7 +114,7 @@
 }
 
 .eta-value {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     font-weight: 800;
     color: var(--accent-green);
     font-family: var(--font-mono);
@@ -123,57 +123,84 @@
 /* Timeline */
 .success-timeline {
     width: 100%;
-    max-width: 480px;
+    max-width: 560px;
     text-align: left;
-    margin-bottom: 28px;
+    margin-bottom: 36px;
 }
 
 .timeline-title {
-    font-size: 0.78rem;
+    font-size: 0.88rem;
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     display: block;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .timeline-items {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding-left: 8px;
+    gap: 12px;
+    padding-left: 10px;
 }
 
 .timeline-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .timeline-dot {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: var(--accent-blue);
     flex-shrink: 0;
 }
 
 .timeline-event {
-    font-size: 0.8rem;
+    font-size: 0.92rem;
     color: var(--text-secondary);
 }
 
 .success-actions {
-    margin-top: 8px;
+    margin-top: 12px;
 }
 
 @media (max-width: 768px) {
     .success-title {
-        font-size: 1.4rem;
+        font-size: 1.8rem;
     }
 
     .success-helper-card {
-        padding: 16px 20px;
+        padding: 20px 24px;
     }
 }
+
+.action-triggers {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+    width: 100%;
+    max-width: 560px;
+    justify-content: center;
+}
+
+.action-triggers button {
+    flex: 1;
+    font-size: 0.92rem;
+    padding: 12px 18px;
+}
+
+.rated-confirmation-badge {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--accent-amber);
+    padding: 12px 24px;
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    flex: 1;
+    text-align: center;
+}

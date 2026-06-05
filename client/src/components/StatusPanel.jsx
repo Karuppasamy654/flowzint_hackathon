@@ -18,6 +18,15 @@ export default function StatusPanel({ status, analysis, communities, quickAssist
     const config = statusConfig[status] || statusConfig.idle;
     const isActive = status !== 'idle' && status !== 'resolved';
 
+    // Extract wow variables
+    const confidence = analysis ? Math.round((analysis.confidence || 0.92) * 100) : 0;
+    const score = analysis ? (analysis.emergencyScore || 50) : 0;
+    const isHigh = analysis?.urgency === 'high';
+    const emergencyLabel = score >= 80 ? 'CRITICAL HIGH' : score >= 50 ? 'MEDIUM' : 'LOW';
+
+    // Local vs Gemini AI flag
+    const isLocal = analysis?.confidence === 0.85; // Custom marker we set for regex fallback
+
     return (
         <AnimatePresence mode="wait">
             {status !== 'idle' && (
@@ -43,7 +52,7 @@ export default function StatusPanel({ status, analysis, communities, quickAssist
                         </div>
                     </div>
 
-                    {/* AI Analysis Results */}
+                    {/* Upgraded WOW FACTOR - AI Crisis Intel Panel */}
                     <AnimatePresence>
                         {analysis && (status === 'analyzing' || status !== 'received') && (
                             <motion.div
@@ -52,31 +61,65 @@ export default function StatusPanel({ status, analysis, communities, quickAssist
                                 animate={{ opacity: 1, height: 'auto' }}
                                 transition={{ duration: 0.4, delay: 0.2 }}
                             >
-                                <div className="analysis-header">
-                                    <span className="section-title">🧠 AI Analysis</span>
-                                    <span className="confidence-badge">
-                                        {Math.round((analysis.confidence || 0.92) * 100)}% confidence
+                                <div className="analysis-header-new">
+                                    <span className="section-title-intel">🔥 AI Crisis Intelligence Panel</span>
+                                    <span className="safeguard-pill">
+                                        {isLocal ? '🛡️ Local NLP Backup' : '⚡ Gemini AI Online'}
                                     </span>
                                 </div>
-                                <div className="analysis-grid">
+
+                                <div className="analysis-intel-grid">
+                                    {/* Confidence Level */}
+                                    <div className="intel-card">
+                                        <div className="intel-card-header">
+                                            <span className="intel-card-lbl">AI Confidence Score</span>
+                                            <span className="intel-card-val" style={{ color: 'var(--accent-cyan)' }}>{confidence}%</span>
+                                        </div>
+                                        <div className="intel-progress-bar">
+                                            <motion.div 
+                                                className="intel-progress-fill cyan"
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${confidence}%` }}
+                                                transition={{ duration: 0.8 }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Emergency Level */}
+                                    <div className="intel-card">
+                                        <div className="intel-card-header">
+                                            <span className="intel-card-lbl">Emergency Score</span>
+                                            <span className="intel-card-val" style={{ color: isHigh ? 'var(--accent-red)' : 'var(--accent-amber)' }}>{score}/100</span>
+                                        </div>
+                                        <div className="intel-progress-bar">
+                                            <motion.div 
+                                                className={`intel-progress-fill ${isHigh ? 'red' : 'amber'}`}
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${score}%` }}
+                                                transition={{ duration: 0.8 }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Custom Details Grid */}
+                                <div className="analysis-grid margin-top-intel">
                                     <div className="analysis-item">
-                                        <span className="analysis-label">Type</span>
+                                        <span className="analysis-label">Parsed Category</span>
                                         <span className="analysis-value">{analysis.type?.replace('_', ' ')}</span>
                                     </div>
                                     <div className="analysis-item">
-                                        <span className="analysis-label">Urgency</span>
-                                        <span className={`badge badge-urgency-${analysis.urgency}`}>
-                                            {analysis.urgency?.toUpperCase()}
+                                        <span className="analysis-label">Threat Level</span>
+                                        <span className={`badge ${isHigh ? 'badge-urgency-high animate-pulse-glow' : 'badge-urgency-medium'}`}>
+                                            {emergencyLabel}
                                         </span>
                                     </div>
-                                    {analysis.bloodGroup && (
-                                        <div className="analysis-item">
-                                            <span className="analysis-label">Blood Group</span>
-                                            <span className="analysis-value highlight">{analysis.bloodGroup}</span>
-                                        </div>
-                                    )}
                                     <div className="analysis-item">
-                                        <span className="analysis-label">Location</span>
+                                        <span className="analysis-label">Stress Sentiment</span>
+                                        <span className="analysis-value text-capitalize">{analysis.sentiment || 'neutral'}</span>
+                                    </div>
+                                    <div className="analysis-item">
+                                        <span className="analysis-label">Incident GPS</span>
                                         <span className="analysis-value">{analysis.location?.label}</span>
                                     </div>
                                 </div>

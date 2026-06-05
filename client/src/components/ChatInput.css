@@ -1,11 +1,11 @@
 .chat-input-wrapper {
     width: 100%;
-    max-width: 700px;
+    max-width: 900px;
     margin: 0 auto;
 }
 
 .chat-input-container {
-    padding: 20px;
+    padding: 28px;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -23,11 +23,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 14px;
+    margin-bottom: 18px;
 }
 
 .input-label {
-    font-size: 0.85rem;
+    font-size: 1.05rem;
     font-weight: 600;
     color: var(--text-secondary);
     letter-spacing: 0.03em;
@@ -36,10 +36,10 @@
 .emergency-toggle {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
+    gap: 8px;
+    padding: 8px 18px;
     border-radius: var(--radius-full);
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     font-weight: 600;
     background: rgba(239, 68, 68, 0.08);
     color: var(--text-secondary);
@@ -60,12 +60,12 @@
 }
 
 .emergency-icon {
-    font-size: 1rem;
+    font-size: 1.15rem;
 }
 
 .input-row {
     display: flex;
-    gap: 12px;
+    gap: 16px;
     align-items: flex-end;
 }
 
@@ -74,9 +74,9 @@
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
-    padding: 14px 16px;
+    padding: 16px 20px;
     color: var(--text-primary);
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     line-height: 1.5;
     resize: none;
     transition: all 0.3s ease;
@@ -92,9 +92,9 @@
 }
 
 .send-btn {
-    width: 48px;
-    height: 48px;
-    min-width: 48px;
+    width: 60px;
+    height: 60px;
+    min-width: 60px;
     border-radius: var(--radius-md);
     background: var(--gradient-primary);
     color: white;
@@ -103,6 +103,11 @@
     justify-content: center;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.send-btn svg {
+    width: 24px;
+    height: 24px;
 }
 
 .send-btn:disabled {
@@ -116,28 +121,28 @@
 }
 
 .suggestions {
-    margin-top: 14px;
+    margin-top: 18px;
     overflow: hidden;
 }
 
 .suggestions-label {
-    font-size: 0.75rem;
+    font-size: 0.88rem;
     color: var(--text-muted);
     font-weight: 500;
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .suggestion-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
 }
 
 .suggestion-chip {
-    padding: 6px 14px;
+    padding: 8px 16px;
     border-radius: var(--radius-full);
-    font-size: 0.78rem;
+    font-size: 0.88rem;
     color: var(--text-secondary);
     background: rgba(99, 102, 241, 0.06);
     border: 1px solid var(--border-glass);
@@ -154,15 +159,15 @@
 
 @media (max-width: 768px) {
     .chat-input-container {
-        padding: 16px;
+        padding: 20px;
     }
 
     .suggestion-chips {
-        gap: 6px;
+        gap: 8px;
     }
 
     .suggestion-chip {
-        font-size: 0.72rem;
-        padding: 5px 10px;
+        font-size: 0.8rem;
+        padding: 6px 12px;
     }
 }

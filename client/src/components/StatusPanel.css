@@ -1,24 +1,24 @@
 .status-panel {
-    padding: 20px;
-    margin-top: 16px;
+    padding: 28px;
+    margin-top: 24px;
 }
 
 .status-header {
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 18px;
+    gap: 18px;
+    margin-bottom: 24px;
 }
 
 .status-indicator {
-    width: 42px;
-    height: 42px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     background: rgba(99, 102, 241, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     transition: all 0.3s ease;
 }
 
@@ -29,12 +29,12 @@
 .status-info {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
 }
 
 .status-label {
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 1.25rem;
     letter-spacing: 0.02em;
 }
 
@@ -43,20 +43,20 @@
 .communities-section,
 .assist-section {
     overflow: hidden;
-    padding-top: 16px;
+    padding-top: 20px;
     border-top: 1px solid var(--border-subtle);
-    margin-top: 16px;
+    margin-top: 20px;
 }
 
 .analysis-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 14px;
+    margin-bottom: 18px;
 }
 
 .section-title {
-    font-size: 0.82rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--text-secondary);
     letter-spacing: 0.04em;
@@ -64,9 +64,9 @@
 }
 
 .confidence-badge {
-    font-size: 0.72rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    padding: 4px 10px;
+    padding: 6px 14px;
     border-radius: var(--radius-full);
     background: rgba(16, 185, 129, 0.1);
     color: var(--accent-green);
@@ -75,22 +75,22 @@
 
 .analysis-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
 }
 
 .analysis-item {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 10px 14px;
+    gap: 6px;
+    padding: 14px 18px;
     background: rgba(0, 0, 0, 0.2);
     border-radius: var(--radius-md);
     border: 1px solid var(--border-subtle);
 }
 
 .analysis-label {
-    font-size: 0.7rem;
+    font-size: 0.82rem;
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -98,7 +98,7 @@
 }
 
 .analysis-value {
-    font-size: 0.9rem;
+    font-size: 1.05rem;
     font-weight: 600;
     color: var(--text-primary);
     text-transform: capitalize;
@@ -106,7 +106,7 @@
 
 .analysis-value.highlight {
     color: var(--accent-red);
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-weight: 700;
 }
 
@@ -114,21 +114,21 @@
 .community-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-top: 12px;
+    gap: 12px;
+    margin-top: 16px;
 }
 
 .community-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
+    gap: 16px;
+    padding: 16px 20px;
 }
 
 .comm-icon {
-    font-size: 1.3rem;
-    width: 36px;
-    height: 36px;
+    font-size: 1.6rem;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -143,27 +143,27 @@
 }
 
 .comm-name {
-    font-size: 0.88rem;
+    font-size: 1.05rem;
     font-weight: 600;
 }
 
 .comm-count {
-    font-size: 0.72rem;
+    font-size: 0.82rem;
     color: var(--text-muted);
 }
 
 .comm-status {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.72rem;
+    gap: 8px;
+    font-size: 0.82rem;
     color: var(--accent-green);
     font-weight: 600;
 }
 
 .comm-active-dot {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: var(--accent-green);
     animation: pulse-glow 1.5s infinite;
@@ -173,16 +173,16 @@
 .assist-tips {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-top: 12px;
+    gap: 10px;
+    margin-top: 16px;
 }
 
 .assist-tip {
-    padding: 10px 14px;
+    padding: 14px 18px;
     background: rgba(6, 182, 212, 0.06);
     border: 1px solid rgba(6, 182, 212, 0.12);
     border-radius: var(--radius-md);
-    font-size: 0.82rem;
+    font-size: 0.95rem;
     color: var(--text-secondary);
     line-height: 1.5;
 }
@@ -192,3 +192,104 @@
         grid-template-columns: 1fr 1fr;
     }
 }
+
+/* Upgraded WOW FACTOR - Intel Section */
+.analysis-header-new {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-title-intel {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: 0.01em;
+    text-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+}
+
+.safeguard-pill {
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    background: rgba(6, 182, 212, 0.12);
+    color: var(--accent-cyan);
+    border: 1px solid rgba(6, 182, 212, 0.2);
+    letter-spacing: 0.02em;
+}
+
+.analysis-intel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.intel-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px 24px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+}
+
+.intel-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.intel-card-lbl {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.intel-card-val {
+    font-size: 1.4rem;
+    font-weight: 800;
+    font-family: var(--font-mono);
+}
+
+.intel-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.intel-progress-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+}
+
+.intel-progress-fill.cyan {
+    background: var(--accent-cyan);
+    box-shadow: 0 0 8px var(--accent-cyan);
+}
+
+.intel-progress-fill.amber {
+    background: var(--accent-amber);
+    box-shadow: 0 0 8px var(--accent-amber);
+}
+
+.intel-progress-fill.red {
+    background: var(--accent-red);
+    box-shadow: 0 0 8px var(--accent-red);
+}
+
+.margin-top-intel {
+    margin-top: 18px;
+}
+
+@media (max-width: 576px) {
+    .analysis-intel-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}

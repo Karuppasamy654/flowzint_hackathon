@@ -1,4 +1,5 @@
-function analyzeRequest(text) {
+// Local regex-based fallback classifier
+function fallbackAnalyzeRequest(text) {
     const lower = text.toLowerCase();
 
     // Detect request type
@@ -24,11 +25,17 @@ function analyzeRequest(text) {
 
     // Detect urgency
     let urgency = 'low';
+    let emergencyScore = 30;
     const highUrgency = /urgent|emergency|asap|immediately|dying|critical|life.?threatening|accident|bleeding|help now|sos|please help/i;
     const medUrgency = /soon|today|need|required|important|quickly|fast/i;
 
-    if (highUrgency.test(lower)) urgency = 'high';
-    else if (medUrgency.test(lower)) urgency = 'medium';
+    if (highUrgency.test(lower)) {
+        urgency = 'high';
+        emergencyScore = 90;
+    } else if (medUrgency.test(lower)) {
+        urgency = 'medium';
+        emergencyScore = 60;
+    }
 
     // Detect location
     let location = { lat: 28.6139, lng: 77.2090, label: 'Central Delhi (auto-detected)' };
@@ -64,6 +71,11 @@ function analyzeRequest(text) {
     const bgMatch = lower.match(/\b(o|a|b|ab)[+-]\b/i);
     if (bgMatch) bloodGroup = bgMatch[0].toUpperCase();
 
+    // Sentiment detection
+    let sentiment = 'neutral';
+    if (/dying|scared|panic|pain|please|sos|bleeding/i.test(lower)) sentiment = 'desperate';
+    else if (/sad|depressed|lonely|anxiety/i.test(lower)) sentiment = 'anxious';
+
     return {
         type,
         urgency,
@@ -71,7 +83,10 @@ function analyzeRequest(text) {
         skillsNeeded,
         bloodGroup,
         summary: generateSummary(type, urgency, bloodGroup),
-        confidence: 0.92
+        confidence: 0.85,
+        emergencyScore,
+        sentiment,
+        quickAssist: getQuickAssist({ type })
     };
 }
 
@@ -115,13 +130,13 @@ function detectFakeRequest(text) {
 function getQuickAssist(analysis) {
     const tips = {
         blood: [
-            '🩸 Contact nearest blood bank via 1800-XXX-XXXX',
+            '🩸 Contact nearest blood bank via 1800-11-8700',
             '📱 Share your blood group info with potential donors',
             '🏥 Nearest hospitals with blood banks are being identified',
             '⏱️ Blood requests typically get matched within 15 minutes'
         ],
         medical: [
-            '🚑 Call 108 for medical emergency ambulance',
+            '🚑 Call 102/108 for medical emergency ambulance',
             '💊 Keep any current medications accessible',
             '📋 Prepare a brief medical history if possible',
             '🏥 Nearest hospitals are being identified'
@@ -161,4 +176,93 @@ function getQuickAssist(analysis) {
     return tips[analysis.type] || tips.general;
 }
 
-module.exports = { analyzeRequest, detectFakeRequest, getQuickAssist };
+// Google Gemini API integration
+async function analyzeRequest(text) {
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+        console.log('[AI Service] No GEMINI_API_KEY found in environment. Falling back to local Regex parser...');
+        return fallbackAnalyzeRequest(text);
+    }
+
+    try {
+        const systemPrompt = `Analyze the following social crisis request text. Classify and extract metadata.
+You must return a valid, parsable JSON object EXACTLY conforming to this JSON schema (do not wrap in markdown or backticks like \`\`\`json, return the raw JSON text directly):
+{
+  "type": "blood" | "medical" | "study" | "money" | "food" | "shelter" | "transport" | "mental_health" | "legal" | "general",
+  "urgency": "high" | "medium" | "low",
+  "location": {
+     "lat": number,
+     "lng": number,
+     "label": string
+  },
+  "skillsNeeded": [string],
+  "bloodGroup": string | null,
+  "summary": string,
+  "confidence": number,
+  "emergencyScore": number,
+  "sentiment": string,
+  "quickAssist": [string]
+}
+
+For locations in Delhi, default coordinates if not matched specifically:
+- Connaught Place: { "lat": 28.6315, "lng": 77.2167 }
+- Karol Bagh: { "lat": 28.6519, "lng": 77.1905 }
+- Saket: { "lat": 28.5244, "lng": 77.2066 }
+- Dwarka: { "lat": 28.5921, "lng": 77.0460 }
+- Rohini: { "lat": 28.7495, "lng": 77.0565 }
+If no specific Delhi locality is matched, use default Delhi center: { "lat": 28.6139, "lng": 77.2090, "label": "Delhi" }.
+
+Request Text: "${text.replace(/"/g, '\\"')}"`;
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: systemPrompt
+                    }]
+                }],
+                generationConfig: {
+                    responseMimeType: 'application/json'
+                }
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        
+        if (!responseText) {
+            throw new Error('Empty response from Gemini API');
+        }
+
+        const parsedAnalysis = JSON.parse(responseText.trim());
+        
+        // Ensure standard keys exist
+        return {
+            type: parsedAnalysis.type || 'general',
+            urgency: parsedAnalysis.urgency || 'low',
+            location: parsedAnalysis.location || { lat: 28.6139, lng: 77.2090, label: 'Delhi' },
+            skillsNeeded: parsedAnalysis.skillsNeeded || [],
+            bloodGroup: parsedAnalysis.bloodGroup || null,
+            summary: parsedAnalysis.summary || generateSummary(parsedAnalysis.type || 'general', parsedAnalysis.urgency || 'low', parsedAnalysis.bloodGroup),
+            confidence: parsedAnalysis.confidence || 0.9,
+            emergencyScore: parsedAnalysis.emergencyScore || 50,
+            sentiment: parsedAnalysis.sentiment || 'neutral',
+            quickAssist: parsedAnalysis.quickAssist || getQuickAssist({ type: parsedAnalysis.type || 'general' })
+        };
+    } catch (err) {
+        console.error('[AI Service] Gemini API Call failed:', err.message);
+        console.log('[AI Service] Falling back to local Regex parser...');
+        return fallbackAnalyzeRequest(text);
+    }
+}
+
+module.exports = { analyzeRequest, detectFakeRequest, getQuickAssist, fallbackAnalyzeRequest };

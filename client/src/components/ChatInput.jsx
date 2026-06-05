@@ -74,7 +74,7 @@ export default function ChatInput({ onSubmit, disabled, demoMode }) {
                             onBlur={() => setIsFocused(false)}
                             placeholder="Tell us what help you need..."
                             disabled={disabled}
-                            rows={2}
+                            rows={3}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
                                     e.preventDefault();
