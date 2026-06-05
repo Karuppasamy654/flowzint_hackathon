@@ -91,9 +91,11 @@ app.get('/api/admin/reset', async (req, res) => {
             // Memory fallback clean
             const { memoryRequests } = require('./controllers/requestController');
             const { memoryUsers } = require('./controllers/authController');
+            const { helpers } = require('./data/seed');
             memoryRequests.length = 0;
             memoryUsers.length = 0;
-            res.json({ status: 'ok', message: 'Fallback in-memory tables cleared successfully.' });
+            memoryUsers.push(...helpers);
+            res.json({ status: 'ok', message: 'Fallback in-memory tables cleared and re-seeded successfully.' });
         }
     } catch (err) {
         res.status(500).json({ error: err.message });

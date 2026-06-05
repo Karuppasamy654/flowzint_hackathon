@@ -217,6 +217,17 @@ export default function Dashboard() {
     addToast('Incident request cancelled.');
   };
 
+  const handleSimulateAccept = () => {
+    if (socket && requestId) {
+      const helperId = helpers[0]?.id || helpers[0]?._id?.toString() || 'helper_priya';
+      socket.emit('volunteer-accept-request', {
+        requestId,
+        helperId
+      });
+      addToast('Simulating volunteer acceptance...', 'info');
+    }
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -316,18 +327,32 @@ export default function Dashboard() {
                   )}
                 </AnimatePresence>
 
-                {/* Reset Button */}
+                {/* Reset & Simulate Buttons */}
                 {isProcessing && (
-                  <motion.button
-                    className="reset-btn"
-                    onClick={handleReset}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Cancel Request
-                  </motion.button>
+                  <div className="action-btns-row">
+                    <motion.button
+                      className="reset-btn"
+                      onClick={handleReset}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      Cancel Request
+                    </motion.button>
+                    {(status === 'waiting' || status === 'matching' || status === 'expanding_search') && (
+                      <motion.button
+                        className="simulate-btn"
+                        onClick={handleSimulateAccept}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        ⚡ Simulate Helper Accept
+                      </motion.button>
+                    )}
+                  </div>
                 )}
               </div>
 

@@ -3,9 +3,10 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose');
 const User = require('../models/User');
+const { helpers: seedHelpers } = require('../data/seed');
 
 const JWT_SECRET = 'acin_secret_key_2024';
-const memoryUsers = []; // Fallback memory store
+const memoryUsers = [...seedHelpers]; // Fallback memory store populated with seed helpers
 
 async function register(req, res) {
     const { name, email, password, isHelper, occupation, skills } = req.body;
