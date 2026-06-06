@@ -1,164 +1,277 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import TagSelector from '../components/TagSelector';
 import './Home.css';
 
-const features = [
-    { icon: '🧠', title: 'AI Understanding', desc: 'Instantly analyzes your request type, urgency, and location using intelligent NLP' },
-    { icon: '🎯', title: 'Smart Matching', desc: 'Ranks helpers by proximity, availability, track record, and response speed' },
-    { icon: '📡', title: 'Auto Escalation', desc: '3-tier escalation ensures help reaches you even when initial helpers are unavailable' },
-    { icon: '🏅', title: 'Trust & Reputation', desc: 'Every helper is rated — platinum, gold, silver badges backed by success history' },
-    { icon: '👥', title: 'Micro Communities', desc: 'Auto-creates collaboration groups for coordinated help delivery' },
-    { icon: '⚡', title: 'Quick AI Assist', desc: 'Provides instant guidance while human helpers are being matched' }
+const onboardingFeatures = [
+  { icon: '🌐', title: 'Purposeful Connections', desc: 'Match with peers based on real skills, not just keywords.' },
+  { icon: '⚡', title: 'Instant Matching', desc: 'See only requests that match your expertise and availability.' },
+  { icon: '💬', title: 'Focused Conversations', desc: 'Chats are tied to a request and stay contextual.' }
 ];
 
-const stats = [
-    { value: '15+', label: 'Active Helpers' },
-    { value: '3', label: 'Communities' },
-    { value: '<30s', label: 'Avg Match Time' },
-    { value: '95%', label: 'Success Rate' }
-];
+const authSkills = ['Web Development', 'Content Writing', 'Mathematics', 'Mechanics', 'Design', 'Mental Health', 'Career Advice', 'Productivity'];
 
 export default function Home() {
-    const navigate = useNavigate();
-    const { demoLogin } = useAuth();
+  const navigate = useNavigate();
+  const { user, login, register, demoLogin, updateProfile } = useAuth();
+  const [authMode, setAuthMode] = useState('login');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    bio: '',
+    skills: []
+  });
 
-    const handleGetStarted = async () => {
-        try { await demoLogin(); } catch { }
-        navigate('/dashboard');
-    };
+  useEffect(() => {
+    if (user && user.bio && user.skills?.length > 0) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
-    const handleDemo = async () => {
-        try { await demoLogin(); } catch { }
-        navigate('/dashboard?demo=true');
-    };
+  const handleInput = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
 
-    return (
-        <div className="home-page">
-            {/* Hero Section */}
-            <section className="hero">
-                <motion.div
-                    className="hero-content"
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      await login(form.email, form.password);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignup = async (event) => {
+    event.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      await register({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        bio: form.bio,
+        skills: form.skills
+      });
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemo = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await demoLogin();
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleProfileSave = async (event) => {
+    event.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      await updateProfile({ bio: form.bio, skills: form.skills });
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      setForm({
+        name: user.name || '',
+        email: user.email || '',
+        password: '',
+        bio: user.bio || '',
+        skills: user.skills || []
+      });
+    }
+  }, [user]);
+
+  return (
+    <div className="home-page">
+      <div className="home-shell">
+        <section className="auth-panel glass-card-strong">
+          <div className="auth-brand">
+            <div className="brand-mark">FM</div>
+            <div>
+              <h1>FlowMatch</h1>
+              <p>Peer help matching redesigned as a social experience.</p>
+            </div>
+          </div>
+
+          {user && (!user.bio || !user.skills?.length) ? (
+            <form className="profile-form" onSubmit={handleProfileSave}>
+              <h2>Finish your profile</h2>
+              <p>Complete your bio and skills so the platform can connect you with the right requests.</p>
+              <label>
+                Bio
+                <textarea
+                  value={form.bio}
+                  onChange={(e) => handleInput('bio', e.target.value)}
+                  placeholder="Describe your strengths and what you enjoy helping with"
+                  rows={4}
+                />
+              </label>
+              <TagSelector
+                label="Select your skills"
+                tags={authSkills}
+                selected={form.skills}
+                onChange={(next) => handleInput('skills', next)}
+              />
+              {error && <p className="form-error">{error}</p>}
+              <button className="btn-primary" type="submit" disabled={loading || !form.bio || !form.skills.length}>
+                Save Profile
+              </button>
+            </form>
+          ) : (
+            <>
+              <div className="auth-switch">
+                <button
+                  type="button"
+                  className={authMode === 'login' ? 'active' : ''}
+                  onClick={() => setAuthMode('login')}
                 >
-                    <motion.div
-                        className="hero-badge"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.2 }}
-                    >
-                        <span className="badge-dot" />
-                        AI-Powered Crisis Response System
-                    </motion.div>
-
-                    <h1 className="hero-title">
-                        Intelligent Help
-                        <br />
-                        <span className="gradient-text">When You Need It Most</span>
-                    </h1>
-
-                    <p className="hero-subtitle">
-                        ACIN ensures help delivery through AI-driven matching, community targeting,
-                        and automated escalation. Not a chatbot — an intelligent crisis response network.
-                    </p>
-
-                    <div className="hero-actions">
-                        <motion.button
-                            className="btn-primary btn-lg"
-                            onClick={handleGetStarted}
-                            whileHover={{ scale: 1.03 }}
-                            whileTap={{ scale: 0.97 }}
-                        >
-                            Get Started →
-                        </motion.button>
-                        <motion.button
-                            className="btn-secondary btn-lg demo-btn"
-                            onClick={handleDemo}
-                            whileHover={{ scale: 1.03 }}
-                            whileTap={{ scale: 0.97 }}
-                        >
-                            🎬 Run Demo
-                        </motion.button>
-                    </div>
-                </motion.div>
-
-                {/* Floating orbs */}
-                <div className="hero-orbs">
-                    <div className="orb orb-1" />
-                    <div className="orb orb-2" />
-                    <div className="orb orb-3" />
-                </div>
-            </section>
-
-            {/* Stats */}
-            <section className="stats-section container">
-                <div className="stats-grid">
-                    {stats.map((stat, i) => (
-                        <motion.div
-                            key={i}
-                            className="stat-item glass-card"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: i * 0.1 }}
-                        >
-                            <span className="stat-value">{stat.value}</span>
-                            <span className="stat-label">{stat.label}</span>
-                        </motion.div>
-                    ))}
-                </div>
-            </section>
-
-            {/* Features */}
-            <section className="features-section container">
-                <motion.h2
-                    className="section-heading"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
+                  Login
+                </button>
+                <button
+                  type="button"
+                  className={authMode === 'signup' ? 'active' : ''}
+                  onClick={() => setAuthMode('signup')}
                 >
-                    How <span className="gradient-text">ACIN</span> Works
-                </motion.h2>
-                <div className="features-grid">
-                    {features.map((f, i) => (
-                        <motion.div
-                            key={i}
-                            className="feature-card glass-card"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: i * 0.08 }}
-                            whileHover={{ y: -4, borderColor: 'rgba(99, 102, 241, 0.3)' }}
-                        >
-                            <span className="feature-icon">{f.icon}</span>
-                            <h3 className="feature-title">{f.title}</h3>
-                            <p className="feature-desc">{f.desc}</p>
-                        </motion.div>
-                    ))}
-                </div>
-            </section>
+                  Sign Up
+                </button>
+              </div>
 
-            {/* CTA */}
-            <section className="cta-section container">
-                <motion.div
-                    className="cta-card glass-card-strong"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                >
-                    <h2>Ready to see ACIN in action?</h2>
-                    <p>Experience the full AI-powered crisis response pipeline with our interactive demo.</p>
-                    <button className="btn-primary btn-lg" onClick={handleDemo}>
-                        🚀 Launch Demo Simulation
-                    </button>
-                </motion.div>
-            </section>
+              <form className="auth-form" onSubmit={authMode === 'login' ? handleLogin : handleSignup}>
+                <h2>{authMode === 'login' ? 'Welcome Back' : 'Create your account'}</h2>
+                <p>{authMode === 'login' ? 'Log in and start matching with helpers instantly.' : 'Build a profile that matches requests with the right skills.'}</p>
 
-            <footer className="home-footer">
-                <p>ACIN — AI-Powered Social Crisis Help Network • Built for FlowZint Hackathon</p>
-            </footer>
-        </div>
-    );
+                {authMode === 'signup' && (
+                  <label>
+                    Full name
+                    <input
+                      value={form.name}
+                      onChange={(e) => handleInput('name', e.target.value)}
+                      placeholder="Your name"
+                      required
+                    />
+                  </label>
+                )}
+
+                <label>
+                  Email address
+                  <input
+                    value={form.email}
+                    onChange={(e) => handleInput('email', e.target.value)}
+                    type="email"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </label>
+                <label>
+                  Password
+                  <input
+                    value={form.password}
+                    onChange={(e) => handleInput('password', e.target.value)}
+                    type="password"
+                    placeholder="Enter a secure password"
+                    required
+                  />
+                </label>
+
+                {authMode === 'signup' && (
+                  <>
+                    <label>
+                      Bio
+                      <textarea
+                        value={form.bio}
+                        onChange={(e) => handleInput('bio', e.target.value)}
+                        placeholder="Tell people what kind of help you offer"
+                        rows={3}
+                        required
+                      />
+                    </label>
+
+                    <TagSelector
+                      label="Choose your strengths"
+                      tags={authSkills}
+                      selected={form.skills}
+                      onChange={(next) => handleInput('skills', next)}
+                    />
+                  </>
+                )}
+
+                {error && <p className="form-error">{error}</p>}
+                <button className="btn-primary" type="submit" disabled={loading || (authMode === 'signup' && (!form.bio || !form.skills.length))}>
+                  {authMode === 'login' ? 'Login' : 'Create account'}
+                </button>
+              </form>
+
+              <div className="demo-footer">
+                <span>Want a quick walkthrough?</span>
+                <button className="btn-secondary" type="button" onClick={handleDemo} disabled={loading}>
+                  Launch Demo Account
+                </button>
+              </div>
+            </>
+          )}
+        </section>
+
+        <section className="hero-panel">
+          <div className="hero-copy">
+            <div className="hero-pill">Social help matching meets modern collaboration.</div>
+            <h1>Connect over problem-solving, not noise.</h1>
+            <p>Build your profile, discover requests that match your skills, and keep every conversation contextual to the task at hand.</p>
+            <div className="hero-stats">
+              <div>
+                <strong>12</strong>
+                <span>Live skill channels</span>
+              </div>
+              <div>
+                <strong>4.8/5</strong>
+                <span>Connection quality</span>
+              </div>
+              <div>
+                <strong>In-browser</strong>
+                <span>Local demo state</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="hero-cards">
+            {onboardingFeatures.map((feature) => (
+              <motion.div key={feature.title} className="hero-card glass-card" whileHover={{ y: -6 }}>
+                <span className="hero-card-icon">{feature.icon}</span>
+                <h3>{feature.title}</h3>
+                <p>{feature.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
 }

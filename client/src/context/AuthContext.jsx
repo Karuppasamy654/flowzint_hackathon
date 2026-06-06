@@ -1,67 +1,93 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import {
+  ensureEngineSeed,
+  findUserByEmail,
+  createUser,
+  updateUser,
+  DEFAULT_SKILLS
+} from '../utils/engine';
 
 const AuthContext = createContext(null);
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:5000';
+const STORAGE_USER = 'help_social_current_user';
 
 export function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(localStorage.getItem('acin_token'));
+  const [user, setUser] = useState(null);
 
-    useEffect(() => {
-        const savedUser = localStorage.getItem('acin_user');
-        if (savedUser) {
-            try { setUser(JSON.parse(savedUser)); } catch { }
-        }
-    }, []);
+  useEffect(() => {
+    ensureEngineSeed();
+    const savedUser = localStorage.getItem(STORAGE_USER);
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch {
+        localStorage.removeItem(STORAGE_USER);
+      }
+    }
+  }, []);
 
-    const login = async (email, password) => {
-        const res = await fetch(`${SERVER_URL}/api/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        setToken(data.token);
-        setUser(data.user);
-        localStorage.setItem('acin_token', data.token);
-        localStorage.setItem('acin_user', JSON.stringify(data.user));
-        return data;
-    };
+  const persistUser = (nextUser) => {
+    setUser(nextUser);
+    localStorage.setItem(STORAGE_USER, JSON.stringify(nextUser));
+    updateUser(nextUser);
+  };
 
-    const register = async (name, email, password) => {
-        const res = await fetch(`${SERVER_URL}/api/auth/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        setToken(data.token);
-        setUser(data.user);
-        localStorage.setItem('acin_token', data.token);
-        localStorage.setItem('acin_user', JSON.stringify(data.user));
-        return data;
-    };
+  const login = async (email, password) => {
+    const found = findUserByEmail(email);
+    if (!found || found.password !== password) {
+      throw new Error('Invalid email or password.');
+    }
+    persistUser(found);
+    return found;
+  };
 
-    const logout = () => {
-        setToken(null);
-        setUser(null);
-        localStorage.removeItem('acin_token');
-        localStorage.removeItem('acin_user');
-    };
+  const register = async ({ name, email, password, bio, skills }) => {
+    const existing = findUserByEmail(email);
+    if (existing) {
+      throw new Error('This email is already registered.');
+    }
+    if (!name || !email || !password) {
+      throw new Error('Name, email, and password are required.');
+    }
+    const nextUser = createUser({ name, email, password, bio: bio || '', skills: skills || [] });
+    persistUser(nextUser);
+    return nextUser;
+  };
 
-    const demoLogin = async () => {
-        return login('demo@acin.ai', 'demo123');
-    };
+  const updateProfile = async ({ bio, skills }) => {
+    if (!user) throw new Error('No authenticated user.');
+    const nextUser = updateUser({ ...user, bio: bio || user.bio, skills: skills || user.skills });
+    persistUser(nextUser);
+    return nextUser;
+  };
 
-    return (
-        <AuthContext.Provider value={{ user, token, login, register, logout, demoLogin }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem(STORAGE_USER);
+  };
+
+  const demoLogin = async () => {
+    const demoEmail = 'demo@flowmatch.app';
+    let demoUser = findUserByEmail(demoEmail);
+    if (!demoUser) {
+      demoUser = createUser({
+        name: 'Demo Helper',
+        email: demoEmail,
+        password: 'demo123',
+        bio: 'Fast responder with strong collaboration skills.',
+        skills: ['Web Development', 'Content Writing', 'Career Advice']
+      });
+    }
+    persistUser(demoUser);
+    return demoUser;
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, DEFAULT_SKILLS, login, register, logout, demoLogin, updateProfile }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
-    return useContext(AuthContext);
+  return useContext(AuthContext);
 }
