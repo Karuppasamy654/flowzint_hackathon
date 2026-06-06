@@ -29,9 +29,20 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
+const aiRoutes = require('./routes/ai');
+const communityRoutes = require('./routes/community');
+const notificationRoutes = require('./routes/notification');
+const gamificationRoutes = require('./routes/gamification');
+const userRoutes = require('./routes/user');
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/requests', requestRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/community', communityRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/gamification', gamificationRoutes);
+app.use('/api/users', userRoutes);
 
 // Dynamic Stats Dashboard endpoint
 app.get('/api/stats', async (req, res) => {
@@ -71,17 +82,23 @@ app.get('/api/admin/reset', async (req, res) => {
             const Message = require('./models/Message');
             const Report = require('./models/Report');
             const Block = require('./models/Block');
+            const CommunityPost = require('./models/CommunityPost');
+            const Comment = require('./models/Comment');
+            const Review = require('./models/Review');
+            const Notification = require('./models/Notification');
 
             // Wipe collections
             await Request.deleteMany({});
             await Message.deleteMany({});
             await Report.deleteMany({});
             await Block.deleteMany({});
-            
-            // Delete standard seekers, preserve volunteer helpers
-            await User.deleteMany({ isHelper: { $ne: true } });
+            await CommunityPost.deleteMany({});
+            await Comment.deleteMany({});
+            await Review.deleteMany({});
+            await Notification.deleteMany({});
+            await User.deleteMany({});
 
-            // Re-seed original volunteer helpers
+            // Re-seed datasets
             const { seedData } = require('./data/seed');
             await seedData();
 

@@ -9,7 +9,7 @@ const JWT_SECRET = 'acin_secret_key_2024';
 const memoryUsers = [...seedHelpers]; // Fallback memory store populated with seed helpers
 
 async function register(req, res) {
-    const { name, email, password, isHelper, occupation, skills } = req.body;
+    const { name, email, password, isHelper, occupation, skills, expertiseLevel, city, state, country, availabilityText, bio, avatar } = req.body;
     if (!name || !email || !password) {
         return res.status(400).json({ error: 'All fields are required' });
     }
@@ -28,16 +28,27 @@ async function register(req, res) {
                 name,
                 email,
                 password: hashedPassword,
-                location: { lat: 28.6139, lng: 77.2090, label: 'Delhi' },
+                location: { lat: 28.6139, lng: 77.2090, label: `${city || 'Delhi'}, India` },
                 isHelper: isHelper || false,
                 occupation: occupation || 'student',
-                skills: skills || []
+                skills: skills || [],
+                expertiseLevel: expertiseLevel || 'Beginner',
+                city: city || 'Delhi',
+                state: state || 'Delhi',
+                country: country || 'India',
+                availabilityText: availabilityText || 'Available Now',
+                bio: bio || '',
+                avatar: avatar || '👤'
             });
 
             const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
             return res.status(201).json({
                 token,
-                user: { id: user._id, name: user.name, email: user.email, isHelper: user.isHelper || false, occupation: user.occupation, skills: user.skills }
+                user: { 
+                    id: user._id, name: user.name, email: user.email, isHelper: user.isHelper || false, 
+                    occupation: user.occupation, skills: user.skills, avatar: user.avatar,
+                    city: user.city, bio: user.bio, points: user.points, badge: user.badge
+                }
             });
         } else {
             // Memory fallback
@@ -51,10 +62,19 @@ async function register(req, res) {
                 name,
                 email,
                 password: hashedPassword,
-                location: { lat: 28.6139, lng: 77.2090, label: 'Delhi' },
+                location: { lat: 28.6139, lng: 77.2090, label: `${city || 'Delhi'}, India` },
                 isHelper: isHelper || false,
                 occupation: occupation || 'student',
                 skills: skills || [],
+                expertiseLevel: expertiseLevel || 'Beginner',
+                city: city || 'Delhi',
+                state: state || 'Delhi',
+                country: country || 'India',
+                availabilityText: availabilityText || 'Available Now',
+                bio: bio || '',
+                avatar: avatar || '👤',
+                points: 0,
+                badge: 'Silver',
                 createdAt: new Date().toISOString()
             };
             memoryUsers.push(user);
@@ -62,7 +82,11 @@ async function register(req, res) {
             const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
             return res.status(201).json({
                 token,
-                user: { id: user.id, name: user.name, email: user.email, isHelper: user.isHelper || false, occupation: user.occupation, skills: user.skills }
+                user: { 
+                    id: user.id, name: user.name, email: user.email, isHelper: user.isHelper || false, 
+                    occupation: user.occupation, skills: user.skills, avatar: user.avatar,
+                    city: user.city, bio: user.bio, points: user.points, badge: user.badge
+                }
             });
         }
     } catch (err) {
@@ -94,7 +118,12 @@ async function login(req, res) {
             const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
             return res.json({
                 token,
-                user: { id: user._id, name: user.name, email: user.email, isHelper: user.isHelper || false }
+                user: { 
+                    id: user._id, name: user.name, email: user.email, isHelper: user.isHelper || false,
+                    avatar: user.avatar, city: user.city, bio: user.bio, points: user.points, badge: user.badge,
+                    skills: user.skills, occupation: user.occupation, expertiseLevel: user.expertiseLevel,
+                    availabilityText: user.availabilityText
+                }
             });
         } else {
             // Memory fallback
@@ -106,7 +135,12 @@ async function login(req, res) {
             const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
             return res.json({
                 token,
-                user: { id: user.id, name: user.name, email: user.email, isHelper: user.isHelper || false }
+                user: { 
+                    id: user.id, name: user.name, email: user.email, isHelper: user.isHelper || false,
+                    avatar: user.avatar, city: user.city, bio: user.bio, points: user.points, badge: user.badge,
+                    skills: user.skills, occupation: user.occupation, expertiseLevel: user.expertiseLevel,
+                    availabilityText: user.availabilityText
+                }
             });
         }
     } catch (err) {

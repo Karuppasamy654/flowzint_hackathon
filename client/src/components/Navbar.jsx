@@ -23,9 +23,9 @@ export default function Navbar({ onLogout }) {
                 <div className="navbar-brand">
                     <div className="navbar-logo">
                         <span className="logo-icon">⚡</span>
-                        <span className="logo-text">ACIN</span>
+                        <span className="logo-text">FlowZint</span>
                     </div>
-                    <span className="navbar-tagline">AI Crisis Help Network</span>
+                    <span className="navbar-tagline">Real-time Assistance Platform</span>
                 </div>
 
                 <div className="navbar-actions">

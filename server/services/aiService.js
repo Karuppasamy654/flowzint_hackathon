@@ -265,4 +265,130 @@ Request Text: "${text.replace(/"/g, '\\"')}"`;
     }
 }
 
-module.exports = { analyzeRequest, detectFakeRequest, getQuickAssist, fallbackAnalyzeRequest };
+function fallbackSuggestRequestRefinement(title, description) {
+    const text = (title + " " + description).toLowerCase();
+    let category = 'General Help';
+    let tags = ['General'];
+    let solutions = [
+        '💡 Try explaining the problem to someone else (Rubber Duck debugging)',
+        '🔍 Search official documentation for key error statements',
+        '⏱️ Break down the task into smaller steps and verify each one'
+    ];
+
+    if (text.includes('react') || text.includes('js') || text.includes('javascript') || text.includes('state') || text.includes('css') || text.includes('html') || text.includes('vite') || text.includes('tailwind')) {
+        category = 'Web Development';
+        tags = ['React', 'JavaScript', 'TailwindCSS'];
+        solutions = [
+            '📦 Verify your package.json node_modules are fully installed',
+            '💡 Check console logs and React Developer Tools to trace state updates',
+            '🔧 Ensure components are correctly mounted and props are not undefined'
+        ];
+    } else if (text.includes('figma') || text.includes('ux') || text.includes('ui') || text.includes('design') || text.includes('photoshop')) {
+        category = 'Design';
+        tags = ['UI/UX', 'Figma', 'Design System'];
+        solutions = [
+            '📐 Check alignment grids and component autolayout settings in Figma',
+            '🎨 Ensure consistent color palette tokens are mapped to your variables',
+            '💡 Benchmark your spacing against popular design systems like Material UI'
+        ];
+    } else if (text.includes('resume') || text.includes('cv') || text.includes('interview') || text.includes('career') || text.includes('job')) {
+        category = 'Career Advice';
+        tags = ['Resume Review', 'Interview Prep'];
+        solutions = [
+            '📝 Ensure your resume utilizes action verbs and quantifies bullet metrics',
+            '💼 Format details cleanly using the Harvard Resume Style guide',
+            '🤝 Practice STAR method response sheets for behavioral queries'
+        ];
+    } else if (text.includes('math') || text.includes('physics') || text.includes('calculus') || text.includes('exam') || text.includes('homework') || text.includes('college')) {
+        category = 'Academics';
+        tags = ['Mathematics', 'Tutoring'];
+        solutions = [
+            '📝 Review the basic formulas and work through a simple example problem',
+            '📚 Consult khan academy or textbook worksheets for similar derivations',
+            '💡 Write down assumptions and boundary conditions first before executing'
+        ];
+    } else if (text.includes('blood') || text.includes('hospital') || text.includes('donor') || text.includes('emergency')) {
+        category = 'Medical / Blood Donation';
+        tags = ['First Aid', 'Blood Donation'];
+        solutions = [
+            '🩸 Contact nearest blood bank via central helpline 1800-11-8700',
+            '🏥 Identify nearest government or private hospital ICU unit locations',
+            '🚨 Alert local neighborhood WhatsApp communities with exact details'
+        ];
+    }
+
+    return {
+        titleSuggestions: [
+            `Optimize: ${title}`,
+            `Need help with: ${title} / ${tags[0] || 'General'}`
+        ],
+        category,
+        tags,
+        possibleSolutions: solutions
+    };
+}
+
+async function suggestRequestRefinement(title, description) {
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+        console.log('[AI Service] No GEMINI_API_KEY found. Using fallback suggestions.');
+        return fallbackSuggestRequestRefinement(title, description);
+    }
+
+    try {
+        const systemPrompt = `You are a helpful assistant for FlowZint (a peer matching help platform).
+Analyze the following user help request:
+Title: "${title}"
+Description: "${description}"
+
+Provide request optimization suggestions. You MUST return a valid, parsable JSON object conforming to this exact schema (do not wrap in markdown or backticks):
+{
+  "titleSuggestions": [string, string],
+  "category": string,
+  "tags": [string],
+  "possibleSolutions": [string, string, string]
+}
+
+Suggested Categories: Web Development, Design, Career Advice, Academics, Medical, Blood Donation, Volunteering, General Help.
+Return the raw JSON text directly.`;
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: systemPrompt }] }],
+                generationConfig: { responseMimeType: 'application/json' }
+            })
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!responseText) throw new Error('Empty response');
+
+        const parsed = JSON.parse(responseText.trim());
+        return {
+            titleSuggestions: parsed.titleSuggestions || [`Refine: ${title}`, `Review: ${title}`],
+            category: parsed.category || 'General Help',
+            tags: parsed.tags || ['General'],
+            possibleSolutions: parsed.possibleSolutions || [
+                '💡 Review details and specifications in your request text',
+                '🔍 Search documentation on the related tags',
+                '🤝 Connect with online helpers on FlowZint for assistance'
+            ]
+        };
+    } catch (err) {
+        console.error('[AI Service] Gemini refine request failed:', err.message);
+        return fallbackSuggestRequestRefinement(title, description);
+    }
+}
+
+module.exports = { 
+    analyzeRequest, 
+    detectFakeRequest, 
+    getQuickAssist, 
+    fallbackAnalyzeRequest,
+    suggestRequestRefinement 
+};

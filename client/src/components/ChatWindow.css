@@ -246,3 +246,145 @@
     width: calc(100vw - 20px);
   }
 }
+
+/* WhatsApp Extensions */
+.chat-action-icon-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.15rem;
+  cursor: pointer;
+  opacity: 0.6;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.chat-action-icon-btn:hover,
+.chat-action-icon-btn.active {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.chat-search-bar-row {
+  display: flex;
+  align-items: center;
+  padding: 6px 14px;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid var(--border-subtle);
+  gap: 8px;
+  overflow: hidden;
+}
+
+.chat-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  outline: none;
+}
+
+.search-clear-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.chat-pinned-shelf {
+  display: flex;
+  align-items: center;
+  background: rgba(245, 158, 11, 0.08);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+  padding: 6px 16px;
+  gap: 8px;
+}
+
+.pinned-shelf-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--accent-amber);
+  text-transform: uppercase;
+}
+
+.pinned-message-preview {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.message-bubble.pinned-highlight {
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+  background: rgba(245, 158, 11, 0.04) !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.05);
+}
+
+.msg-pin-toggle-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.message-bubble:hover .msg-pin-toggle-btn {
+  opacity: 0.6;
+}
+
+.message-bubble:hover .msg-pin-toggle-btn:hover {
+  opacity: 1;
+}
+
+.chat-emoji-drawer-card {
+  position: absolute;
+  bottom: 66px;
+  left: 14px;
+  width: 240px;
+  z-index: 1000;
+  background: rgba(17, 24, 39, 0.95);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+}
+
+.emoji-picker-grid button {
+  transition: transform 0.2s ease;
+}
+
+.emoji-picker-grid button:hover {
+  transform: scale(1.25);
+}
+
+.chat-voice-btn.recording {
+  animation: pulse-glow 1s infinite alternate;
+}
+
+.seen-status-ticks {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  margin-left: 2px;
+}
+
+.seen-status-ticks.seen {
+  color: var(--accent-cyan);
+}
+
+.typing-dot {
+  width: 5px;
+  height: 5px;
+  background: var(--text-accent);
+  border-radius: 50%;
+}
+.typing-dot:nth-child(1) { animation: typing-dot-chat 1.4s infinite 0s; }
+.typing-dot:nth-child(2) { animation: typing-dot-chat 1.4s infinite 0.2s; }
+.typing-dot:nth-child(3) { animation: typing-dot-chat 1.4s infinite 0.4s; }

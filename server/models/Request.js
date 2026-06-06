@@ -2,7 +2,15 @@ const mongoose = require('mongoose');
 
 const RequestSchema = new mongoose.Schema({
     userId: { type: String, default: 'anonymous' },
+    title: { type: String, default: 'Help Request' },
+    description: { type: String, default: '' },
     text: { type: String, required: true },
+    category: { type: String, default: 'General' },
+    urgency: { type: String, default: 'low' },
+    expectedDuration: { type: String, default: '1 hour' },
+    budget: { type: String, default: '' },
+    isAnonymous: { type: Boolean, default: false },
+    requiredSkills: [{ type: String }],
     analysis: {
         type: { type: String, default: 'general' },
         urgency: { type: String, default: 'low' },

@@ -5,10 +5,14 @@ const { analyzeRequest, detectFakeRequest, getQuickAssist } = require('../servic
 const memoryRequests = []; // Fallback memory store
 
 async function createRequest(req, res) {
-    const { text, isEmergency } = req.body;
+    const { title, description, text: textBody, category, urgency, expectedDuration, budget, isAnonymous, requiredSkills, isEmergency } = req.body;
+
+    const finalTitle = title || 'Help Request';
+    const finalDesc = description || '';
+    const text = textBody || `${finalTitle}: ${finalDesc}`;
 
     if (!text || text.trim().length === 0) {
-        return res.status(400).json({ error: 'Request text is required' });
+        return res.status(400).json({ error: 'Request title and description are required' });
     }
 
     // Check for fake request
@@ -24,7 +28,12 @@ async function createRequest(req, res) {
     try {
         // Analyze request (real AI analysis with fallback)
         const analysis = await analyzeRequest(text);
-        if (isEmergency) analysis.urgency = 'high';
+        if (isEmergency || urgency === 'critical') analysis.urgency = 'high';
+
+        // Override skills needed from form if provided
+        if (requiredSkills && requiredSkills.length > 0) {
+            analysis.skillsNeeded = requiredSkills;
+        }
 
         // Get quick assist tips
         const quickAssist = getQuickAssist(analysis);
@@ -34,7 +43,15 @@ async function createRequest(req, res) {
         if (isDbConnected) {
             const request = await Request.create({
                 userId: req.user?.id || 'anonymous',
+                title: finalTitle,
+                description: finalDesc,
                 text,
+                category: category || analysis.type || 'General',
+                urgency: urgency || analysis.urgency || 'low',
+                expectedDuration: expectedDuration || '1 hour',
+                budget: budget || '',
+                isAnonymous: isAnonymous || false,
+                requiredSkills: requiredSkills || analysis.skillsNeeded || [],
                 analysis,
                 quickAssist,
                 status: 'analyzing',
@@ -52,7 +69,15 @@ async function createRequest(req, res) {
             const request = {
                 id: uuidv4(),
                 userId: req.user?.id || 'anonymous',
+                title: finalTitle,
+                description: finalDesc,
                 text,
+                category: category || analysis.type || 'General',
+                urgency: urgency || analysis.urgency || 'low',
+                expectedDuration: expectedDuration || '1 hour',
+                budget: budget || '',
+                isAnonymous: isAnonymous || false,
+                requiredSkills: requiredSkills || analysis.skillsNeeded || [],
                 analysis,
                 quickAssist,
                 status: 'analyzing',

@@ -183,14 +183,18 @@ function setupSocketHandlers(io) {
 
         // Send a message in live chat
         socket.on('send-message', async (data) => {
-            const { requestId, senderId, senderName, text } = data;
-            console.log(`[Chat] Msg in ${requestId} from ${senderName}: "${text}"`);
+            const { requestId, senderId, senderName, text, type, fileUrl } = data;
+            console.log(`[Chat] Msg in ${requestId} from ${senderName} (Type: ${type || 'text'}): "${text}"`);
 
             let msgPayload = {
                 requestId,
                 senderId,
                 senderName,
                 text,
+                type: type || 'text',
+                fileUrl: fileUrl || '',
+                status: 'sent',
+                isPinned: false,
                 createdAt: new Date().toISOString()
             };
 
@@ -200,7 +204,10 @@ function setupSocketHandlers(io) {
                         requestId,
                         senderId,
                         senderName,
-                        text
+                        text,
+                        type: type || 'text',
+                        fileUrl: fileUrl || '',
+                        status: 'sent'
                     });
                     msgPayload = msgDoc.toObject();
                 } catch (err) {
@@ -280,6 +287,43 @@ function setupSocketHandlers(io) {
                 } catch (err) {
                     console.error('[Socket] Save rating failed:', err.message);
                 }
+            }
+        });
+
+        // Mark messages in room as seen
+        socket.on('mark-seen', async (data) => {
+            const { requestId, userId } = data;
+            console.log(`[Chat] Seen receipt in room ${requestId} for user ${userId}`);
+            if (mongoose.connection.readyState === 1) {
+                try {
+                    await Message.updateMany(
+                        { requestId, senderId: { $ne: userId } },
+                        { $set: { status: 'seen' } }
+                    );
+                    io.to(requestId).emit('messages-seen', { requestId });
+                } catch (err) {
+                    console.error('[Socket] Seen receipt error:', err.message);
+                }
+            } else {
+                io.to(requestId).emit('messages-seen', { requestId });
+            }
+        });
+
+        // Pin/Unpin chat message
+        socket.on('pin-message', async (data) => {
+            const { messageId, requestId, isPinned } = data;
+            console.log(`[Chat] Pin status updated: ${messageId} -> ${isPinned}`);
+            if (mongoose.connection.readyState === 1) {
+                try {
+                    const msg = await Message.findByIdAndUpdate(messageId, { isPinned }, { new: true });
+                    if (msg) {
+                        io.to(requestId).emit('message-pinned-update', { messageId, isPinned, message: msg });
+                    }
+                } catch (err) {
+                    console.error('[Socket] Pin message error:', err.message);
+                }
+            } else {
+                io.to(requestId).emit('message-pinned-update', { messageId, isPinned });
             }
         });
 

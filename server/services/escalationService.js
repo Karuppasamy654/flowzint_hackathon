@@ -108,6 +108,27 @@ class EscalationEngine {
             const topHelpers = await getTopHelpers(analysis, 3, escalation.requesterId);
             escalation.topHelpers = topHelpers;
 
+            // Create database notification for matched helpers
+            if (mongoose.connection.readyState === 1) {
+                try {
+                    const Notification = require('../models/Notification');
+                    for (const h of topHelpers) {
+                        const helperId = h.id || h._id?.toString();
+                        if (helperId && helperId !== 'anonymous') {
+                            await Notification.create({
+                                userId: helperId,
+                                type: 'match',
+                                title: 'New Help Request Match! 🎯',
+                                message: `A request matching your skills is nearby: "${escalation.requestText.slice(0, 45)}..."`,
+                                link: `/dashboard?request=${requestId}`
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.error('[Escalation] Match notification failed:', e.message);
+                }
+            }
+
             const timelineHelpersEvent = {
                 time: new Date(),
                 event: 'helpers_found',
@@ -266,6 +287,22 @@ class EscalationEngine {
             status: 'resolved',
             matchedHelpers: [helper]
         }, timelineEvent);
+
+        // Create database notification for the seeker
+        if (mongoose.connection.readyState === 1 && escalation.requesterId && escalation.requesterId !== 'anonymous') {
+            try {
+                const Notification = require('../models/Notification');
+                await Notification.create({
+                    userId: escalation.requesterId,
+                    type: 'accept',
+                    title: 'Request Accepted! 🚀',
+                    message: `${helper.name} has accepted your help request. Connect in Chat now.`,
+                    link: `/dashboard?chat=${requestId}`
+                });
+            } catch (err) {
+                console.error('[Escalation] Acceptance notification failed:', err.message);
+            }
+        }
 
         // Notify room (joins requester socket)
         this.io.to(requestId).emit('helper-response', {
