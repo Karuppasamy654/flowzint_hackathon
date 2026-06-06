@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
-import { UIProvider } from './context/UIContext';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import HelperDashboard from './pages/HelperDashboard';
@@ -17,24 +16,17 @@ function App() {
   return (
     <AuthProvider>
       <SocketProvider>
-        <UIProvider>
-          <Router>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/helper" element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-          </Router>
-        </UIProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </Router>
       </SocketProvider>
     </AuthProvider>
   );
