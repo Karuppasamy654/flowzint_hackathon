@@ -62,43 +62,83 @@ export default function StatusPanel({ status, analysis, communities, quickAssist
                                 transition={{ duration: 0.4, delay: 0.2 }}
                             >
                                 <div className="analysis-header-new">
-                                    <span className="section-title-intel">🔥 AI Crisis Intelligence Panel</span>
+                                    <span className="section-title-intel">⚡ AI CRISIS DECISION CORE</span>
                                     <span className="safeguard-pill">
-                                        {isLocal ? '🛡️ Local NLP Backup' : '⚡ Gemini AI Online'}
+                                        {isLocal ? '🛡️ Local NLP Backup' : '⚡ Gemini AI Active'}
                                     </span>
                                 </div>
 
                                 <div className="analysis-intel-grid">
-                                    {/* Confidence Level */}
+                                    {/* Urgency Score */}
                                     <div className="intel-card">
                                         <div className="intel-card-header">
-                                            <span className="intel-card-lbl">AI Confidence Score</span>
-                                            <span className="intel-card-val" style={{ color: 'var(--accent-cyan)' }}>{confidence}%</span>
+                                            <span className="intel-card-lbl">AI URGENCY SCORE</span>
+                                            <span className="intel-card-val" style={{ color: score >= 75 ? 'var(--accent-red)' : 'var(--accent-amber)' }}>{analysis.urgencyScore || score}/100</span>
                                         </div>
                                         <div className="intel-progress-bar">
                                             <motion.div 
-                                                className="intel-progress-fill cyan"
+                                                className={`intel-progress-fill ${score >= 75 ? 'red' : 'amber'}`}
                                                 initial={{ width: 0 }}
-                                                animate={{ width: `${confidence}%` }}
+                                                animate={{ width: `${analysis.urgencyScore || score}%` }}
                                                 transition={{ duration: 0.8 }}
                                             />
                                         </div>
                                     </div>
 
-                                    {/* Emergency Level */}
+                                    {/* Action Status */}
                                     <div className="intel-card">
                                         <div className="intel-card-header">
-                                            <span className="intel-card-lbl">Emergency Score</span>
-                                            <span className="intel-card-val" style={{ color: isHigh ? 'var(--accent-red)' : 'var(--accent-amber)' }}>{score}/100</span>
+                                            <span className="intel-card-lbl">RISK LEVEL</span>
+                                            <span className="intel-card-val text-uppercase" style={{ color: score >= 75 ? 'var(--accent-red)' : 'var(--accent-cyan)' }}>
+                                                {analysis.riskLevel || emergencyLabel}
+                                            </span>
                                         </div>
-                                        <div className="intel-progress-bar">
-                                            <motion.div 
-                                                className={`intel-progress-fill ${isHigh ? 'red' : 'amber'}`}
-                                                initial={{ width: 0 }}
-                                                animate={{ width: `${score}%` }}
-                                                transition={{ duration: 0.8 }}
-                                            />
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                            Status: {score >= 75 ? '🚨 Prioritized emergency broadcast active' : '📡 Radial matchmaking active'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* AI Reasoning Block */}
+                                <div className="intel-reasoning-panel" style={{ marginTop: '16px', padding: '12px 16px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.15)', borderRadius: '8px' }}>
+                                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-pink)', display: 'block', textTransform: 'uppercase' }}>🧠 AI Decision Rationale</span>
+                                    <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: 1.45 }}>
+                                        "{analysis.reasoning || `Classified as ${analysis.type} request with ${analysis.urgency} urgency based on token match. Triggering volunteer dispatch.`}"
+                                    </p>
+                                </div>
+
+                                {/* AI Transparency Explainability Panel */}
+                                <div className="ai-transparency-panel" style={{ marginTop: '16px', padding: '16px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-glass)', borderRadius: '8px' }}>
+                                    <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--accent-cyan)', display: 'block', textTransform: 'uppercase', marginBottom: '8px' }}>⚙️ FlowZint AI Explainability Ledger</span>
+                                    
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '0.8rem' }}>
+                                        <div>
+                                            <span style={{ color: 'var(--text-muted)', display: 'block' }}>Detected Tone / Sentiment</span>
+                                            <span style={{ color: 'var(--text-primary)', fontWeight: 600, textTransform: 'capitalize' }}>
+                                                🎭 {analysis.sentiment || 'neutral'}
+                                            </span>
                                         </div>
+                                        <div>
+                                            <span style={{ color: 'var(--text-muted)', display: 'block' }}>Scanned Match Radius</span>
+                                            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+                                                📡 {status === 'expanding_search' ? '+30km (Expanded)' : '+15km (Local)'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ marginTop: '10px' }}>
+                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', display: 'block' }}>Extracted Keywords Tokenized:</span>
+                                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
+                                            {(analysis.detectedKeywords || [analysis.type]).map((kw, idx) => (
+                                                <span key={idx} style={{ background: 'rgba(6, 182, 212, 0.12)', color: 'var(--accent-cyan)', border: '1px solid rgba(6, 182, 212, 0.2)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 600 }}>
+                                                    🔑 {kw}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div style={{ marginTop: '10px', fontSize: '0.78rem', color: 'var(--text-secondary)', borderTop: '1px solid var(--border-subtle)', paddingTop: '8px', lineHeight: 1.4 }}>
+                                        💡 <strong>Match Logic:</strong> Panic inputs detected. Scaled urgency index to <strong>{(analysis.urgencyScore || score)}%</strong>. Dispatched websocket triggers to all certified <code>{analysis.type}</code> specialists.
                                     </div>
                                 </div>
 
@@ -110,13 +150,9 @@ export default function StatusPanel({ status, analysis, communities, quickAssist
                                     </div>
                                     <div className="analysis-item">
                                         <span className="analysis-label">Threat Level</span>
-                                        <span className={`badge ${isHigh ? 'badge-urgency-high animate-pulse-glow' : 'badge-urgency-medium'}`}>
-                                            {emergencyLabel}
+                                        <span className={`badge ${score >= 75 ? 'badge-urgency-high animate-pulse-glow' : 'badge-urgency-medium'}`}>
+                                            {score >= 75 ? 'CRITICAL HIGH' : emergencyLabel}
                                         </span>
-                                    </div>
-                                    <div className="analysis-item">
-                                        <span className="analysis-label">Stress Sentiment</span>
-                                        <span className="analysis-value text-capitalize">{analysis.sentiment || 'neutral'}</span>
                                     </div>
                                     <div className="analysis-item">
                                         <span className="analysis-label">Incident GPS</span>

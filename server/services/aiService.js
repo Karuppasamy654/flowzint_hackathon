@@ -73,8 +73,18 @@ function fallbackAnalyzeRequest(text) {
 
     // Sentiment detection
     let sentiment = 'neutral';
-    if (/dying|scared|panic|pain|please|sos|bleeding/i.test(lower)) sentiment = 'desperate';
+    if (/dying|scared|panic|pain|please|sos|bleeding|critical|emergency/i.test(lower)) sentiment = 'desperate';
     else if (/sad|depressed|lonely|anxiety/i.test(lower)) sentiment = 'anxious';
+
+    const riskLevel = urgency === 'high' ? 'critical' : urgency === 'medium' ? 'high' : 'medium';
+    
+    // Extract keywords
+    const keywordsSet = new Set();
+    const matches = lower.match(/\b(blood|medical|emergency|critical|urgency|accident|injury|oxygen|help|dying|pain|hospital|doctor|ambulance|first.?aid|sos|asap)\b/g);
+    if (matches) matches.forEach(m => keywordsSet.add(m));
+    const detectedKeywords = Array.from(keywordsSet);
+
+    const reasoning = `Detected high-risk emergency markers (${detectedKeywords.join(', ') || 'general help'}). Matching immediately with nearby ${type} specialists.`;
 
     return {
         type,
@@ -85,6 +95,10 @@ function fallbackAnalyzeRequest(text) {
         summary: generateSummary(type, urgency, bloodGroup),
         confidence: 0.85,
         emergencyScore,
+        urgencyScore: emergencyScore,
+        riskLevel,
+        reasoning,
+        detectedKeywords,
         sentiment,
         quickAssist: getQuickAssist({ type })
     };
@@ -201,6 +215,10 @@ You must return a valid, parsable JSON object EXACTLY conforming to this JSON sc
   "summary": string,
   "confidence": number,
   "emergencyScore": number,
+  "urgencyScore": number,
+  "riskLevel": "low" | "medium" | "high" | "critical",
+  "reasoning": string,
+  "detectedKeywords": [string],
   "sentiment": string,
   "quickAssist": [string]
 }
@@ -255,6 +273,10 @@ Request Text: "${text.replace(/"/g, '\\"')}"`;
             summary: parsedAnalysis.summary || generateSummary(parsedAnalysis.type || 'general', parsedAnalysis.urgency || 'low', parsedAnalysis.bloodGroup),
             confidence: parsedAnalysis.confidence || 0.9,
             emergencyScore: parsedAnalysis.emergencyScore || 50,
+            urgencyScore: parsedAnalysis.urgencyScore || parsedAnalysis.emergencyScore || 50,
+            riskLevel: parsedAnalysis.riskLevel || (parsedAnalysis.urgency === 'high' ? 'critical' : parsedAnalysis.urgency === 'medium' ? 'high' : 'medium'),
+            reasoning: parsedAnalysis.reasoning || `Classified as ${parsedAnalysis.type} with ${parsedAnalysis.urgency} urgency. Dispatching network scans.`,
+            detectedKeywords: parsedAnalysis.detectedKeywords || [parsedAnalysis.type || 'help'],
             sentiment: parsedAnalysis.sentiment || 'neutral',
             quickAssist: parsedAnalysis.quickAssist || getQuickAssist({ type: parsedAnalysis.type || 'general' })
         };

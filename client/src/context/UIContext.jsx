@@ -5,7 +5,7 @@ const UIContext = createContext(null);
 const translations = {
     en: {
         brand: 'FlowZint',
-        tagline: 'Real-time Assistance Platform',
+        tagline: 'Real-time AI-powered Crisis Response Network',
         homeFeed: 'Home Feed',
         requestHelp: 'Request Help',
         activeChats: 'Active Chats',
@@ -158,7 +158,7 @@ const translations = {
     },
     hi: {
         brand: 'फ़्लोज़िंट',
-        tagline: 'रीयल-टाइम सहायता मंच',
+        tagline: 'रीयल-टाइम एआई-संचालित संकट प्रतिक्रिया नेटवर्क',
         homeFeed: 'मुख्य फ़ीड',
         requestHelp: 'सहायता माँगें',
         activeChats: 'सक्रिय चैट',
@@ -311,7 +311,7 @@ const translations = {
     },
     ta: {
         brand: 'ஃப்ளோசிண்ட்',
-        tagline: 'நிகழ்நேர உதவி தளம்',
+        tagline: 'நிகழ்நேர AI-இயங்கும் அவசர கால உதவி தளம்',
         homeFeed: 'முகப்பு ஊட்டம்',
         requestHelp: 'உதவி கோருக',
         activeChats: 'செயலில் உள்ள அரட்டைகள்',

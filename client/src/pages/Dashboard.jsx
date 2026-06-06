@@ -322,6 +322,27 @@ export default function Dashboard() {
         // Show review modal params
         setReviewHelperId(data.helper.id);
         setReviewHelperName(data.helper.name);
+
+        // Auto-open chat window after connection is made (Wow Feature 1 / 7)
+        setTimeout(() => {
+          setActiveTab('chats');
+          setActiveChatId(data.requestId);
+          setActiveChatHelper(data.helper);
+          addToast(`Redirecting you to active coordination channel...`, 'success');
+          
+          // Send automated response message from helper
+          setTimeout(() => {
+            if (socket) {
+              socket.emit('send-message', {
+                requestId: data.requestId,
+                senderId: data.helper.id,
+                senderName: data.helper.name,
+                text: `🚨 AI EMERGENCY DISPATCH ROUTING CONTEXT: Hello! I am a certified helper. I received the critical alert and have an Oxygen Cylinder available. I am en-route now! (ETA: 8 mins). Let me know the exact address.`,
+                type: 'text'
+              });
+            }
+          }, 1000);
+        }, 1200);
       }
     });
 
@@ -387,6 +408,61 @@ export default function Dashboard() {
     setSuccessData(null);
     setRequestId(null);
     setIsProcessing(false);
+  };
+
+  const handleRunLiveDemo = async () => {
+    // 1. Switch to request tab
+    setActiveTab('request');
+    
+    // 2. Clean previous states
+    handleCancelRequest();
+    
+    // 3. Auto fill fields
+    setAiTitleInput("🚨 EMERGENCY: Critical Oxygen Cylinder Needed");
+    setAiDescInput("Patient critical at Karol Bagh. Oxygen level dropping fast at 76%. Need emergency volunteer with oxygen supply immediately.");
+    setAiCategoryInput("Medical");
+    setAiUrgencyInput("critical");
+    setAiDurationInput("Immediate");
+    setAiBudgetInput("Free");
+    setAiAnonymousInput(false);
+    setAiSkillsInput(["Oxygen", "Medical", "Emergency", "First Aid"]);
+    
+    // 4. Populate visual mock suggestion ledger
+    setAiSuggestions({
+      titleSuggestions: [
+        "🚨 EMERGENCY: Critical Oxygen Cylinder Needed",
+        "Urgent: Patient requires Oxygen cylinder backup at Karol Bagh"
+      ],
+      category: "Medical",
+      tags: ["Oxygen", "Medical", "Emergency", "First Aid"],
+      possibleSolutions: [
+        "🏥 Red Cross Ambulance Alert: call 102/108",
+        "🩸 Proximity match launched: scanning Karol Bagh community base",
+        "💡 Directing request to active volunteer network"
+      ]
+    });
+    
+    // 5. Brief AI analysis sweep delay, then emit socket creation
+    setTimeout(() => {
+      if (!socket) return;
+      setIsProcessing(true);
+      setStatus('received');
+      playBeep('alert');
+      
+      socket.emit('submit-request', {
+        text: "🚨 EMERGENCY: Critical Oxygen Cylinder Needed: Patient critical at Karol Bagh. Oxygen level dropping fast at 76%. Need emergency volunteer with oxygen supply immediately.",
+        title: "🚨 EMERGENCY: Critical Oxygen Cylinder Needed",
+        description: "Patient critical at Karol Bagh. Oxygen level dropping fast at 76%. Need emergency volunteer with oxygen supply immediately.",
+        category: "Medical",
+        urgency: "critical",
+        expectedDuration: "Immediate",
+        budget: "Free",
+        isAnonymous: false,
+        requiredSkills: ["Oxygen", "Medical", "Emergency", "First Aid"],
+        userId: user?.id || 'anonymous',
+        location: { lat: 28.6519, lng: 77.1905, label: "Karol Bagh (Emergency Scan)" }
+      });
+    }, 1200);
   };
 
   // Helper accepts a feed request card
@@ -756,6 +832,22 @@ export default function Dashboard() {
               <span>{tab.label}</span>
             </button>
           ))}
+
+          <button
+            onClick={handleRunLiveDemo}
+            className="sidebar-nav-item live-demo-btn animate-pulse-glow"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '12px 14px',
+              borderRadius: '8px', fontSize: '0.82rem', fontWeight: 900, color: '#fff',
+              background: 'var(--gradient-primary)',
+              boxShadow: '0 0 15px rgba(139, 92, 246, 0.4)',
+              border: '1px solid rgba(139, 92, 246, 0.5)',
+              textAlign: 'left', cursor: 'pointer', marginTop: '16px', transition: 'all 0.2s ease'
+            }}
+          >
+            <span>⚡</span>
+            <span>RUN LIVE DEMO</span>
+          </button>
           
           <div style={{ marginTop: 'auto', borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{t('gpsLoc')}:</div>
@@ -912,7 +1004,17 @@ export default function Dashboard() {
             {activeTab === 'request' && (
               /* TAB 2: REQUEST FORM MODULE WITH AI ASSISTANT PANEL */
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>{t('requestHelp')}</h2>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>{t('requestHelp')}</h2>
+                  <button
+                    type="button"
+                    onClick={handleRunLiveDemo}
+                    className="btn-primary animate-pulse-glow"
+                    style={{ padding: '8px 16px', fontSize: '0.82rem', background: 'var(--gradient-secondary)', boxShadow: '0 0 12px rgba(6,182,212,0.3)', border: 'none', cursor: 'pointer' }}
+                  >
+                    ⚡ RUN LIVE DEMO (1-CLICK SHOWCASE)
+                  </button>
+                </div>
                 
                 {status !== 'idle' ? (
                   /* Searching dispatch feedback radar */

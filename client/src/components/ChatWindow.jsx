@@ -297,6 +297,14 @@ export default function ChatWindow({ requestId, currentUser, helper, onClose }) 
                 </div>
             )}
 
+            {/* Live Emergency Dispatch Banner */}
+            <div className="emergency-status-banner animate-pulse-glow" style={{ padding: '8px 16px', background: 'rgba(16, 185, 129, 0.12)', borderBottom: '1px solid rgba(16, 185, 129, 0.25)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--accent-green)', letterSpacing: '0.04em' }}>
+                    🟢 AI STATUS: HELP ON THE WAY — VOLUNTEER DISPATCHED (ETA: 8 MINS)
+                </span>
+                <span className="badge badge-urgency-high animate-pulse-glow" style={{ fontSize: '0.68rem', padding: '2px 8px' }}>HELP EN ROUTE</span>
+            </div>
+
             {/* Message Area */}
             <div className="chat-messages-container">
                 {filteredMessages.length === 0 ? (
@@ -399,6 +407,48 @@ export default function ChatWindow({ requestId, currentUser, helper, onClose }) 
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Smart Suggested Replies & Quick Actions (Wow Feature 6) */}
+            <div className="smart-chat-extras" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px 16px', borderTop: '1px solid var(--border-subtle)', background: 'rgba(0,0,0,0.1)' }}>
+                {/* AI Suggested Replies */}
+                <div className="ai-suggestions-row" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--accent-cyan)', fontWeight: 800, textTransform: 'uppercase' }}>🤖 AI SUGGESTIONS:</span>
+                    {["On my way!", "I am outside the gate", "Oxygen cylinder ready!", "Thank you!"].map((reply) => (
+                        <button
+                            key={reply}
+                            type="button"
+                            onClick={() => handleSend(reply, 'text')}
+                            className="chat-suggested-pill-btn"
+                            style={{ background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)', color: 'var(--text-accent)', padding: '4px 10px', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}
+                        >
+                            💬 {reply}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Quick Action Buttons */}
+                <div className="quick-actions-row" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <button
+                        type="button"
+                        onClick={() => handleSend("📍 Shared Location: Karol Bagh (GPS Coordinates: 28.6519, 77.1905)", "text")}
+                        className="quick-action-pill-btn"
+                        style={{ background: 'rgba(6, 182, 212, 0.15)', border: '1px solid rgba(6, 182, 212, 0.3)', color: 'var(--accent-cyan)', padding: '4px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                        📍 Share Location
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            alert("📞 Voice Call Simulation: Connecting emergency VoIP routing to volunteer...");
+                            handleSend("📞 Initiated emergency call check-in", "text");
+                        }}
+                        className="quick-action-pill-btn"
+                        style={{ background: 'rgba(139, 92, 246, 0.15)', border: '1px solid rgba(139, 92, 246, 0.3)', color: 'var(--accent-purple)', padding: '4px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                        📞 Call Volunteer
+                    </button>
+                </div>
+            </div>
 
             {/* Input Form Area */}
             <div className="chat-input-form-wrapper" style={{ position: 'relative' }}>

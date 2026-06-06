@@ -172,6 +172,79 @@
   }
 }
 
+.radar-scan-overlay {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(11, 15, 26, 0.85);
+  border: 1px solid var(--accent-blue);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.scan-text {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--accent-blue);
+  letter-spacing: 0.08em;
+  animation: scan-pulse 1.2s infinite ease-in-out;
+}
+
+.radar-pulse-wave {
+  fill: none;
+  stroke: var(--accent-blue);
+  stroke-width: 1.5;
+  opacity: 0;
+  transform-origin: 200px 200px;
+  pointer-events: none;
+}
+
+.radar-pulse-wave.wave-1 {
+  animation: pulse-out 3s infinite linear;
+}
+
+.radar-pulse-wave.wave-2 {
+  animation: pulse-out 3s infinite linear 1s;
+}
+
+.radar-pulse-wave.wave-3 {
+  animation: pulse-out 3s infinite linear 2s;
+}
+
+.radar-connection-line.active-matching {
+  stroke: var(--accent-cyan);
+  stroke-width: 2;
+  stroke-dasharray: 8 4;
+  animation: line-pulse 1s infinite linear;
+}
+
+@keyframes line-pulse {
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+
+@keyframes pulse-out {
+  0% {
+    r: 10px;
+    opacity: 0.8;
+  }
+  100% {
+    r: 180px;
+    opacity: 0;
+  }
+}
+
+@keyframes scan-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
 @media (max-width: 768px) {
   .crisis-radar-map {
     height: 420px;

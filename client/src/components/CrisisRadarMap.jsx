@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import './CrisisRadarMap.css';
 
 export default function CrisisRadarMap({ status, analysis, helpers, escalationTier }) {
     const userLoc = analysis?.location || { lat: 28.6139, lng: 77.2090, label: 'Delhi' };
+    const [hoveredHelperId, setHoveredHelperId] = useState(null);
     
     // Map latitude/longitude to SVG 400x400 viewbox (center 200, 200)
     const mapCoords = (lat, lng) => {
@@ -50,6 +52,13 @@ export default function CrisisRadarMap({ status, analysis, helpers, escalationTi
             </div>
 
             <div className="radar-svg-wrapper">
+                {/* SVG Scanning Indicator Overlay */}
+                {status !== 'idle' && status !== 'resolved' && status !== 'helper_accepted' && (
+                    <div className="radar-scan-overlay">
+                        <span className="scan-text">SCANNING REGION...</span>
+                    </div>
+                )}
+
                 <svg width="100%" height="100%" viewBox="0 0 400 400" className="radar-svg">
                     {/* Glowing grid backgrounds */}
                     <defs>
@@ -64,6 +73,15 @@ export default function CrisisRadarMap({ status, analysis, helpers, escalationTi
                     </defs>
 
                     <circle cx="200" cy="200" r="180" fill="url(#radarGlow)" />
+
+                    {/* Concentric Search Radar Pulsing Waves (Wow Feature 3.1) */}
+                    {status !== 'idle' && status !== 'resolved' && (
+                        <>
+                            <circle cx="200" cy="200" r="0" className="radar-pulse-wave wave-1" />
+                            <circle cx="200" cy="200" r="0" className="radar-pulse-wave wave-2" />
+                            <circle cx="200" cy="200" r="0" className="radar-pulse-wave wave-3" />
+                        </>
+                    )}
 
                     {/* Concentric search rings */}
                     {searchRadii.map((radius, idx) => {
@@ -102,18 +120,25 @@ export default function CrisisRadarMap({ status, analysis, helpers, escalationTi
                     {helpers && helpers.map((helper, idx) => {
                         const coords = mapCoords(helper.location?.lat || 28.6139, helper.location?.lng || 77.2090);
                         const isAccepted = helper.status === 'accepted';
+                        const idKey = helper.id || helper._id?.toString() || idx;
+                        const isHovered = hoveredHelperId === idKey;
                         
                         return (
-                            <g key={helper.id || idx}>
+                            <g 
+                                key={idKey}
+                                onMouseEnter={() => setHoveredHelperId(idKey)}
+                                onMouseLeave={() => setHoveredHelperId(null)}
+                                style={{ cursor: 'pointer' }}
+                            >
                                 {/* Connecting line to user */}
                                 <motion.line
                                     x1="200"
                                     y1="200"
                                     x2={coords.x}
                                     y2={coords.y}
-                                    className={`radar-connection-line ${isAccepted ? 'accepted' : ''}`}
+                                    className={`radar-connection-line ${isAccepted ? 'accepted' : 'active-matching'}`}
                                     initial={{ strokeDasharray: 8, strokeDashoffset: 50, opacity: 0 }}
-                                    animate={{ strokeDashoffset: 0, opacity: 0.6 }}
+                                    animate={{ strokeDashoffset: 0, opacity: 0.8 }}
                                     transition={{ duration: 1 }}
                                 />
 
@@ -121,7 +146,7 @@ export default function CrisisRadarMap({ status, analysis, helpers, escalationTi
                                 <circle
                                     cx={coords.x}
                                     cy={coords.y}
-                                    r={isAccepted ? 16 : 10}
+                                    r={isAccepted || isHovered ? 18 : 10}
                                     className={`helper-node-glow ${isAccepted ? 'accepted' : ''}`}
                                 />
 
@@ -129,8 +154,9 @@ export default function CrisisRadarMap({ status, analysis, helpers, escalationTi
                                 <circle
                                     cx={coords.x}
                                     cy={coords.y}
-                                    r="6"
+                                    r={isHovered ? 8 : 6}
                                     className={`helper-node ${isAccepted ? 'accepted' : ''}`}
+                                    style={{ transition: 'r 0.2s ease' }}
                                 />
 
                                 {/* Avatar text overlay */}
@@ -142,6 +168,43 @@ export default function CrisisRadarMap({ status, analysis, helpers, escalationTi
                                 >
                                     {helper.avatar} {helper.name.split(' ')[0]} ({helper.distance}km)
                                 </text>
+
+                                {/* Specialty Skill Tag on Node Hover (Wow Feature 3.2) */}
+                                {isHovered && (
+                                    <g style={{ pointerEvents: 'none' }}>
+                                        <rect
+                                            x={coords.x - 70}
+                                            y={coords.y - 52}
+                                            width="140"
+                                            height="32"
+                                            rx="6"
+                                            fill="#111827"
+                                            stroke="var(--accent-cyan)"
+                                            strokeWidth="1"
+                                            opacity="0.95"
+                                        />
+                                        <text
+                                            x={coords.x}
+                                            y={coords.y - 40}
+                                            fill="var(--text-muted)"
+                                            fontSize="8px"
+                                            fontWeight="800"
+                                            textAnchor="middle"
+                                        >
+                                            🛠️ VERIFIED SPECIALTIES:
+                                        </text>
+                                        <text
+                                            x={coords.x}
+                                            y={coords.y - 28}
+                                            fill="var(--accent-cyan)"
+                                            fontSize="8px"
+                                            fontWeight="700"
+                                            textAnchor="middle"
+                                        >
+                                            {helper.skills?.slice(0, 2).join(', ') || 'First Aid, Emergency'}
+                                        </text>
+                                    </g>
+                                )}
                             </g>
                         );
                     })}
