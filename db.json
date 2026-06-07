@@ -1,0 +1,196 @@
+{
+  "User": [
+    {
+      "name": "sk",
+      "email": "sk@gmail.com",
+      "passwordHash": "$2b$12$jdpgsQz0Jnshv1CQTCqH3u28EZrRaVqKavnCB.Q7oJDNFtXHIx0f6",
+      "skills": [
+        "Web Dev",
+        "Design"
+      ],
+      "location": "chennai",
+      "bio": "abcdefgh",
+      "avatarColor": "#B45309",
+      "_id": "513bbdd386689b3e5402b40b",
+      "createdAt": "2026-06-07T09:05:40.526Z",
+      "updatedAt": "2026-06-07T09:05:40.526Z",
+      "avgRating": 0
+    },
+    {
+      "name": "arun",
+      "email": "arun@gmail.com",
+      "passwordHash": "$2b$12$x.TuvUe9es.nvm9Py1rLXeGnxuEiPbkXKVIZc0p.QMvX.HHR5eFhi",
+      "skills": [
+        "Mental Health",
+        "Medical",
+        "Plumbing"
+      ],
+      "location": "Zone 5 Royapuram, Chennai",
+      "bio": "i am plumber",
+      "avatarColor": "#065F46",
+      "_id": "c7cd0759e49f9ae65e4f46dc",
+      "rating": {
+        "total": 5,
+        "count": 1
+      },
+      "createdAt": "2026-06-07T09:35:34.945Z",
+      "updatedAt": "2026-06-07T09:35:34.945Z",
+      "avgRating": 0
+    },
+    {
+      "name": "Tester User",
+      "email": "tester.helpnet.user@example.com",
+      "passwordHash": "$2b$12$ouwAFC9lhH2cM8m2vJF/HuPL5DGRuBYPEMNe/KZ/eKlUMv/UaehKm",
+      "skills": [
+        "Web Dev",
+        "Plumbing"
+      ],
+      "location": "Seattle, WA",
+      "bio": "I am a helpful neighbor willing to help with web development and plumbing.",
+      "avatarColor": "#0F766E",
+      "_id": "0437074e700cee7f9c63a157",
+      "rating": {
+        "total": 0,
+        "count": 0
+      },
+      "createdAt": "2026-06-07T13:38:49.603Z",
+      "updatedAt": "2026-06-07T13:38:49.604Z",
+      "avgRating": 0
+    },
+    {
+      "name": "Demo Neighbor",
+      "email": "demo.neighbor@example.com",
+      "passwordHash": "$2b$12$xNjvLA1p9lyX2sRzomMOj.MsdO.5sSsGQG7oNB0lL.HW4IqB5ZRJy",
+      "skills": [
+        "Web Dev",
+        "Medical"
+      ],
+      "location": "Chennai",
+      "bio": "I am a friendly neighbor eager to help out!",
+      "avatarColor": "#B45309",
+      "_id": "5155664782ca0582b075b628",
+      "rating": {
+        "total": 0,
+        "count": 0
+      },
+      "createdAt": "2026-06-07T14:13:44.035Z",
+      "updatedAt": "2026-06-07T14:21:53.670Z",
+      "avgRating": 0
+    }
+  ],
+  "HelpRequest": [
+    {
+      "seeker": "513bbdd386689b3e5402b40b",
+      "title": "need o+ blood",
+      "description": "i want o+ blood within one hour",
+      "category": "Medical",
+      "urgency": "urgent",
+      "location": "chennai",
+      "matchedHelpers": [
+        "c7cd0759e49f9ae65e4f46dc"
+      ],
+      "status": "active",
+      "_id": "7378cc37b50b9e14319f69be",
+      "createdAt": "2026-06-07T09:09:31.053Z",
+      "updatedAt": "2026-06-07T14:40:59.448Z",
+      "acceptedHelper": "c7cd0759e49f9ae65e4f46dc",
+      "acceptedAt": "2026-06-07T14:40:59.447Z"
+    },
+    {
+      "seeker": "513bbdd386689b3e5402b40b",
+      "title": "Direct connection: Other",
+      "description": "Direct conversation initiated via the Help Assistant.",
+      "category": "Other",
+      "urgency": "flexible",
+      "location": "Zone 5 Royapuram, Chennai",
+      "status": "completed",
+      "acceptedHelper": "c7cd0759e49f9ae65e4f46dc",
+      "acceptedAt": "2026-06-07T13:22:10.381Z",
+      "_id": "9ecbe134acefba4bb9ebae06",
+      "createdAt": "2026-06-07T13:22:10.381Z",
+      "updatedAt": "2026-06-07T13:22:10.381Z",
+      "resolvedAt": "2026-06-07T13:44:13.688Z"
+    }
+  ],
+  "Chat": [
+    {
+      "request": "9ecbe134acefba4bb9ebae06",
+      "seeker": "513bbdd386689b3e5402b40b",
+      "helper": "c7cd0759e49f9ae65e4f46dc",
+      "messages": [
+        {
+          "_id": "6a25759e611af23d65d11c30",
+          "sender": "513bbdd386689b3e5402b40b",
+          "text": "hi",
+          "createdAt": "2026-06-07T13:43:58.624Z",
+          "readBy": [
+            "513bbdd386689b3e5402b40b",
+            "c7cd0759e49f9ae65e4f46dc"
+          ]
+        }
+      ],
+      "status": "resolved",
+      "_id": "c3ef3ad7c51f09335d3bd09e",
+      "createdAt": "2026-06-07T13:22:10.383Z",
+      "updatedAt": "2026-06-07T13:45:06.569Z",
+      "seekerRating": 5,
+      "seekerFeedback": "",
+      "resolvedAt": "2026-06-07T13:44:13.686Z"
+    },
+    {
+      "request": "7378cc37b50b9e14319f69be",
+      "seeker": "513bbdd386689b3e5402b40b",
+      "helper": "c7cd0759e49f9ae65e4f46dc",
+      "messages": [],
+      "status": "active",
+      "_id": "0c0bb2d52bd04ebca7999584",
+      "createdAt": "2026-06-07T14:40:59.449Z",
+      "updatedAt": "2026-06-07T14:40:59.450Z"
+    }
+  ],
+  "Notification": [
+    {
+      "recipient": "c7cd0759e49f9ae65e4f46dc",
+      "type": "message",
+      "title": "New message from sk",
+      "body": "hi",
+      "meta": {
+        "chatId": "c3ef3ad7c51f09335d3bd09e",
+        "messageId": "6a25759e611af23d65d11c30",
+        "senderName": "sk"
+      },
+      "_id": "482e297ec642c60d763d8947",
+      "createdAt": "2026-06-07T13:43:58.626Z",
+      "updatedAt": "2026-06-07T13:45:24.921Z",
+      "read": true
+    },
+    {
+      "recipient": "c7cd0759e49f9ae65e4f46dc",
+      "type": "rating_received",
+      "title": "Feedback received!",
+      "body": "sk rated their experience: 5 stars.",
+      "meta": {
+        "chatId": "c3ef3ad7c51f09335d3bd09e",
+        "rating": 5,
+        "feedback": ""
+      },
+      "_id": "7bc5e4523c2e41fccc3b63aa",
+      "createdAt": "2026-06-07T13:44:13.696Z",
+      "updatedAt": "2026-06-07T14:08:42.316Z",
+      "read": true
+    },
+    {
+      "recipient": "513bbdd386689b3e5402b40b",
+      "type": "request_accepted",
+      "title": "Help is on the way!",
+      "body": "arun accepted your request!",
+      "meta": {
+        "chatId": "0c0bb2d52bd04ebca7999584",
+        "helperId": "c7cd0759e49f9ae65e4f46dc"
+      },
+      "_id": "b6f7ab7d6e949e4ee5f8d505",
+      "createdAt": "2026-06-07T14:40:59.451Z",
+      "updatedAt": "2026-06-07T14:40:59.452Z"
+    }
+  ]
+}
