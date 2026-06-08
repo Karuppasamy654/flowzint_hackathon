@@ -34,50 +34,24 @@ export async function POST(
       }
     }
 
-    // Find the request
-    const helpRequest = await HelpRequest.findById(requestId);
-    if (!helpRequest) {
-      return NextResponse.json(
-        { success: false, error: 'Help request not found' },
-        { status: 404 }
-      );
-    }
-
-    // Must be in matchedHelpers array
-    const isMatched = helpRequest.matchedHelpers.some(
-      (hId: any) => hId.toString() === helperId
+    // Atomic MongoDB update using findOneAndUpdate to handle race condition
+    const updated = await HelpRequest.findOneAndUpdate(
+      { _id: requestId, status: 'pending' },
+      { $set: { status: 'active', acceptedHelper: new mongoose.Types.ObjectId(helperId), acceptedAt: new Date() } },
+      { new: true }
     );
-    if (!isMatched && process.env.USE_MOCK_DB !== 'true') {
+
+    if (!updated) {
       return NextResponse.json(
-        { success: false, error: 'You are not matched for this request' },
-        { status: 403 }
+        { success: false, error: 'This request has already been accepted by someone else.' },
+        { status: 409 }
       );
     }
-
-    // Check request is still pending
-    if (helpRequest.status !== 'pending') {
-      return NextResponse.json(
-        { success: false, error: `This request is no longer pending (status: ${helpRequest.status})` },
-        { status: 400 }
-      );
-    }
-
-    // Update request: acceptedHelper = helperId, status = active, acceptedAt = now
-    helpRequest.acceptedHelper = new mongoose.Types.ObjectId(helperId);
-    helpRequest.status = 'active';
-    helpRequest.acceptedAt = new Date();
-    
-    // In mock DB mode, ensure helperId is in matchedHelpers if it wasn't already, so UI doesn't break
-    if (process.env.USE_MOCK_DB === 'true' && !isMatched) {
-      helpRequest.matchedHelpers.push(new mongoose.Types.ObjectId(helperId));
-    }
-    
-    await helpRequest.save();
 
     // Create Chat document
     const chat = await Chat.create({
       request: new mongoose.Types.ObjectId(requestId),
-      seeker: helpRequest.seeker,
+      seeker: updated.seeker,
       helper: new mongoose.Types.ObjectId(helperId),
       messages: [],
       status: 'active',
@@ -88,7 +62,7 @@ export async function POST(
     const helperAvatar = helperUser ? helperUser.avatarUrl || '' : '';
     const helperColor = helperUser ? helperUser.avatarColor : '#7C3AED';
 
-    const seekerId = helpRequest.seeker.toString();
+    const seekerId = updated.seeker.toString();
 
     // Create Notification for the seeker
     const notification = await Notification.create({
@@ -102,7 +76,17 @@ export async function POST(
       },
     });
 
-    // Broadcast to seeker via Supabase Realtime
+    // Broadcast to seeker via Supabase Realtime channel request:[requestId]
+    await broadcastRealtimeEvent(`request:${requestId}`, 'request_accepted', {
+      chatId: chat._id.toString(),
+      helperName,
+      helperAvatar,
+      helperColor,
+      helperId,
+      requestId,
+    });
+
+    // Notify seeker via notifications:seekerId channel
     await broadcastRealtimeEvent(`notifications:${seekerId}`, 'request_accepted', {
       notificationId: notification._id.toString(),
       chatId: chat._id.toString(),
@@ -112,7 +96,34 @@ export async function POST(
       requestId,
     });
 
-    return NextResponse.json({ success: true, data: { chat } }, { status: 200 });
+    // Handle notifications and broadcasts for other matched helpers
+    const otherHelpers = updated.matchedHelpers.filter(
+      (mh: any) => (mh.userId || mh).toString() !== helperId
+    );
+
+    const otherPromises = otherHelpers.map(async (mh: any) => {
+      const otherId = (mh.userId || mh).toString();
+      
+      // Create Notification doc
+      await Notification.create({
+        recipient: new mongoose.Types.ObjectId(otherId),
+        type: 'request_taken',
+        title: 'Request taken',
+        body: `The request you matched for has been accepted by someone else.`,
+        meta: {
+          requestId,
+        },
+      });
+
+      // Broadcast event via Supabase notifications:[helperId]
+      await broadcastRealtimeEvent(`notifications:${otherId}`, 'request_taken', {
+        requestId,
+      });
+    });
+
+    await Promise.all(otherPromises);
+
+    return NextResponse.json({ success: true, chatId: chat._id.toString(), data: { chat } }, { status: 200 });
   } catch (error: any) {
     console.error('Accept request error:', error);
     return NextResponse.json(

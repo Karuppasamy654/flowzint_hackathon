@@ -8,6 +8,9 @@ export interface IMessage {
   text: string;
   createdAt: Date;
   readBy: mongoose.Types.ObjectId[];
+  originalText?: string;
+  originalLanguage?: string;
+  translations?: Record<string, string> | any;
 }
 
 export interface IChat extends Document {
@@ -28,6 +31,9 @@ const MessageSchema = new Schema<IMessage>({
   text: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
   readBy: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
+  originalText: { type: String },
+  originalLanguage: { type: String },
+  translations: { type: Map, of: String, default: {} },
 });
 
 const ChatSchema: Schema<IChat> = new Schema(

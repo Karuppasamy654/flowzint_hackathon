@@ -9,8 +9,11 @@ import { RatingModal } from './RatingModal';
 import { Avatar } from '../ui/avatar';
 import { Button } from '../ui/button';
 import { toast } from '@/components/ui/toast';
-import { ArrowLeft, CheckCircle, Send, ShieldCheck, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Send, ShieldCheck, Loader2, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { SmartReplyChips } from './SmartReplyChips';
+import { getLanguageName } from '@/lib/languages';
+import { format } from 'date-fns';
 
 interface ChatWindowProps {
   chatId: string;
@@ -25,6 +28,7 @@ export function ChatWindow({ chatId, currentUserId }: ChatWindowProps) {
   const [chatMeta, setChatMeta] = React.useState<any>(null);
   const [isRatingOpen, setIsRatingOpen] = React.useState(false);
   const [isOtherUserTyping, setIsOtherUserTyping] = React.useState(false);
+  const [showScrollButton, setShowScrollButton] = React.useState(false);
 
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
@@ -68,6 +72,13 @@ export function ChatWindow({ chatId, currentUserId }: ChatWindowProps) {
       setTimeout(scrollToBottom, 50);
     }
   }, [isOtherUserTyping]);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const isUp = el.scrollHeight - el.scrollTop - el.clientHeight > 200;
+    setShowScrollButton(isUp);
+  };
 
   const triggerMockReply = (userText: string, otherUser: any) => {
     const cleaned = userText.toLowerCase();
@@ -114,15 +125,18 @@ export function ChatWindow({ chatId, currentUserId }: ChatWindowProps) {
     }, 800);
   };
 
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputText.trim() || isSending) return;
+  const handleSend = async (e?: React.FormEvent, customText?: string) => {
+    if (e) e.preventDefault();
+    
+    const textToSend = customText ? customText.trim() : inputText.trim();
+    if (!textToSend || isSending) return;
 
-    const textToSend = inputText.trim();
     setIsSending(true);
     try {
       await sendMessage(textToSend);
-      setInputText('');
+      if (!customText) {
+        setInputText('');
+      }
 
       // Auto-reply in Mock DB Mode
       if (process.env.NEXT_PUBLIC_USE_MOCK_DB === 'true' && otherUser) {
@@ -133,6 +147,10 @@ export function ChatWindow({ chatId, currentUserId }: ChatWindowProps) {
     } finally {
       setIsSending(false);
     }
+  };
+
+  const handleSmartReplySelect = (reply: string) => {
+    handleSend(undefined, reply);
   };
 
   const handleResolveSubmit = async (rating: number, feedback: string) => {
@@ -163,6 +181,25 @@ export function ChatWindow({ chatId, currentUserId }: ChatWindowProps) {
     }
   };
 
+  const getDayLabel = (dateStr: string | Date) => {
+    try {
+      const date = new Date(dateStr);
+      const today = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+
+      if (date.toDateString() === today.toDateString()) {
+        return 'Today';
+      } else if (date.toDateString() === yesterday.toDateString()) {
+        return 'Yesterday';
+      } else {
+        return format(date, 'MMMM d, yyyy');
+      }
+    } catch (e) {
+      return '';
+    }
+  };
+
   if (isLoading || !chatMeta || !chatMeta.seeker || !chatMeta.helper) {
     return (
       <div className="flex flex-col items-center justify-center py-24 space-y-4">
@@ -176,8 +213,39 @@ export function ChatWindow({ chatId, currentUserId }: ChatWindowProps) {
   const isSeeker = chatMeta.seeker._id === currentUserId;
   const isResolved = chatMeta.status === 'resolved';
 
+  // WhatsApp style consecutive message grouping calculation
+  const analyzedMessages = messages.map((msg, idx) => {
+    const prevMsg = messages[idx - 1];
+    const nextMsg = messages[idx + 1];
+
+    const isMe = msg.sender._id === currentUserId;
+    const prevSenderId = prevMsg?.sender?._id;
+    const nextSenderId = nextMsg?.sender?._id;
+
+    const isPrevConsecutive = prevSenderId === msg.sender._id;
+    const isNextConsecutive = nextSenderId === msg.sender._id;
+
+    const prevTimeDiff = prevMsg ? Math.abs(new Date(msg.createdAt).getTime() - new Date(prevMsg.createdAt).getTime()) : Infinity;
+    const nextTimeDiff = nextMsg ? Math.abs(new Date(nextMsg.createdAt).getTime() - new Date(msg.createdAt).getTime()) : Infinity;
+
+    const isGroupedWithPrev = isPrevConsecutive && prevTimeDiff < 3 * 60 * 1000;
+    const isGroupedWithNext = isNextConsecutive && nextTimeDiff < 3 * 60 * 1000;
+
+    const isFirstInGroup = !isGroupedWithPrev;
+    const isLastInGroup = !isGroupedWithNext;
+
+    return {
+      ...msg,
+      isMe,
+      isFirstInGroup,
+      isLastInGroup,
+      showAvatar: !isMe && isLastInGroup,
+      showName: !isMe && isFirstInGroup,
+    };
+  });
+
   return (
-    <div className="flex flex-col h-[calc(100vh-80px)] md:h-[calc(100vh-64px)] bg-[#131B2E]/50 border border-white/10 rounded-lg overflow-hidden backdrop-blur-md text-white">
+    <div className="flex flex-col h-[calc(100vh-80px)] md:h-[calc(100vh-64px)] bg-[#131B2E]/50 border border-white/10 rounded-lg overflow-hidden backdrop-blur-md text-white relative">
       {/* Header section */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#131B2E]/70 shrink-0">
         <div className="flex items-center gap-3">
@@ -197,8 +265,22 @@ export function ChatWindow({ chatId, currentUserId }: ChatWindowProps) {
           />
           
           <div className="text-left">
-            <h4 className="text-sm font-bold text-white leading-none">{otherUser.name}</h4>
-            <p className="text-[10px] text-slate-400 mt-1 truncate">{otherUser.location}</p>
+            <div className="flex items-center gap-2">
+              <h4 className="text-sm font-bold text-white leading-none">{otherUser.name}</h4>
+              {chatMeta.seeker.preferredLanguage !== chatMeta.helper.preferredLanguage && (
+                <span className="text-[9px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-semibold">
+                  🌐 Auto-translate
+                </span>
+              )}
+            </div>
+            <p className="text-[10px] text-slate-400 mt-1 truncate">
+              {otherUser.location}
+              {chatMeta.seeker.preferredLanguage !== chatMeta.helper.preferredLanguage && (
+                <span className="ml-1 text-[9px] text-slate-500 font-normal">
+                  ({getLanguageName(otherUser.preferredLanguage)} &rarr; {getLanguageName(chatMeta[isSeeker ? 'seeker' : 'helper'].preferredLanguage)})
+                </span>
+              )}
+            </p>
           </div>
         </div>
 
@@ -223,7 +305,11 @@ export function ChatWindow({ chatId, currentUserId }: ChatWindowProps) {
       </div>
 
       {/* Scrollable messages and context container */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col bg-[#0B0F1A]/30" ref={scrollRef}>
+      <div 
+        className="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col bg-[#0B0F1A]/30 relative" 
+        ref={scrollRef}
+        onScroll={handleScroll}
+      >
         {/* Context Card */}
         {chatMeta.request && (
           <div className="shrink-0 mb-2">
@@ -232,31 +318,54 @@ export function ChatWindow({ chatId, currentUserId }: ChatWindowProps) {
         )}
 
         {/* Messages loop */}
-        <div className="flex-1 flex flex-col space-y-3 justify-end">
-          {messages.length === 0 ? (
+        <div className="flex-1 flex flex-col space-y-1 justify-end">
+          {analyzedMessages.length === 0 ? (
             <div className="text-center py-12 text-xs text-slate-500 font-medium">
               This is the beginning of your conversation.
             </div>
           ) : (
-            messages.map((message) => (
-              <MessageBubble
-                key={message._id}
-                message={message}
-                currentUserId={currentUserId}
-              />
-            ))
+            analyzedMessages.map((message, idx) => {
+              const prevMessage = analyzedMessages[idx - 1];
+              const showDaySeparator = !prevMessage || 
+                new Date(message.createdAt).toDateString() !== new Date(prevMessage.createdAt).toDateString();
+
+              return (
+                <React.Fragment key={message._id}>
+                  {showDaySeparator && (
+                    <div className="flex justify-center my-4 animate-in fade-in duration-300">
+                      <span className="bg-[#1e293b]/60 border border-white/5 text-[10px] uppercase font-bold tracking-wider text-slate-400 px-3 py-1 rounded-full shadow-sm">
+                        {getDayLabel(message.createdAt)}
+                      </span>
+                    </div>
+                  )}
+                  <MessageBubble
+                    message={message}
+                    currentUserId={currentUserId}
+                    preferredLanguage={isSeeker 
+                      ? chatMeta.seeker.preferredLanguage 
+                      : chatMeta.helper.preferredLanguage}
+                    isFirstInGroup={message.isFirstInGroup}
+                    isLastInGroup={message.isLastInGroup}
+                    showAvatar={message.showAvatar}
+                    showName={message.showName}
+                  />
+                </React.Fragment>
+              );
+            })
           )}
 
           {/* Typing Indicator Bubble */}
           {isOtherUserTyping && (
             <div className="flex items-start gap-2.5 max-w-[85%] sm:max-w-[70%] self-start animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <Avatar
-                src={otherUser.avatarUrl}
-                name={otherUser.name}
-                color={otherUser.avatarColor}
-                size="sm"
-                className="mt-0.5 shrink-0 border border-white/10"
-              />
+              <div className="w-8 shrink-0 flex justify-center">
+                <Avatar
+                  src={otherUser.avatarUrl}
+                  name={otherUser.name}
+                  color={otherUser.avatarColor}
+                  size="sm"
+                  className="border border-white/10"
+                />
+              </div>
               <div className="flex flex-col space-y-1">
                 <span className="text-[10px] font-semibold text-slate-400 pl-1">
                   {otherUser.name}
@@ -273,31 +382,57 @@ export function ChatWindow({ chatId, currentUserId }: ChatWindowProps) {
             </div>
           )}
         </div>
+
+        {/* ↓ New message float indicator */}
+        {showScrollButton && (
+          <button
+            type="button"
+            onClick={scrollToBottom}
+            className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-30 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3.5 py-2 rounded-full shadow-lg border border-indigo-500/30 flex items-center gap-1.5 animate-bounce active:scale-95 transition-all cursor-pointer"
+          >
+            <ChevronDown className="h-3.5 w-3.5" />
+            New message
+          </button>
+        )}
       </div>
 
       {/* Message input footer */}
-      <div className="p-3 border-t border-white/10 bg-[#131B2E]/70 shrink-0">
-        <form onSubmit={handleSend} className="flex gap-2">
-          <input
-            type="text"
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            placeholder={isResolved ? "This chat is resolved" : "Type a message..."}
-            disabled={isResolved || isSending}
-            className="flex-1 h-10 px-4 py-2 bg-[#0B0F1A]/70 border border-white/10 rounded-md text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:bg-[#0B0F1A]/30 disabled:cursor-not-allowed text-white"
+      <div className="border-t border-white/10 bg-[#131B2E]/70 shrink-0">
+        {!isResolved && (
+          <SmartReplyChips
+            messages={messages}
+            currentUserId={currentUserId}
+            requestTitle={chatMeta.request?.title || ''}
+            requestDescription={chatMeta.request?.description || ''}
+            myRole={isSeeker ? 'seeker' : 'helper'}
+            onSelect={handleSmartReplySelect}
           />
-          <Button
-            type="submit"
-            disabled={isResolved || isSending || !inputText.trim()}
-            className="h-10 w-10 flex items-center justify-center p-0 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md shrink-0 disabled:opacity-50 transition-colors"
-          >
-            {isSending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4.5 w-4.5" />
-            )}
-          </Button>
-        </form>
+        )}
+        
+        <div className="p-3">
+          <form onSubmit={handleSend} className="flex gap-2">
+            <input
+              id="chat-input-field"
+              type="text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder={isResolved ? "This chat is resolved" : "Type a message..."}
+              disabled={isResolved || isSending}
+              className="flex-1 h-10 px-4 py-2 bg-[#0B0F1A]/70 border border-white/10 rounded-md text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:bg-[#0B0F1A]/30 disabled:cursor-not-allowed text-white"
+            />
+            <Button
+              type="submit"
+              disabled={isResolved || isSending || !inputText.trim()}
+              className="h-10 w-10 flex items-center justify-center p-0 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md shrink-0 disabled:opacity-50 transition-colors"
+            >
+              {isSending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4.5 w-4.5" />
+              )}
+            </Button>
+          </form>
+        </div>
       </div>
 
       {/* Rating modal */}

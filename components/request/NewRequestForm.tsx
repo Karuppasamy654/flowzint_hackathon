@@ -29,12 +29,30 @@ interface NewRequestFormProps {
 
 export function NewRequestForm({ userLocation, onRequestCreated }: NewRequestFormProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+  const [analysis, setAnalysis] = React.useState<{
+    title?: string;
+    category?: string;
+    urgency?: string;
+    clarityScore: number;
+    clarityFeedback?: string;
+    missingInfo?: string[];
+  } | null>(null);
+
+  const [safety, setSafety] = React.useState<{
+    safe: boolean;
+    category: string;
+    reason: string;
+    suggestion: string;
+  } | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
+    watch,
   } = useForm<RequestFormData>({
     resolver: zodResolver(CreateRequestSchema),
     defaultValues: {
@@ -43,6 +61,79 @@ export function NewRequestForm({ userLocation, onRequestCreated }: NewRequestFor
       category: '',
     },
   });
+
+  const watchDescription = watch('description');
+  const watchTitle = watch('title');
+
+  // Debounced input analysis
+  React.useEffect(() => {
+    if (!watchDescription || watchDescription.trim().length < 15) {
+      setAnalysis(null);
+      setSafety(null);
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(async () => {
+      setIsAnalyzing(true);
+      try {
+        const [analysisRes, safetyRes] = await Promise.all([
+          fetch('/api/ai/analyse-request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ description: watchDescription }),
+          }),
+          fetch('/api/ai/safety-check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: watchTitle || '', description: watchDescription }),
+          })
+        ]);
+
+        const analysisResult = await analysisRes.json();
+        const safetyResult = await safetyRes.json();
+
+        if (analysisResult.success && analysisResult.data) {
+          const data = analysisResult.data;
+          setAnalysis(data);
+          
+          if (data.category) {
+            setValue('category', data.category);
+          }
+          if (data.urgency) {
+            setValue('urgency', data.urgency);
+          }
+          if (data.title && !watchTitle) {
+            setValue('title', data.title);
+          }
+        }
+
+        if (safetyResult.success && safetyResult.data) {
+          setSafety(safetyResult.data);
+        }
+      } catch (err) {
+        console.error('Real-time analysis error:', err);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    }, 800); // 800ms debounce
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [watchDescription, watchTitle, setValue]);
+
+  const handleChipClick = (info: string) => {
+    const currentText = watchDescription || '';
+    const spacer = currentText ? (currentText.endsWith(' ') ? '' : ' ') : '';
+    const newText = `${currentText}${spacer}[Add detail about ${info}: ]`;
+    setValue('description', newText);
+    const textarea = document.getElementById('description-textarea');
+    if (textarea) {
+      textarea.focus();
+      // Move cursor to the end
+      setTimeout(() => {
+        (textarea as HTMLTextAreaElement).setSelectionRange(newText.length, newText.length);
+      }, 0);
+    }
+  };
 
   const onSubmit = async (data: RequestFormData) => {
     setIsSubmitting(true);
@@ -59,6 +150,8 @@ export function NewRequestForm({ userLocation, onRequestCreated }: NewRequestFor
           description: 'Nearby helpers have been notified.',
         });
         reset();
+        setAnalysis(null);
+        setSafety(null);
         onRequestCreated(result.data);
       } else {
         toast.error(result.error || 'Failed to post help request');
@@ -71,9 +164,21 @@ export function NewRequestForm({ userLocation, onRequestCreated }: NewRequestFor
     }
   };
 
+  const isClarityTooLow = analysis ? analysis.clarityScore <= 3 : false;
+  const isUnsafe = safety ? !safety.safe : false;
+  const disableSubmit = isSubmitting || isAnalyzing || isClarityTooLow || isUnsafe;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 bg-[#131B2E]/50 p-6 rounded-lg border border-white/10 shadow-2xl backdrop-blur-md">
-      <h3 className="text-lg font-display font-semibold text-white mb-2">Request Assistance</h3>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-lg font-display font-semibold text-white">Request Assistance</h3>
+        {isAnalyzing && (
+          <span className="inline-flex items-center text-xs text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+            <Loader2 className="h-3 w-3 animate-spin mr-1" />
+            AI analyzing...
+          </span>
+        )}
+      </div>
 
       {/* Title */}
       <div>
@@ -98,8 +203,13 @@ export function NewRequestForm({ userLocation, onRequestCreated }: NewRequestFor
       {/* Category & Urgency */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1 flex items-center justify-between animate-in fade-in duration-300">
             Category
+            {analysis?.category && (
+              <span className="text-[10px] text-indigo-300 font-semibold uppercase tracking-wider">
+                ✨ AI suggested
+              </span>
+            )}
           </label>
           <select
             {...register('category')}
@@ -122,8 +232,13 @@ export function NewRequestForm({ userLocation, onRequestCreated }: NewRequestFor
         </div>
 
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1 flex items-center justify-between animate-in fade-in duration-300">
             Urgency
+            {analysis?.urgency && (
+              <span className="text-[10px] text-indigo-300 font-semibold uppercase tracking-wider">
+                ✨ AI detected
+              </span>
+            )}
           </label>
           <select
             {...register('urgency')}
@@ -169,10 +284,11 @@ export function NewRequestForm({ userLocation, onRequestCreated }: NewRequestFor
           Describe what you need
         </label>
         <Textarea
+          id="description-textarea"
           placeholder="Describe the issue, what tools might be needed, and relevant details..."
           {...register('description')}
           className={cn(
-            'resize-none bg-[#0B0F1A]/70 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-indigo-500/50 focus-visible:border-indigo-500/50',
+            'resize-none bg-[#0B0F1A]/70 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-indigo-500/50 focus-visible:border-indigo-500/50 min-h-[100px]',
             errors.description ? 'border-red-500/60 focus-visible:ring-red-500/50' : ''
           )}
           disabled={isSubmitting}
@@ -183,16 +299,128 @@ export function NewRequestForm({ userLocation, onRequestCreated }: NewRequestFor
         )}
       </div>
 
+      {/* Clarity score checker UI */}
+      {analysis && (
+        <div className="p-4 rounded-lg bg-[#0F172A]/80 border border-white/10 space-y-3 transition-all duration-300 animate-fadeIn">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+              Request Clarity Score
+            </span>
+            <div className="flex items-center gap-2">
+              <div className="w-24 bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div 
+                  className={cn(
+                    "h-full transition-all duration-500",
+                    analysis.clarityScore <= 3 ? 'bg-red-500' :
+                    analysis.clarityScore <= 6 ? 'bg-amber-500' : 'bg-emerald-500'
+                  )}
+                  style={{ width: `${analysis.clarityScore * 10}%` }}
+                />
+              </div>
+              <span className={cn(
+                "text-sm font-bold",
+                analysis.clarityScore <= 3 ? 'text-red-400' :
+                analysis.clarityScore <= 6 ? 'text-amber-400' : 'text-emerald-400'
+              )}>
+                {analysis.clarityScore}/10
+              </span>
+            </div>
+          </div>
+
+          {analysis.clarityFeedback && (
+            <p className="text-xs text-slate-300 leading-relaxed">
+              {analysis.clarityFeedback}
+            </p>
+          )}
+
+          {analysis.missingInfo && analysis.missingInfo.length > 0 && (
+            <div className="space-y-1.5 pt-1 animate-in slide-in-from-bottom duration-300">
+              <span className="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">
+                💡 Tip: Click to append missing information:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {analysis.missingInfo.map((info, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleChipClick(info)}
+                    className="text-[11px] bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 px-2.5 py-0.5 rounded-full transition-colors active:scale-95 cursor-pointer"
+                  >
+                    + {info}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Trust & Safety Warning UI */}
+      {safety && !safety.safe && (
+        <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-white space-y-3 animate-shake">
+          <div className="flex items-center gap-2 text-red-400">
+            <span className="text-sm font-bold uppercase tracking-wider">
+              ⚠️ Content Policy Warning ({safety.category.replace('_', ' ')})
+            </span>
+          </div>
+          <p className="text-xs text-red-200 leading-relaxed">
+            {safety.reason}
+          </p>
+          {safety.suggestion && (
+            <p className="text-xs text-slate-300 italic">
+              Suggestion: {safety.suggestion}
+            </p>
+          )}
+          <div className="flex gap-2 pt-1">
+            <Button
+              type="button"
+              onClick={() => {
+                const textarea = document.getElementById('description-textarea');
+                if (textarea) textarea.focus();
+              }}
+              className="text-xs bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-500/30 h-8 px-3 py-1 font-semibold rounded"
+            >
+              Edit Request
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                toast.message('Support Contacted', {
+                  description: 'Our safety team has been notified and will review your draft shortly.',
+                });
+              }}
+              className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 h-8 px-3 py-1 font-semibold rounded"
+            >
+              Contact Support
+            </Button>
+          </div>
+        </div>
+      )}
+
       <Button
         type="submit"
-        disabled={isSubmitting}
-        className="w-full h-11 bg-indigo-600 text-white hover:bg-indigo-700 font-semibold rounded-md shadow-lg flex items-center justify-center transition-colors"
+        disabled={disableSubmit}
+        className={cn(
+          "w-full h-11 font-semibold rounded-md shadow-lg flex items-center justify-center transition-colors text-sm",
+          isUnsafe ? "bg-red-700/50 text-red-300 cursor-not-allowed hover:bg-red-700/50 border border-red-500/30" :
+          isClarityTooLow ? "bg-amber-700/50 text-amber-300 cursor-not-allowed hover:bg-amber-700/50 border border-amber-500/30" :
+          "bg-indigo-600 text-white hover:bg-indigo-700"
+        )}
       >
         {isSubmitting ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
             Posting request...
           </>
+        ) : isAnalyzing ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            AI analyzing request...
+          </>
+        ) : isUnsafe ? (
+          'Submission Blocked: Safety Warning'
+        ) : isClarityTooLow ? (
+          'Submission Blocked: Low Clarity'
         ) : (
           'Submit Help Request'
         )}

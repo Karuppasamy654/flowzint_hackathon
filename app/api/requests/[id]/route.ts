@@ -22,7 +22,7 @@ export async function GET(
     const helpRequest = await HelpRequest.findById(params.id)
       .populate('seeker', 'name email avatarUrl avatarColor rating bio location')
       .populate('acceptedHelper', 'name email avatarUrl avatarColor rating bio location')
-      .populate('matchedHelpers', 'name email avatarUrl avatarColor rating bio location');
+      .populate('matchedHelpers.userId', 'name email avatarUrl avatarColor rating bio location skills');
 
     if (!helpRequest) {
       return NextResponse.json(

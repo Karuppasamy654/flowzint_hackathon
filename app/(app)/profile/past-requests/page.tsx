@@ -135,7 +135,7 @@ export default function PastRequestsPage() {
           ) : seekerRequests.length === 0 ? (
             <div className="bg-white p-12 rounded-lg border border-border border-dashed text-center space-y-3 text-gray-400 py-16">
               <History className="h-10 w-10 text-gray-300 mx-auto" />
-              <p className="text-sm font-semibold text-gray-800">No past requests</p>
+              <p className="text-sm font-semibold text-gray-800">No past requests yet.</p>
               <p className="text-xs max-w-xs mx-auto">
                 Completed, cancelled, or expired help requests will be archived here.
               </p>

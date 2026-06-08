@@ -6,8 +6,9 @@ import Notification from '@/models/Notification';
 import User from '@/models/User';
 import { auth } from '@/lib/auth';
 import { z } from 'zod';
-import { SKILL_CATEGORIES, findMatchingHelpers } from '@/lib/matching';
+import { SKILL_CATEGORIES } from '@/lib/matching';
 import { broadcastRealtimeEvent } from '@/lib/supabase';
+import { geminiFlash, callGeminiWithTimeout } from '@/lib/gemini';
 
 const CreateRequestSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -15,6 +16,9 @@ const CreateRequestSchema = z.object({
   category: z.enum(SKILL_CATEGORIES as [string, ...string[]]),
   urgency: z.enum(['flexible', 'today', 'urgent']),
   location: z.string().min(1, 'Location is required'),
+  aiTitle: z.string().optional(),
+  detectedLanguage: z.string().optional(),
+  keywords: z.array(z.string()).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -38,14 +42,189 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { title, description, category, urgency, location } = parseResult.data;
+    const { title, description, category, urgency, location, aiTitle, detectedLanguage, keywords } = parseResult.data;
     const seekerId = session.user.id;
 
-    // 1. Run the matching algorithm
-    const matchedHelpers = await findMatchingHelpers(category, seekerId, 20);
-    const matchedHelperIds = matchedHelpers.map((h) => h._id);
+    // --- STEP 1: Server-side Safety Check (Second Layer) ---
+    let safetyResult = { safe: true, category: 'safe', reason: '' };
+    try {
+      const safetyPrompt = `You are a content moderator for a community help platform where people
+ask neighbours for assistance with everyday tasks.
 
-    // 2. Create the HelpRequest
+Analyse this help request and return ONLY a JSON object. No markdown.
+
+Request title: "${title}"
+Request description: "${description}"
+
+Return exactly:
+{
+  "safe": true,
+  "category": "safe",
+  "reason": "",
+  "suggestion": ""
+}
+
+Replace default values. Category must be one of: safe, harassment, illegal_activity, dangerous, privacy_violation, hate_speech, scam, other_violation.
+"reason" must be a friendly but firm one-sentence explanation written directly to the user if not safe.
+"suggestion" must be one sentence advising how to rephrase legitimately if not safe.
+
+Flag as NOT safe if the request:
+- Asks for help with illegal activities (breaking in, theft, fraud, drugs)
+- Contains harassment, threats, or targeting of a specific person
+- Requests dangerous or harmful actions
+- Contains hate speech or discrimination
+- Is clearly a scam or attempts to exploit helpers
+- Violates anyone's privacy or safety
+
+Do NOT flag:
+- Legitimate home repair, medical, legal, financial, or personal help
+- Requests that mention sensitive topics legitimately (e.g. mental health support)
+- Anything that is a genuine community help request even if unusual
+- Requests in any language — translate mentally before judging`;
+
+      const response = await callGeminiWithTimeout(geminiFlash.generateContent(safetyPrompt));
+      const text = response.response.text();
+      let cleaned = text.trim();
+      if (cleaned.startsWith('```')) {
+        cleaned = cleaned.replace(/^```[a-zA-Z]*\n/, '');
+        cleaned = cleaned.replace(/\n```$/, '');
+      }
+      cleaned = cleaned.trim();
+      const safetyObj = JSON.parse(cleaned);
+      safetyResult = {
+        safe: safetyObj.safe !== false,
+        category: safetyObj.category || 'safe',
+        reason: safetyObj.reason || '',
+      };
+    } catch (geminiError) {
+      console.error('Gemini server-side safety check failed, failing open:', geminiError);
+      safetyResult = { safe: true, category: 'safe', reason: '' };
+    }
+
+    if (!safetyResult.safe) {
+      return NextResponse.json(
+        { success: false, error: safetyResult.reason || 'This request violates our community safety guidelines.' },
+        { status: 422 }
+      );
+    }
+
+    // --- STEP 2: Wide net helpers query ---
+    // Find all users whose skills array includes the category OR have a non-empty bio, excluding seeker
+    const helpers = await User.find({
+      _id: { $ne: seekerId },
+      $or: [
+        { skills: category },
+        { bio: { $exists: true, $ne: '' } }
+      ]
+    });
+
+    // --- STEP 3: Gemini Matching & Ranking ---
+    let matchedHelpersData: { userId: any; score: number; reason: string }[] = [];
+    if (helpers.length === 0) {
+      // No candidates
+      matchedHelpersData = [];
+    } else if (helpers.length <= 5) {
+      // Use all 5 or fewer candidates directly
+      matchedHelpersData = helpers.map((h: any) => ({
+        userId: h._id,
+        score: 10,
+        reason: `Matches category skill: ${category}`
+      }));
+    } else {
+      try {
+        const rankingPrompt = `You are matching a help request to the most suitable helpers.
+
+Help request:
+Title: "${aiTitle || title}"
+Description: "${description}"
+Category: "${category}"
+Keywords: ${(keywords || []).join(', ')}
+
+Helpers:
+${JSON.stringify(helpers.map((h: any) => ({
+  id: h._id.toString(),
+  skills: h.skills,
+  bio: h.bio || '',
+  location: h.location,
+  rating: h.avgRating || 0
+})))}
+
+Return ONLY a JSON array of objects sorted best to worst match:
+[{ "id": "helperId", "score": 8, "reason": "One sentence why they match" }]
+
+Only include genuinely relevant helpers. Raw JSON array only, no markdown.`;
+
+        const response = await callGeminiWithTimeout(geminiFlash.generateContent(rankingPrompt));
+        const text = response.response.text();
+        let cleaned = text.trim();
+        if (cleaned.startsWith('```')) {
+          cleaned = cleaned.replace(/^```[a-zA-Z]*\n/, '');
+          cleaned = cleaned.replace(/\n```$/, '');
+        }
+        cleaned = cleaned.trim();
+        
+        const ranked: { id: string; score: number; reason: string }[] = JSON.parse(cleaned);
+        
+        matchedHelpersData = ranked
+          .map((r: any) => {
+            const helperDoc = helpers.find((h: any) => h._id.toString() === r.id);
+            if (!helperDoc) return null;
+            return {
+              userId: helperDoc._id,
+              score: Number(r.score),
+              reason: r.reason
+            };
+          })
+          .filter(Boolean) as any[];
+      } catch (geminiError) {
+        console.error('Gemini helper ranking failed, using skills fallback:', geminiError);
+        // Fallback: skill-tag matching only, no scores
+        matchedHelpersData = helpers
+          .filter((h: any) => h.skills.includes(category))
+          .map((h: any) => ({
+            userId: h._id,
+            score: 7,
+            reason: `Helper is skilled in ${category}.`
+          }));
+      }
+    }
+
+    // --- STEP 4: Request Translation ---
+    const originalLang = detectedLanguage || 'en';
+    let translatedTitle = '';
+    let translatedDescription = '';
+
+    if (originalLang !== 'en') {
+      try {
+        const translatePrompt = `Translate the following text to English. Return ONLY a JSON object:
+{
+  "translatedTitle": "English title",
+  "translatedDescription": "English description"
+}
+No markdown, no explanation.
+
+Title: "${aiTitle || title}"
+Description: "${description}"`;
+
+        const response = await callGeminiWithTimeout(geminiFlash.generateContent(translatePrompt));
+        const text = response.response.text();
+        let cleaned = text.trim();
+        if (cleaned.startsWith('```')) {
+          cleaned = cleaned.replace(/^```[a-zA-Z]*\n/, '');
+          cleaned = cleaned.replace(/\n```$/, '');
+        }
+        cleaned = cleaned.trim();
+        const transObj = JSON.parse(cleaned);
+        translatedTitle = transObj.translatedTitle || title;
+        translatedDescription = transObj.translatedDescription || description;
+      } catch (geminiError) {
+        console.error('Translation during request creation failed:', geminiError);
+        translatedTitle = title;
+        translatedDescription = description;
+      }
+    }
+
+    // --- STEP 5: Create Help Request ---
     const helpRequest = await HelpRequest.create({
       seeker: new mongoose.Types.ObjectId(seekerId),
       title,
@@ -53,18 +232,25 @@ export async function POST(req: NextRequest) {
       category,
       urgency,
       location,
-      matchedHelpers: matchedHelperIds,
+      matchedHelpers: matchedHelpersData,
       status: 'pending',
+      aiTitle: aiTitle || title,
+      originalLanguage: originalLang,
+      translatedTitle: translatedTitle || undefined,
+      translatedDescription: translatedDescription || undefined,
+      safetyChecked: true,
+      safetyCategory: safetyResult.category,
     });
 
     const seekerUser = await User.findById(seekerId);
     const seekerName = seekerUser ? seekerUser.name : 'Someone';
+    const seekerAvatar = seekerUser ? seekerUser.avatarUrl || '' : '';
 
-    // 3. Create Notification documents & broadcast to each helper in parallel
-    const notificationPromises = matchedHelpers.map(async (helper) => {
-      const helperId = helper._id.toString();
+    // --- STEP 6: Notification creation & Broadcast ---
+    const notificationPromises = matchedHelpersData.map(async (mh) => {
+      const helperId = mh.userId.toString();
 
-      // Create Notification doc
+      // Create Notification doc in MongoDB
       const notification = await Notification.create({
         recipient: new mongoose.Types.ObjectId(helperId),
         type: 'new_match',
@@ -72,16 +258,31 @@ export async function POST(req: NextRequest) {
         body: `${seekerName} needs help with ${category} near ${location}`,
         meta: {
           requestId: helpRequest._id.toString(),
+          aiTitle: aiTitle || title,
+          category,
+          urgency,
+          seekerName,
+          seekerAvatar,
+          location,
+          description,
+          originalLanguage: originalLang,
+          translatedDescription: translatedDescription || undefined,
         },
       });
 
-      // Broadcast event via Supabase
+      // Broadcast via Supabase
       await broadcastRealtimeEvent(`notifications:${helperId}`, 'new_match', {
         notificationId: notification._id.toString(),
         requestId: helpRequest._id.toString(),
-        seekerName,
+        aiTitle: aiTitle || title,
         category,
         urgency,
+        seekerName,
+        seekerAvatar,
+        location,
+        description,
+        originalLanguage: originalLang,
+        translatedDescription: translatedDescription || undefined,
       });
     });
 
@@ -92,7 +293,7 @@ export async function POST(req: NextRequest) {
         success: true,
         data: {
           ...helpRequest.toJSON(),
-          matchedHelpersCount: matchedHelperIds.length,
+          matchedHelpersCount: matchedHelpersData.length,
         },
       },
       { status: 201 }

@@ -24,6 +24,7 @@ const SignupSchema = z.object({
   location: z.string().min(1, 'Location is required'),
   bio: z.string().max(120, 'Bio must be at most 120 characters').optional(),
   avatarColor: z.enum(AVATAR_COLORS as [string, ...string[]]),
+  preferredLanguage: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, password, skills, location, bio, avatarColor } = parseResult.data;
+    const { name, email, password, skills, location, bio, avatarColor, preferredLanguage } = parseResult.data;
 
     // Check email uniqueness
     const normalizedEmail = email.toLowerCase();
@@ -67,6 +68,7 @@ export async function POST(req: NextRequest) {
       location,
       bio,
       avatarColor,
+      preferredLanguage: preferredLanguage || 'en',
     });
 
     const userResponse = {

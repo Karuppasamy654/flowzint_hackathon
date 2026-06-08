@@ -3,194 +3,306 @@
     {
       "name": "sk",
       "email": "sk@gmail.com",
-      "passwordHash": "$2b$12$jdpgsQz0Jnshv1CQTCqH3u28EZrRaVqKavnCB.Q7oJDNFtXHIx0f6",
+      "passwordHash": "$2b$12$kpGE7VVqidNlXEf2rM5jzeyJ6rhVdguoBe9SAo7i56paadLb7ECZS",
       "skills": [
+        "Design",
         "Web Dev",
-        "Design"
+        "Teaching",
+        "Medical",
+        "Mental Health"
       ],
       "location": "chennai",
-      "bio": "abcdefgh",
-      "avatarColor": "#B45309",
-      "_id": "513bbdd386689b3e5402b40b",
-      "createdAt": "2026-06-07T09:05:40.526Z",
-      "updatedAt": "2026-06-07T09:05:40.526Z",
-      "avgRating": 0
-    },
-    {
-      "name": "arun",
-      "email": "arun@gmail.com",
-      "passwordHash": "$2b$12$x.TuvUe9es.nvm9Py1rLXeGnxuEiPbkXKVIZc0p.QMvX.HHR5eFhi",
-      "skills": [
-        "Mental Health",
-        "Medical",
-        "Plumbing"
-      ],
-      "location": "Zone 5 Royapuram, Chennai",
-      "bio": "i am plumber",
-      "avatarColor": "#065F46",
-      "_id": "c7cd0759e49f9ae65e4f46dc",
+      "bio": "web developer\n",
+      "avatarColor": "#0F766E",
+      "preferredLanguage": "ta",
+      "_id": "b2997076522731a58378052e",
       "rating": {
-        "total": 5,
+        "total": 4,
         "count": 1
       },
-      "createdAt": "2026-06-07T09:35:34.945Z",
-      "updatedAt": "2026-06-07T09:35:34.945Z",
-      "avgRating": 0
-    },
-    {
-      "name": "Tester User",
-      "email": "tester.helpnet.user@example.com",
-      "passwordHash": "$2b$12$ouwAFC9lhH2cM8m2vJF/HuPL5DGRuBYPEMNe/KZ/eKlUMv/UaehKm",
-      "skills": [
-        "Web Dev",
-        "Plumbing"
-      ],
-      "location": "Seattle, WA",
-      "bio": "I am a helpful neighbor willing to help with web development and plumbing.",
-      "avatarColor": "#0F766E",
-      "_id": "0437074e700cee7f9c63a157",
-      "rating": {
-        "total": 0,
-        "count": 0
-      },
-      "createdAt": "2026-06-07T13:38:49.603Z",
-      "updatedAt": "2026-06-07T13:38:49.604Z",
-      "avgRating": 0
-    },
-    {
-      "name": "Demo Neighbor",
-      "email": "demo.neighbor@example.com",
-      "passwordHash": "$2b$12$xNjvLA1p9lyX2sRzomMOj.MsdO.5sSsGQG7oNB0lL.HW4IqB5ZRJy",
-      "skills": [
-        "Web Dev",
-        "Medical"
-      ],
-      "location": "Chennai",
-      "bio": "I am a friendly neighbor eager to help out!",
-      "avatarColor": "#B45309",
-      "_id": "5155664782ca0582b075b628",
-      "rating": {
-        "total": 0,
-        "count": 0
-      },
-      "createdAt": "2026-06-07T14:13:44.035Z",
-      "updatedAt": "2026-06-07T14:21:53.670Z",
+      "createdAt": "2026-06-08T10:21:43.883Z",
+      "updatedAt": "2026-06-08T10:21:43.883Z",
       "avgRating": 0
     }
   ],
   "HelpRequest": [
     {
-      "seeker": "513bbdd386689b3e5402b40b",
-      "title": "need o+ blood",
-      "description": "i want o+ blood within one hour",
-      "category": "Medical",
-      "urgency": "urgent",
-      "location": "chennai",
-      "matchedHelpers": [
-        "c7cd0759e49f9ae65e4f46dc"
-      ],
-      "status": "active",
-      "_id": "7378cc37b50b9e14319f69be",
-      "createdAt": "2026-06-07T09:09:31.053Z",
-      "updatedAt": "2026-06-07T14:40:59.448Z",
-      "acceptedHelper": "c7cd0759e49f9ae65e4f46dc",
-      "acceptedAt": "2026-06-07T14:40:59.447Z"
-    },
-    {
-      "seeker": "513bbdd386689b3e5402b40b",
-      "title": "Direct connection: Other",
-      "description": "Direct conversation initiated via the Help Assistant.",
+      "seeker": "b2997076522731a58378052e",
+      "title": "i need a plumber ",
+      "description": "i want a plumber",
       "category": "Other",
       "urgency": "flexible",
-      "location": "Zone 5 Royapuram, Chennai",
+      "location": "chennai",
+      "matchedHelpers": [],
       "status": "completed",
-      "acceptedHelper": "c7cd0759e49f9ae65e4f46dc",
-      "acceptedAt": "2026-06-07T13:22:10.381Z",
-      "_id": "9ecbe134acefba4bb9ebae06",
-      "createdAt": "2026-06-07T13:22:10.381Z",
-      "updatedAt": "2026-06-07T13:22:10.381Z",
-      "resolvedAt": "2026-06-07T13:44:13.688Z"
+      "aiTitle": "i need a plumber ",
+      "originalLanguage": "en",
+      "safetyChecked": true,
+      "safetyCategory": "safe",
+      "_id": "d4d070ada6b945c0c76ca697",
+      "createdAt": "2026-06-08T10:31:50.204Z",
+      "updatedAt": "2026-06-08T10:31:50.204Z",
+      "acceptedHelper": "b2997076522731a58378052e",
+      "acceptedAt": "2026-06-08T10:32:01.536Z",
+      "resolvedAt": "2026-06-08T10:35:09.732Z"
     }
   ],
   "Chat": [
     {
-      "request": "9ecbe134acefba4bb9ebae06",
-      "seeker": "513bbdd386689b3e5402b40b",
-      "helper": "c7cd0759e49f9ae65e4f46dc",
+      "request": "d4d070ada6b945c0c76ca697",
+      "seeker": "b2997076522731a58378052e",
+      "helper": "b2997076522731a58378052e",
       "messages": [
         {
-          "_id": "6a25759e611af23d65d11c30",
-          "sender": "513bbdd386689b3e5402b40b",
+          "_id": "6a269a6e155328653f924755",
+          "sender": "b2997076522731a58378052e",
           "text": "hi",
-          "createdAt": "2026-06-07T13:43:58.624Z",
+          "createdAt": "2026-06-08T10:33:18.815Z",
           "readBy": [
-            "513bbdd386689b3e5402b40b",
-            "c7cd0759e49f9ae65e4f46dc"
-          ]
+            "b2997076522731a58378052e"
+          ],
+          "originalText": "hi",
+          "originalLanguage": "ta",
+          "translations": {}
+        },
+        {
+          "_id": "6a269a72155328653f924756",
+          "sender": "b2997076522731a58378052e",
+          "text": "Understood! I am on it and will coordinate with you as soon as I arrive.",
+          "createdAt": "2026-06-08T10:33:22.012Z",
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
+          "originalText": "Understood! I am on it and will coordinate with you as soon as I arrive.",
+          "originalLanguage": "ta",
+          "translations": {}
+        },
+        {
+          "_id": "6a269a77155328653f924757",
+          "sender": "b2997076522731a58378052e",
+          "text": "hi",
+          "createdAt": "2026-06-08T10:33:27.918Z",
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
+          "originalText": "hi",
+          "originalLanguage": "ta",
+          "translations": {}
+        },
+        {
+          "_id": "6a269a7b155328653f924758",
+          "sender": "b2997076522731a58378052e",
+          "text": "Got your message. I am packing up and should be there in about 5 to 10 minutes.",
+          "createdAt": "2026-06-08T10:33:31.146Z",
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
+          "originalText": "Got your message. I am packing up and should be there in about 5 to 10 minutes.",
+          "originalLanguage": "ta",
+          "translations": {}
+        },
+        {
+          "_id": "6a269a84155328653f924759",
+          "sender": "b2997076522731a58378052e",
+          "text": "hello",
+          "createdAt": "2026-06-08T10:33:40.347Z",
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
+          "originalText": "hello",
+          "originalLanguage": "ta",
+          "translations": {}
+        },
+        {
+          "_id": "6a269a87155328653f92475a",
+          "sender": "b2997076522731a58378052e",
+          "text": "I am heading over to help you now. Let me know if there are any specific entry instructions!",
+          "createdAt": "2026-06-08T10:33:43.522Z",
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
+          "originalText": "I am heading over to help you now. Let me know if there are any specific entry instructions!",
+          "originalLanguage": "ta",
+          "translations": {}
+        },
+        {
+          "_id": "6a269aca155328653f92475b",
+          "sender": "b2997076522731a58378052e",
+          "text": "ok",
+          "createdAt": "2026-06-08T10:34:50.989Z",
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
+          "originalText": "ok",
+          "originalLanguage": "ta",
+          "translations": {}
+        },
+        {
+          "_id": "6a269ace155328653f92475c",
+          "sender": "b2997076522731a58378052e",
+          "text": "I am heading over to help you now. Let me know if there are any specific entry instructions!",
+          "createdAt": "2026-06-08T10:34:54.234Z",
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
+          "originalText": "I am heading over to help you now. Let me know if there are any specific entry instructions!",
+          "originalLanguage": "ta",
+          "translations": {}
         }
       ],
       "status": "resolved",
-      "_id": "c3ef3ad7c51f09335d3bd09e",
-      "createdAt": "2026-06-07T13:22:10.383Z",
-      "updatedAt": "2026-06-07T13:45:06.569Z",
-      "seekerRating": 5,
+      "_id": "952102c7407b7396711e2fee",
+      "createdAt": "2026-06-08T10:32:01.539Z",
+      "updatedAt": "2026-06-08T10:35:09.727Z",
+      "seekerRating": 4,
       "seekerFeedback": "",
-      "resolvedAt": "2026-06-07T13:44:13.686Z"
-    },
-    {
-      "request": "7378cc37b50b9e14319f69be",
-      "seeker": "513bbdd386689b3e5402b40b",
-      "helper": "c7cd0759e49f9ae65e4f46dc",
-      "messages": [],
-      "status": "active",
-      "_id": "0c0bb2d52bd04ebca7999584",
-      "createdAt": "2026-06-07T14:40:59.449Z",
-      "updatedAt": "2026-06-07T14:40:59.450Z"
+      "resolvedAt": "2026-06-08T10:35:09.726Z"
     }
   ],
   "Notification": [
     {
-      "recipient": "c7cd0759e49f9ae65e4f46dc",
+      "recipient": "b2997076522731a58378052e",
+      "type": "request_accepted",
+      "title": "Help is on the way!",
+      "body": "sk accepted your request!",
+      "meta": {
+        "chatId": "952102c7407b7396711e2fee",
+        "helperId": "b2997076522731a58378052e"
+      },
+      "_id": "d49798c6a9be2e350b7aa1d4",
+      "createdAt": "2026-06-08T10:32:01.546Z",
+      "updatedAt": "2026-06-08T10:32:01.546Z"
+    },
+    {
+      "recipient": "b2997076522731a58378052e",
       "type": "message",
       "title": "New message from sk",
       "body": "hi",
       "meta": {
-        "chatId": "c3ef3ad7c51f09335d3bd09e",
-        "messageId": "6a25759e611af23d65d11c30",
+        "chatId": "952102c7407b7396711e2fee",
+        "messageId": "6a269a6e155328653f924755",
         "senderName": "sk"
       },
-      "_id": "482e297ec642c60d763d8947",
-      "createdAt": "2026-06-07T13:43:58.626Z",
-      "updatedAt": "2026-06-07T13:45:24.921Z",
+      "_id": "0fd26a025cacdb15ffed3303",
+      "createdAt": "2026-06-08T10:33:18.817Z",
+      "updatedAt": "2026-06-08T10:34:44.530Z",
       "read": true
     },
     {
-      "recipient": "c7cd0759e49f9ae65e4f46dc",
+      "recipient": "b2997076522731a58378052e",
+      "type": "message",
+      "title": "New message from sk",
+      "body": "Understood! I am on it and will coordinate with you as soon ...",
+      "meta": {
+        "chatId": "952102c7407b7396711e2fee",
+        "messageId": "6a269a72155328653f924756",
+        "senderName": "sk"
+      },
+      "_id": "0d9c6fc9de32276008201290",
+      "createdAt": "2026-06-08T10:33:22.015Z",
+      "updatedAt": "2026-06-08T10:33:22.016Z"
+    },
+    {
+      "recipient": "b2997076522731a58378052e",
+      "type": "message",
+      "title": "New message from sk",
+      "body": "hi",
+      "meta": {
+        "chatId": "952102c7407b7396711e2fee",
+        "messageId": "6a269a77155328653f924757",
+        "senderName": "sk"
+      },
+      "_id": "1ad8e7fd3c67438830c7d85c",
+      "createdAt": "2026-06-08T10:33:27.920Z",
+      "updatedAt": "2026-06-08T10:33:27.921Z"
+    },
+    {
+      "recipient": "b2997076522731a58378052e",
+      "type": "message",
+      "title": "New message from sk",
+      "body": "Got your message. I am packing up and should be there in abo...",
+      "meta": {
+        "chatId": "952102c7407b7396711e2fee",
+        "messageId": "6a269a7b155328653f924758",
+        "senderName": "sk"
+      },
+      "_id": "5abf8042e3ff438e9376b204",
+      "createdAt": "2026-06-08T10:33:31.149Z",
+      "updatedAt": "2026-06-08T10:33:31.150Z"
+    },
+    {
+      "recipient": "b2997076522731a58378052e",
+      "type": "message",
+      "title": "New message from sk",
+      "body": "hello",
+      "meta": {
+        "chatId": "952102c7407b7396711e2fee",
+        "messageId": "6a269a84155328653f924759",
+        "senderName": "sk"
+      },
+      "_id": "27897f2a361c6df871bf62d6",
+      "createdAt": "2026-06-08T10:33:40.352Z",
+      "updatedAt": "2026-06-08T10:34:37.876Z",
+      "read": true
+    },
+    {
+      "recipient": "b2997076522731a58378052e",
+      "type": "message",
+      "title": "New message from sk",
+      "body": "I am heading over to help you now. Let me know if there are ...",
+      "meta": {
+        "chatId": "952102c7407b7396711e2fee",
+        "messageId": "6a269a87155328653f92475a",
+        "senderName": "sk"
+      },
+      "_id": "86dc83a8e794b55a22e28e39",
+      "createdAt": "2026-06-08T10:33:43.525Z",
+      "updatedAt": "2026-06-08T10:34:18.913Z",
+      "read": true
+    },
+    {
+      "recipient": "b2997076522731a58378052e",
+      "type": "message",
+      "title": "New message from sk",
+      "body": "ok",
+      "meta": {
+        "chatId": "952102c7407b7396711e2fee",
+        "messageId": "6a269aca155328653f92475b",
+        "senderName": "sk"
+      },
+      "_id": "4acdc7402684368ac0cb7338",
+      "createdAt": "2026-06-08T10:34:50.991Z",
+      "updatedAt": "2026-06-08T10:34:50.991Z"
+    },
+    {
+      "recipient": "b2997076522731a58378052e",
+      "type": "message",
+      "title": "New message from sk",
+      "body": "I am heading over to help you now. Let me know if there are ...",
+      "meta": {
+        "chatId": "952102c7407b7396711e2fee",
+        "messageId": "6a269ace155328653f92475c",
+        "senderName": "sk"
+      },
+      "_id": "f6d6c6dc83b8e3c03c6797ac",
+      "createdAt": "2026-06-08T10:34:54.236Z",
+      "updatedAt": "2026-06-08T10:34:58.423Z",
+      "read": true
+    },
+    {
+      "recipient": "b2997076522731a58378052e",
       "type": "rating_received",
       "title": "Feedback received!",
-      "body": "sk rated their experience: 5 stars.",
+      "body": "sk rated their experience: 4 stars.",
       "meta": {
-        "chatId": "c3ef3ad7c51f09335d3bd09e",
-        "rating": 5,
+        "chatId": "952102c7407b7396711e2fee",
+        "rating": 4,
         "feedback": ""
       },
-      "_id": "7bc5e4523c2e41fccc3b63aa",
-      "createdAt": "2026-06-07T13:44:13.696Z",
-      "updatedAt": "2026-06-07T14:08:42.316Z",
+      "_id": "29983be52d17bbae725d3fba",
+      "createdAt": "2026-06-08T10:35:09.741Z",
+      "updatedAt": "2026-06-08T10:44:31.233Z",
       "read": true
-    },
-    {
-      "recipient": "513bbdd386689b3e5402b40b",
-      "type": "request_accepted",
-      "title": "Help is on the way!",
-      "body": "arun accepted your request!",
-      "meta": {
-        "chatId": "0c0bb2d52bd04ebca7999584",
-        "helperId": "c7cd0759e49f9ae65e4f46dc"
-      },
-      "_id": "b6f7ab7d6e949e4ee5f8d505",
-      "createdAt": "2026-06-07T14:40:59.451Z",
-      "updatedAt": "2026-06-07T14:40:59.452Z"
     }
   ]
 }

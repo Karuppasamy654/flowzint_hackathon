@@ -4,39 +4,50 @@ import * as React from 'react';
 import { Shield, Sparkles, Heart, Activity } from 'lucide-react';
 
 export function ImpactDashboard() {
-  const [helpersCount, setHelpersCount] = React.useState(142);
-  const [resolvedCount, setResolvedCount] = React.useState(1284);
-  const [emergenciesCount, setEmergenciesCount] = React.useState(24);
+  const [helpersCount, setHelpersCount] = React.useState<number>(0);
+  const [resolvedCount, setResolvedCount] = React.useState<number>(0);
+  const [emergenciesCount, setEmergenciesCount] = React.useState<number>(0);
+  const [avgResponseTime, setAvgResponseTime] = React.useState<string>('4.2m');
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  // Simulate real-time updates for impact metrics
   React.useEffect(() => {
-    // 1. Slightly fluctuate helpers count every 6 seconds
-    const helpersInterval = setInterval(() => {
-      setHelpersCount((prev) => {
-        const delta = Math.random() > 0.5 ? 1 : -1;
-        return Math.max(135, prev + delta);
-      });
-    }, 6000);
+    let active = true;
 
-    // 2. Increment resolved count occasionally (every 10 seconds)
-    const resolvedInterval = setInterval(() => {
-      setResolvedCount((prev) => prev + 1);
-    }, 10000);
+    async function fetchStats() {
+      try {
+        const res = await fetch('/api/requests/stats');
+        const json = await res.json();
+        if (active && json.success) {
+          setHelpersCount(json.data.helpersCount);
+          setResolvedCount(json.data.resolvedCount);
+          setEmergenciesCount(json.data.emergenciesCount);
 
-    // 3. Fluctuate active emergency cases
-    const emergenciesInterval = setInterval(() => {
-      setEmergenciesCount((prev) => {
-        const delta = Math.random() > 0.6 ? 1 : -1;
-        return Math.max(15, prev + delta);
-      });
-    }, 8500);
+          const mins = json.data.avgResponseMinutes;
+          if (mins < 1) {
+            setAvgResponseTime(`${Math.round(mins * 60)}s`);
+          } else {
+            setAvgResponseTime(`${mins.toFixed(1)}m`);
+          }
+          setIsLoading(false);
+        }
+      } catch (err) {
+        console.error('Failed to fetch stats:', err);
+      }
+    }
+
+    fetchStats();
+    // Poll stats every 10 seconds to keep dashboard real-time
+    const interval = setInterval(fetchStats, 10000);
 
     return () => {
-      clearInterval(helpersInterval);
-      clearInterval(resolvedInterval);
-      clearInterval(emergenciesInterval);
+      active = false;
+      clearInterval(interval);
     };
   }, []);
+
+  const Skeleton = () => (
+    <span className="inline-block w-16 h-6 bg-slate-800/80 animate-pulse rounded mt-1.5" />
+  );
 
   return (
     <div className="bg-[#131B2E]/50 border border-white/10 rounded-lg p-5 shadow-2xl backdrop-blur-md select-none w-full animate-in fade-in duration-300">
@@ -59,9 +70,13 @@ export function ImpactDashboard() {
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
             Active Helpers
           </span>
-          <span className="text-2xl font-semibold text-white mt-1.5 font-mono">
-            {helpersCount}
-          </span>
+          {isLoading ? (
+            <Skeleton />
+          ) : (
+            <span className="text-2xl font-semibold text-white mt-1.5 font-mono">
+              {helpersCount}
+            </span>
+          )}
           <span className="text-[9px] text-emerald-400 mt-1 flex items-center gap-0.5">
             ● Live nearby
           </span>
@@ -73,11 +88,15 @@ export function ImpactDashboard() {
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
             Requests Resolved
           </span>
-          <span className="text-2xl font-semibold text-indigo-300 mt-1.5 font-mono">
-            {resolvedCount.toLocaleString()}
-          </span>
+          {isLoading ? (
+            <Skeleton />
+          ) : (
+            <span className="text-2xl font-semibold text-indigo-300 mt-1.5 font-mono">
+              {resolvedCount.toLocaleString()}
+            </span>
+          )}
           <span className="text-[9px] text-indigo-400 mt-1">
-            +1 resolved recently
+            Completed sessions
           </span>
         </div>
 
@@ -87,11 +106,15 @@ export function ImpactDashboard() {
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
             Active Emergencies
           </span>
-          <span className="text-2xl font-semibold text-rose-400 mt-1.5 font-mono">
-            {emergenciesCount}
-          </span>
+          {isLoading ? (
+            <Skeleton />
+          ) : (
+            <span className="text-2xl font-semibold text-rose-400 mt-1.5 font-mono">
+              {emergenciesCount}
+            </span>
+          )}
           <span className="text-[9px] text-rose-400 mt-1">
-            🚨 Dispatching alerts
+            {emergenciesCount > 0 ? '🚨 Dispatching alerts' : '✨ Zero pending urgent'}
           </span>
         </div>
 
@@ -101,9 +124,13 @@ export function ImpactDashboard() {
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
             Avg Response Time
           </span>
-          <span className="text-2xl font-semibold text-amber-300 mt-1.5 font-mono">
-            4.2m
-          </span>
+          {isLoading ? (
+            <Skeleton />
+          ) : (
+            <span className="text-2xl font-semibold text-amber-300 mt-1.5 font-mono">
+              {avgResponseTime}
+            </span>
+          )}
           <span className="text-[9px] text-amber-400 mt-1">
             ⚡ Instant pairing
           </span>
@@ -112,3 +139,4 @@ export function ImpactDashboard() {
     </div>
   );
 }
+

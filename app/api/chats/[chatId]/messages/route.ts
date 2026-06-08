@@ -7,6 +7,8 @@ import Notification from '@/models/Notification';
 import { auth } from '@/lib/auth';
 import { z } from 'zod';
 import { broadcastRealtimeEvent } from '@/lib/supabase';
+import { geminiFlash, callGeminiWithTimeout } from '@/lib/gemini';
+import { getLanguageName } from '@/lib/languages';
 
 const CreateMessageSchema = z.object({
   text: z.string().min(1, 'Message text cannot be empty').max(2000, 'Message cannot exceed 2000 characters'),
@@ -56,6 +58,41 @@ export async function POST(
       senderId = body.senderId;
     }
 
+    const isSenderSeeker = chat.seeker.toString() === senderId;
+    const recipientId = isSenderSeeker ? chat.helper : chat.seeker;
+
+    const [senderUser, recipientUser] = await Promise.all([
+      User.findById(senderId),
+      User.findById(recipientId),
+    ]);
+
+    const senderName = senderUser ? senderUser.name : 'Someone';
+    const senderAvatar = senderUser ? senderUser.avatarUrl || '' : '';
+    const senderColor = senderUser ? senderUser.avatarColor : '#7C3AED';
+
+    const fromLang = senderUser?.preferredLanguage || 'en';
+    const toLang = recipientUser?.preferredLanguage || 'en';
+
+    const translations: Record<string, string> = {};
+    const originalText = text;
+    const originalLanguage = fromLang;
+
+    if (fromLang !== toLang) {
+      const fromLangName = getLanguageName(fromLang);
+      const toLangName = getLanguageName(toLang);
+      const prompt = `Translate this text from ${fromLangName} to ${toLangName}.
+Return ONLY the translated text, nothing else. No quotes, no explanation.
+Text: "${text}"`;
+      try {
+        const response = await callGeminiWithTimeout(geminiFlash.generateContent(prompt));
+        const responseText = response.response.text();
+        translations[toLang] = responseText.trim();
+      } catch (geminiError) {
+        console.error('Gemini Translate Message failed during sending message:', geminiError);
+        translations[toLang] = text; // fallback
+      }
+    }
+
     // Create the message subdocument
     const messageId = new mongoose.Types.ObjectId();
     const newMessage = {
@@ -64,20 +101,15 @@ export async function POST(
       text,
       createdAt: new Date(),
       readBy: [new mongoose.Types.ObjectId(senderId)],
+      originalText,
+      originalLanguage,
+      translations,
     };
 
     // Push to chat messages and update the chat timestamp
     chat.messages.push(newMessage as any);
     chat.updatedAt = new Date();
     await chat.save();
-
-    const isSenderSeeker = chat.seeker.toString() === senderId;
-    const recipientId = isSenderSeeker ? chat.helper : chat.seeker;
-
-    const senderUser = await User.findById(senderId);
-    const senderName = senderUser ? senderUser.name : 'Someone';
-    const senderAvatar = senderUser ? senderUser.avatarUrl || '' : '';
-    const senderColor = senderUser ? senderUser.avatarColor : '#7C3AED';
 
     // 1. Create Notification for the recipient
     const notification = await Notification.create({
@@ -101,6 +133,9 @@ export async function POST(
       senderColor,
       text,
       createdAt: newMessage.createdAt.toISOString(),
+      originalText,
+      originalLanguage,
+      translations,
     });
 
     // 3. Broadcast to the recipient's notification channel to alert them

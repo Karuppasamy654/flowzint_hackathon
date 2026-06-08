@@ -199,9 +199,13 @@ export function EditProfileModal({ open, onOpenChange, user, onSuccess }: EditPr
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+              placeholder="e.g. Koramangala, Bengaluru"
               required
               disabled={isSubmitting}
             />
+            <div className="text-[11px] text-gray-400 mt-1 select-none">
+              Enter your neighbourhood or area name.
+            </div>
           </div>
 
           {/* Bio */}

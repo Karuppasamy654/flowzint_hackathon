@@ -9,6 +9,7 @@ export interface IUser extends Document {
   skills: string[];
   avatarUrl?: string;
   avatarColor: string;
+  preferredLanguage: string;
   rating: {
     total: number;
     count: number;
@@ -32,6 +33,7 @@ const UserSchema: Schema<IUser> = new Schema(
       required: true,
       enum: ['#7C3AED', '#0F766E', '#B45309', '#1D4ED8', '#9D174D', '#065F46', '#C2410C', '#1A7F5A'],
     },
+    preferredLanguage: { type: String, default: 'en' },
     rating: {
       total: { type: Number, default: 0 },
       count: { type: Number, default: 0 },

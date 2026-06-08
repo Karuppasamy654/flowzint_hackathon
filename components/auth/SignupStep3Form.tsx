@@ -6,10 +6,10 @@ import { signIn } from 'next-auth/react';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
-import { InteractiveMap } from '../ui/InteractiveMap';
 import { toast } from '@/components/ui/toast';
 import { Camera, ChevronLeft, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { SUPPORTED_LANGUAGES } from '@/lib/languages';
 
 const PALETTE = [
   '#7C3AED',
@@ -27,6 +27,7 @@ export function SignupStep3Form() {
   const [avatarColor, setAvatarColor] = React.useState('#7C3AED');
   const [location, setLocation] = React.useState('');
   const [bio, setBio] = React.useState('');
+  const [preferredLanguage, setPreferredLanguage] = React.useState('en');
   const [file, setFile] = React.useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -112,6 +113,7 @@ export function SignupStep3Form() {
         bio,
         avatarColor,
         avatarUrl,
+        preferredLanguage,
       };
 
       const signupRes = await fetch('/api/users', {
@@ -215,21 +217,34 @@ export function SignupStep3Form() {
         </label>
         <Input
           type="text"
-          placeholder="e.g. Brooklyn, NY"
+          placeholder="e.g. Koramangala, Bengaluru"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
           required
           disabled={isSubmitting}
         />
-        <div className="text-[11px] text-gray-400 select-none">
-          💡 Or drop a pin on the map below to automatically select your neighborhood:
+        <div className="text-xs text-gray-400 select-none">
+          Enter your neighbourhood or area name.
         </div>
-        <div className="h-48 w-full rounded-md overflow-hidden border border-gray-200 shadow-inner relative">
-          <InteractiveMap
-            interactive={true}
-            onLocationSelect={(lat, lng, addressName) => setLocation(addressName)}
-          />
-        </div>
+      </div>
+
+      {/* Preferred language field */}
+      <div className="space-y-2">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500">
+          Preferred Language
+        </label>
+        <select
+          value={preferredLanguage}
+          onChange={(e) => setPreferredLanguage(e.target.value)}
+          disabled={isSubmitting}
+          className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50 text-gray-800"
+        >
+          {SUPPORTED_LANGUAGES.map((lang) => (
+            <option key={lang.code} value={lang.code}>
+              {lang.name} ({lang.nativeName})
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Bio field */}

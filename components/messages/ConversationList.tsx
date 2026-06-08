@@ -121,7 +121,7 @@ export function ConversationList({ currentUserId }: ConversationListProps) {
           <MessageSquare className="h-6 w-6" />
         </div>
         <div className="space-y-1">
-          <p className="text-sm font-semibold text-gray-800">No conversations yet</p>
+          <p className="text-sm font-semibold text-gray-800">No conversations yet. Request help to get started.</p>
           <p className="text-xs text-gray-400 max-w-xs mx-auto">
             Once you accept a request or someone accepts your request, a direct chat channel will appear here.
           </p>

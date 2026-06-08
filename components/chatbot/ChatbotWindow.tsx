@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { InteractiveMap } from '../ui/InteractiveMap';
 import { Button } from '../ui/button';
 import { Avatar } from '../ui/avatar';
 import { toast } from '@/components/ui/toast';
@@ -16,7 +15,6 @@ import {
   Star,
   MessageSquare,
   Loader2,
-  Map as MapIcon,
   MessageCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -43,22 +41,6 @@ interface MessageItem {
   parsedLocation?: string;
   isSearchingForNeeds?: boolean;
 }
-
-// Common city coordinates for instant speed
-const CITY_COORDINATES: Record<string, [number, number]> = {
-  chennai: [13.0827, 80.2707],
-  brooklyn: [40.7128, -74.0060],
-  'new york': [40.7128, -74.0060],
-  ny: [40.7128, -74.0060],
-  nyc: [40.7128, -74.0060],
-  bangalore: [12.9716, 77.5946],
-  bengaluru: [12.9716, 77.5946],
-  mumbai: [19.0760, 72.8777],
-  delhi: [28.7041, 77.1025],
-  sf: [37.7749, -122.4194],
-  'san francisco': [37.7749, -122.4194],
-  london: [51.5074, -0.1278],
-};
 
 // Custom keyword aliases mapping to formal skill categories
 const ALIAS_MAP: Record<string, string> = {
@@ -90,14 +72,9 @@ export function ChatbotWindow({ currentUser }: ChatbotWindowProps) {
   const [inputValue, setInputValue] = React.useState('');
   const [isTyping, setIsTyping] = React.useState(false);
 
-  // Map state
-  const [mapCenter, setMapCenter] = React.useState<[number, number]>(CITY_COORDINATES.chennai);
-  const [mapMarkers, setMapMarkers] = React.useState<any[]>([]);
+  // Results state
   const [activeHelpers, setActiveHelpers] = React.useState<any[]>([]);
   const [activeRequests, setActiveRequests] = React.useState<any[]>([]);
-  
-  // Mobile UI tab toggle: 'chat' or 'map'
-  const [activeMobileView, setActiveMobileView] = React.useState<'chat' | 'map'>('chat');
 
   const chatEndRef = React.useRef<HTMLDivElement>(null);
 
@@ -105,42 +82,6 @@ export function ChatbotWindow({ currentUser }: ChatbotWindowProps) {
   React.useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
-
-  // Center map on user location at start
-  React.useEffect(() => {
-    async function centerOnUserLocation() {
-      const coords = await getCoordsForLocationName(currentUser.location);
-      setMapCenter(coords);
-    }
-    centerOnUserLocation();
-  }, [currentUser.location]);
-
-  // Locate coordinates of a location term
-  async function getCoordsForLocationName(locName: string): Promise<[number, number]> {
-    const normalized = locName.toLowerCase().trim();
-    
-    // Check static cache
-    for (const key of Object.keys(CITY_COORDINATES)) {
-      if (normalized.includes(key)) {
-        return CITY_COORDINATES[key];
-      }
-    }
-
-    // Fallback to OSM Nominatim API
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locName)}&limit=1`
-      );
-      const data = await res.json();
-      if (data && data[0]) {
-        return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-      }
-    } catch (e) {
-      console.warn('Geocoding search failed, using default coordinate');
-    }
-
-    return CITY_COORDINATES.chennai;
-  }
 
   // Parse skill category and location terms from message
   const parseQuery = (text: string) => {
@@ -229,42 +170,14 @@ export function ChatbotWindow({ currentUser }: ChatbotWindowProps) {
                 requests = result.data || [];
               }
 
-              const centerCoords = await getCoordsForLocationName(location);
-              setMapCenter(centerCoords);
-
-              // Generate markers
-              const markers = requests.map((req: any, idx: number) => {
-                const angle = (idx / requests.length) * 2 * Math.PI;
-                const radius = 0.015 + Math.random() * 0.01;
-                const lat = centerCoords[0] + Math.sin(angle) * radius;
-                const lng = centerCoords[1] + Math.cos(angle) * radius;
-
-                return {
-                  lat,
-                  lng,
-                  title: req.title,
-                  body: req.description || 'Someone needs help nearby.',
-                  name: req.seeker?.name || 'Neighbor',
-                  skills: [req.category],
-                  avatarColor: req.seeker?.avatarColor || '#6366F1',
-                  avatarUrl: req.seeker?.avatarUrl,
-                  requestId: req._id,
-                };
-              });
-
-              setMapMarkers(markers);
               setActiveRequests(requests);
               setActiveHelpers([]); // clear helpers listing
 
               let botText = '';
               if (requests.length > 0) {
-                botText = `I found **${requests.length} pending help request(s)** in **${location}**! 🤝\n\nYou can click on their markers on the map to see details, or accept requests directly from the list below to start helping!`;
-                if (window.innerWidth < 768) {
-                  setActiveMobileView('map');
-                }
+                botText = `I found **${requests.length} pending help request(s)** in **${location}**! 🤝\n\nYou can accept requests directly from the list below to start helping!`;
               } else {
                 botText = `I couldn't find any pending help requests in **${location}** right now. 😔\n\nTry checking a broader area or looking up a different location!`;
-                setMapMarkers([]);
                 setActiveRequests([]);
               }
 
@@ -290,42 +203,14 @@ export function ChatbotWindow({ currentUser }: ChatbotWindowProps) {
                 helpers = (result.data || []).filter((h: any) => h._id !== currentUser.id);
               }
 
-              const centerCoords = await getCoordsForLocationName(location);
-              setMapCenter(centerCoords);
-
-              // Generate markers
-              const markers = helpers.map((helper: any, idx: number) => {
-                const angle = (idx / helpers.length) * 2 * Math.PI;
-                const radius = 0.015 + Math.random() * 0.01;
-                const lat = centerCoords[0] + Math.sin(angle) * radius;
-                const lng = centerCoords[1] + Math.cos(angle) * radius;
-
-                return {
-                  lat,
-                  lng,
-                  title: helper.name,
-                  body: helper.bio || 'Community helper ready to assist.',
-                  name: helper.name,
-                  skills: helper.skills,
-                  avatarColor: helper.avatarColor,
-                  avatarUrl: helper.avatarUrl,
-                  helperId: helper._id,
-                };
-              });
-
-              setMapMarkers(markers);
               setActiveHelpers(helpers);
               setActiveRequests([]); // clear requests
 
               let botText = '';
               if (helpers.length > 0) {
-                botText = `I found **${helpers.length} helper(s)** in **${location}**! 🎉\n\nYou can click on their markers on the map to see their details, or start a direct conversation using the profile card list below.`;
-                if (window.innerWidth < 768) {
-                  setActiveMobileView('map');
-                }
+                botText = `I found **${helpers.length} helper(s)** in **${location}**! 🎉\n\nYou can start a direct conversation using the profile card list below.`;
               } else {
                 botText = `I couldn't find any helpers in **${location}** right now. 😔\n\nTry checking a broader area or looking up a different location!`;
-                setMapMarkers([]);
                 setActiveHelpers([]);
               }
 
@@ -334,7 +219,7 @@ export function ChatbotWindow({ currentUser }: ChatbotWindowProps) {
                 sender: 'bot',
                 text: botText,
                 timestamp: new Date(),
-                helpers: helpers.map((h: any, i: number) => ({ ...h, marker: markers[i] })),
+                helpers,
                 parsedLocation: location,
                 isSearchingForNeeds: false,
               };
@@ -369,42 +254,14 @@ export function ChatbotWindow({ currentUser }: ChatbotWindowProps) {
             requests = result.data || [];
           }
 
-          const centerCoords = await getCoordsForLocationName(location || currentUser.location);
-          setMapCenter(centerCoords);
-
-          // Generate markers for requests with dispersion
-          const markers = requests.map((req: any, idx: number) => {
-            const angle = (idx / requests.length) * 2 * Math.PI;
-            const radius = 0.015 + Math.random() * 0.01;
-            const lat = centerCoords[0] + Math.sin(angle) * radius;
-            const lng = centerCoords[1] + Math.cos(angle) * radius;
-
-            return {
-              lat,
-              lng,
-              title: req.title,
-              body: req.description || 'Someone needs help nearby.',
-              name: req.seeker?.name || 'Neighbor',
-              skills: [req.category],
-              avatarColor: req.seeker?.avatarColor || '#6366F1',
-              avatarUrl: req.seeker?.avatarUrl,
-              requestId: req._id,
-            };
-          });
-
-          setMapMarkers(markers);
           setActiveRequests(requests);
           setActiveHelpers([]); // clear helpers listing
 
           let botText = '';
           if (requests.length > 0) {
-            botText = `I found **${requests.length} pending help request(s)** for **${category}** in **${location}**! 🤝\n\nYou can click on their markers on the map to see details, or accept requests directly from the list below to start helping!`;
-            if (window.innerWidth < 768) {
-              setActiveMobileView('map');
-            }
+            botText = `I found **${requests.length} pending help request(s)** for **${category}** in **${location}**! 🤝\n\nYou can accept requests directly from the list below to start helping!`;
           } else {
             botText = `I couldn't find any pending help requests for **${category}** in **${location}** right now. 😔\n\nTry checking a broader area or looking up a different category!`;
-            setMapMarkers([]);
             setActiveRequests([]);
           }
 
@@ -437,42 +294,14 @@ export function ChatbotWindow({ currentUser }: ChatbotWindowProps) {
             );
           }
 
-          const centerCoords = await getCoordsForLocationName(location || currentUser.location);
-          setMapCenter(centerCoords);
-
-          // Generate markers with coordinate dispersion
-          const markers = locationFiltered.map((helper: any, idx: number) => {
-            const angle = (idx / locationFiltered.length) * 2 * Math.PI;
-            const radius = 0.015 + Math.random() * 0.01;
-            const lat = centerCoords[0] + Math.sin(angle) * radius;
-            const lng = centerCoords[1] + Math.cos(angle) * radius;
-
-            return {
-              lat,
-              lng,
-              title: helper.name,
-              body: helper.bio || 'Community helper ready to assist.',
-              name: helper.name,
-              skills: helper.skills,
-              avatarColor: helper.avatarColor,
-              avatarUrl: helper.avatarUrl,
-              helperId: helper._id,
-            };
-          });
-
-          setMapMarkers(markers);
           setActiveHelpers(locationFiltered);
           setActiveRequests([]); // clear requests listing
 
           let botText = '';
           if (locationFiltered.length > 0) {
-            botText = `I found **${locationFiltered.length} helper(s)** for **${category}** in **${location}**! 🎉\n\nYou can click on their markers on the map to see their details, or start a direct conversation using the profile card list below.`;
-            if (window.innerWidth < 768) {
-              setActiveMobileView('map');
-            }
+            botText = `I found **${locationFiltered.length} helper(s)** for **${category}** in **${location}**! 🎉\n\nYou can start a direct conversation using the profile card list below.`;
           } else {
             botText = `I couldn't find any helpers for **${category}** in **${location}** right now. 😔\n\nTry checking a broader area or looking up a different skill category!`;
-            setMapMarkers([]);
             setActiveHelpers([]);
           }
 
@@ -481,7 +310,7 @@ export function ChatbotWindow({ currentUser }: ChatbotWindowProps) {
             sender: 'bot',
             text: botText,
             timestamp: new Date(),
-            helpers: locationFiltered.map((h: any, i: number) => ({ ...h, marker: markers[i] })),
+            helpers: locationFiltered,
             parsedCategory: category,
             parsedLocation: location,
             isSearchingForNeeds: false,
@@ -561,41 +390,12 @@ export function ChatbotWindow({ currentUser }: ChatbotWindowProps) {
             Describe what you need, and find neighbors with matching skills.
           </p>
         </div>
-
-        {/* Mobile View Toggle Button */}
-        <div className="flex md:hidden border border-border rounded-md overflow-hidden shrink-0">
-          <button
-            onClick={() => setActiveMobileView('chat')}
-            className={cn(
-              'px-3 py-1.5 text-xs font-semibold flex items-center gap-1 transition-all',
-              activeMobileView === 'chat' ? 'bg-primary text-white' : 'bg-white text-gray-500'
-            )}
-          >
-            <MessageCircle className="h-3.5 w-3.5" />
-            Chat
-          </button>
-          <button
-            onClick={() => setActiveMobileView('map')}
-            className={cn(
-              'px-3 py-1.5 text-xs font-semibold flex items-center gap-1 transition-all',
-              activeMobileView === 'map' ? 'bg-primary text-white' : 'bg-white text-gray-500'
-            )}
-          >
-            <MapIcon className="h-3.5 w-3.5" />
-            Map
-          </button>
-        </div>
       </div>
 
       {/* Main Split Interface */}
       <div className="flex-1 flex gap-4 overflow-hidden relative">
         {/* Panel 1: Chat Stream */}
-        <div
-          className={cn(
-            'flex-1 flex flex-col bg-white rounded-lg border border-border overflow-hidden h-full shadow-sm',
-            activeMobileView === 'chat' ? 'flex' : 'hidden md:flex'
-          )}
-        >
+        <div className="flex-1 flex flex-col bg-white rounded-lg border border-border overflow-hidden h-full shadow-sm">
           {/* Messages Feed */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
             {messages.map((msg) => {
@@ -778,93 +578,6 @@ export function ChatbotWindow({ currentUser }: ChatbotWindowProps) {
               <Send className="h-4.5 w-4.5" />
             </Button>
           </form>
-        </div>
-
-        {/* Panel 2: Interactive Map Panel */}
-        <div
-          className={cn(
-            'w-full md:w-[380px] lg:w-[460px] flex flex-col space-y-3 h-full shrink-0 relative z-20',
-            activeMobileView === 'map' ? 'flex' : 'hidden md:flex'
-          )}
-        >
-          {/* Leaflet Map Frame */}
-          <div className="flex-1 bg-white rounded-lg border border-border shadow-sm overflow-hidden relative min-h-[300px]">
-            <InteractiveMap center={mapCenter} zoom={13} markers={mapMarkers} />
-          </div>
-
-          {/* Quick List overlay for matching helpers or requests */}
-          {(activeHelpers.length > 0 || activeRequests.length > 0) && (
-            <div className="bg-white p-3 rounded-lg border border-border shadow-sm max-h-[180px] overflow-y-auto space-y-2">
-              <h4 className="text-[10px] uppercase font-extrabold text-gray-400 tracking-wider">
-                List View ({activeHelpers.length || activeRequests.length})
-              </h4>
-              <div className="space-y-1.5">
-                {activeHelpers.length > 0 ? (
-                  activeHelpers.map((helper) => (
-                    <div
-                      key={helper._id}
-                      className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50 transition-colors border border-gray-100"
-                    >
-                      <div className="flex items-center gap-2 truncate">
-                        <Avatar
-                          src={helper.avatarUrl}
-                          name={helper.name}
-                          color={helper.avatarColor}
-                          size="sm"
-                        />
-                        <div className="truncate text-left">
-                          <span className="text-xs font-bold text-gray-800 block truncate">
-                            {helper.name}
-                          </span>
-                          <span className="text-[9px] text-gray-400">
-                            {helper.location}
-                          </span>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => handleStartDirectChat(helper._id, 'Other')}
-                        className="text-[9px] font-extrabold text-primary hover:underline shrink-0"
-                      >
-                        Message
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  activeRequests.map((request) => (
-                    <div
-                      key={request._id}
-                      className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50 transition-colors border border-gray-100"
-                    >
-                      <div className="flex items-center gap-2 truncate">
-                        <Avatar
-                          src={request.seeker?.avatarUrl}
-                          name={request.seeker?.name || 'Neighbor'}
-                          color={request.seeker?.avatarColor || '#6366F1'}
-                          size="sm"
-                        />
-                        <div className="truncate text-left">
-                          <span className="text-xs font-bold text-gray-800 block truncate">
-                            {request.title}
-                          </span>
-                          <span className="text-[9px] text-gray-400">
-                            Seeker: {request.seeker?.name || 'Neighbor'}
-                          </span>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => handleAcceptRequestFromChatbot(request._id)}
-                        className="text-[9px] font-extrabold text-primary hover:underline shrink-0"
-                      >
-                        Accept
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

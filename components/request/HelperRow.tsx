@@ -42,7 +42,7 @@ export function HelperRow({ helper }: HelperRowProps) {
         
         {/* Skills list */}
         <div className="flex flex-wrap gap-1 mt-1.5">
-          {helper.skills.slice(0, 3).map((skill) => (
+          {helper.skills && helper.skills.slice(0, 3).map((skill) => (
             <span
               key={skill}
               className="text-[10px] font-semibold bg-[#0B0F1A]/70 text-slate-300 border border-white/5 rounded-sm px-1.5 py-0.5"
@@ -50,7 +50,7 @@ export function HelperRow({ helper }: HelperRowProps) {
               {skill}
             </span>
           ))}
-          {helper.skills.length > 3 && (
+          {helper.skills && helper.skills.length > 3 && (
             <span className="text-[9px] text-slate-500 font-medium self-center ml-0.5">
               +{helper.skills.length - 3} more
             </span>

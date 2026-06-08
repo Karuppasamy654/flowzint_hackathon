@@ -71,6 +71,10 @@ export function useNotifications(userId: string | undefined) {
               router.push(`/messages/${data.chatId}`);
             },
           });
+        } else if (payload.event === 'request_taken') {
+          toast.info('Request Taken', {
+            description: 'A help request you matched with has been accepted by someone else.',
+          });
         } else if (payload.event === 'message') {
           toast.message(`New message from ${data.senderName}`, {
             description: data.text,

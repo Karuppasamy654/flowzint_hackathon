@@ -141,7 +141,11 @@ export class MockDocument {
   [key: string]: any;
   
   constructor(data: any, private _modelName: string) {
-    Object.assign(this, data);
+    const cleanData = { ...data };
+    if (_modelName === 'User') {
+      delete cleanData.avgRating;
+    }
+    Object.assign(this, cleanData);
     if (!this._id) {
       this._id = generateMockId();
     } else {
@@ -235,25 +239,42 @@ export class MockQuery {
       const dbData = await readDbFile();
 
       for (const item of items) {
-        const val = item[path];
-        if (val) {
-          let refModelName = '';
-          if (['seeker', 'acceptedHelper', 'matchedHelpers', 'helper', 'recipient', 'sender'].includes(path)) {
-            refModelName = 'User';
-          } else if (path === 'request') {
-            refModelName = 'HelpRequest';
-          }
+        if (path === 'matchedHelpers.userId' && item.matchedHelpers) {
+          const collection = dbData['User'] || [];
+          item.matchedHelpers = item.matchedHelpers.map((mh: any) => {
+            if (mh.userId) {
+              const matched = collection.find((x: any) => x._id === mh.userId.toString());
+              return {
+                ...mh,
+                userId: matched ? new MockDocument(matched, 'User') : mh.userId
+              };
+            }
+            return mh;
+          });
+        } else {
+          const val = item[path];
+          if (val) {
+            let refModelName = '';
+            if (['seeker', 'acceptedHelper', 'matchedHelpers', 'helper', 'recipient', 'sender'].includes(path)) {
+              refModelName = 'User';
+            } else if (path === 'request') {
+              refModelName = 'HelpRequest';
+            }
 
-          if (refModelName) {
-            const collection = dbData[refModelName] || [];
-            if (Array.isArray(val)) {
-              item[path] = val
-                .map((v) => collection.find((x: any) => x._id === v.toString()))
-                .filter(Boolean)
-                .map((x) => new MockDocument(x, refModelName));
-            } else {
-              const matched = collection.find((x: any) => x._id === val.toString());
-              item[path] = matched ? new MockDocument(matched, refModelName) : null;
+            if (refModelName) {
+              const collection = dbData[refModelName] || [];
+              if (Array.isArray(val)) {
+                item[path] = val
+                  .map((v) => {
+                    const idToFind = v.userId ? v.userId.toString() : v.toString();
+                    return collection.find((x: any) => x._id === idToFind);
+                  })
+                  .filter(Boolean)
+                  .map((x) => new MockDocument(x, refModelName));
+              } else {
+                const matched = collection.find((x: any) => x._id === val.toString());
+                item[path] = matched ? new MockDocument(matched, refModelName) : null;
+              }
             }
           }
         }
@@ -376,6 +397,23 @@ export function getMockModel(modelName: string) {
         readDbFile().then(async (dbData) => {
           const list = dbData[modelName] || [];
           const idx = list.findIndex((x: any) => x._id === id.toString());
+          if (idx < 0) return null;
+          
+          const doc = list[idx];
+          applyUpdate(doc, update);
+          
+          dbData[modelName] = list;
+          await writeDbFile(dbData);
+          return new MockDocument(doc, modelName);
+        })
+      );
+    }
+
+    static findOneAndUpdate(query: any, update: any, options: any = {}) {
+      return new MockQuery(
+        readDbFile().then(async (dbData) => {
+          const list = dbData[modelName] || [];
+          const idx = list.findIndex((x: any) => matchQuery(x, query));
           if (idx < 0) return null;
           
           const doc = list[idx];

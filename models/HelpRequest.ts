@@ -1,6 +1,12 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import { IUser } from './User';
 
+export interface IMatchedHelper {
+  userId: mongoose.Types.ObjectId | any;
+  score?: number;
+  reason?: string;
+}
+
 export interface IHelpRequest extends Document {
   seeker: mongoose.Types.ObjectId | IUser;
   title: string;
@@ -9,8 +15,14 @@ export interface IHelpRequest extends Document {
   urgency: 'flexible' | 'today' | 'urgent';
   location: string;
   status: 'pending' | 'active' | 'completed' | 'cancelled' | 'expired';
-  matchedHelpers: mongoose.Types.ObjectId[] | IUser[];
+  matchedHelpers: IMatchedHelper[];
   acceptedHelper?: mongoose.Types.ObjectId | IUser;
+  aiTitle?: string;
+  originalLanguage?: string;
+  translatedTitle?: string;
+  translatedDescription?: string;
+  safetyChecked: boolean;
+  safetyCategory?: string;
   createdAt: Date;
   updatedAt: Date;
   acceptedAt?: Date;
@@ -32,7 +44,11 @@ const HelpRequestSchema: Schema<IHelpRequest> = new Schema(
       enum: ['pending', 'active', 'completed', 'cancelled', 'expired'],
       default: 'pending',
     },
-    matchedHelpers: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
+    matchedHelpers: [{
+      userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+      score: { type: Number },
+      reason: { type: String }
+    }],
     acceptedHelper: { type: Schema.Types.ObjectId, ref: 'User' },
     acceptedAt: { type: Date },
     resolvedAt: { type: Date },
@@ -41,6 +57,12 @@ const HelpRequestSchema: Schema<IHelpRequest> = new Schema(
       required: true,
       default: () => new Date(Date.now() + 24 * 60 * 60 * 1000), // Default 24 hours from creation
     },
+    aiTitle: { type: String },
+    originalLanguage: { type: String },
+    translatedTitle: { type: String },
+    translatedDescription: { type: String },
+    safetyChecked: { type: Boolean, default: false },
+    safetyCategory: { type: String },
   },
   {
     timestamps: true,

@@ -12,6 +12,9 @@ export interface ChatMessage {
   text: string;
   createdAt: string | Date;
   readBy: string[];
+  originalText?: string;
+  originalLanguage?: string;
+  translations?: Record<string, string>;
 }
 
 export function useRealtimeChat(chatId: string) {
@@ -71,6 +74,9 @@ export function useRealtimeChat(chatId: string) {
             text: data.text,
             createdAt: data.createdAt,
             readBy: [data.senderId],
+            originalText: data.originalText,
+            originalLanguage: data.originalLanguage,
+            translations: data.translations,
           };
 
           return [...prev, receivedMessage];
