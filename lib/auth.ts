@@ -40,7 +40,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           avatarUrl: user.avatarUrl || '',
           avatarColor: user.avatarColor,
-          skills: user.skills,
+          // Ensure skills is a plain array
+          skills: user.skills ? [...user.skills] : [],
           location: user.location,
         };
       },
