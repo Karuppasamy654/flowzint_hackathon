@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { AppShell } from '@/components/shell/AppShell';
+import { ChatAssistant } from '@/components/ai/ChatAssistant';
 
 export default async function AppLayout({
   children,
@@ -24,6 +25,11 @@ export default async function AppLayout({
     location: (session.user as any).location,
   };
 
-  return <AppShell user={userPayload}>{children}</AppShell>;
+  return (
+    <>
+      <AppShell user={userPayload}>{children}</AppShell>
+      <ChatAssistant />
+    </>
+  );
 }
 export const dynamic = 'force-dynamic';

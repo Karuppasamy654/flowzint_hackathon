@@ -94,9 +94,9 @@ export function SmartReplyChips({
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 py-2.5 px-4 animate-pulse">
-        <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-400" />
-        <span className="text-xs text-slate-400 font-medium">Generating smart replies...</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 16px', background: '#F0F2F5' }} className="animate-pulse">
+        <Loader2 style={{ width: 14, height: 14, color: '#1B6CA8' }} className="animate-spin" />
+        <span style={{ fontSize: 13, color: '#8696A0', fontWeight: 500 }}>Generating smart replies...</span>
       </div>
     );
   }
@@ -104,22 +104,39 @@ export function SmartReplyChips({
   if (replies.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 py-2.5 px-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-      <div className="flex items-center gap-1 text-[11px] font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20 mr-1 uppercase tracking-wider shrink-0 select-none">
-        <Sparkles className="h-3 w-3 fill-indigo-400/35" />
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, padding: '6px 16px', background: '#F0F2F5' }}
+      className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#1B6CA8', background: '#EFF6FF', padding: '2px 8px', borderRadius: 4, border: '1px solid #BFDBFE', flexShrink: 0, textTransform: 'uppercase', letterSpacing: '0.05em', userSelect: 'none' }}>
+        <Sparkles style={{ width: 12, height: 12 }} />
         <span>Smart Reply</span>
       </div>
-      <div className="flex flex-wrap gap-1.5">
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {replies.map((reply, idx) => (
           <button
             key={idx}
             type="button"
             onClick={() => {
               onSelect(reply);
-              // Hide suggestions immediately after selection
               setReplies([]);
             }}
-            className="text-xs bg-[#0F172A] hover:bg-[#1E293B] text-slate-200 border border-white/10 px-3.5 py-1.5 rounded-full transition-all active:scale-95 text-left font-medium max-w-[250px] truncate cursor-pointer shadow-sm hover:border-indigo-500/30"
+            style={{
+              fontSize: 13, background: 'white', color: '#374151',
+              border: '1px solid #E5E7EB', padding: '6px 12px', borderRadius: 999,
+              boxShadow: '0 1px 2px rgba(0,0,0,0.08)', cursor: 'pointer',
+              maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              fontWeight: 500, transition: 'border-color 0.15s, color 0.15s',
+            }}
+            onMouseOver={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = '#1B6CA8';
+              (e.currentTarget as HTMLElement).style.color = '#1B6CA8';
+              (e.currentTarget as HTMLElement).style.background = '#EFF6FF';
+            }}
+            onMouseOut={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = '#E5E7EB';
+              (e.currentTarget as HTMLElement).style.color = '#374151';
+              (e.currentTarget as HTMLElement).style.background = 'white';
+            }}
           >
             {reply}
           </button>

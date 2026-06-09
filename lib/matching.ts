@@ -1,3 +1,4 @@
+// IMPORTANT: Only real registered users are matched. No bots. No seeds.
 import User, { IUser } from '../models/User';
 import dbConnect from './mongodb';
 import { SKILL_CATEGORIES, SKILL_COLORS } from './constants';

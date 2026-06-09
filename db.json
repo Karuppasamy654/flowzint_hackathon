@@ -23,6 +23,28 @@
       "createdAt": "2026-06-08T10:21:43.883Z",
       "updatedAt": "2026-06-08T10:21:43.883Z",
       "avgRating": 0
+    },
+    {
+      "name": "user1",
+      "email": "user1@gmail.com",
+      "passwordHash": "$2b$12$xgb5Zcf4upVnF8C2pViIN.u7Bw6.EZcED8jdfkw9yBate1ft5co7K",
+      "skills": [
+        "Cooking",
+        "Medical",
+        "Teaching"
+      ],
+      "location": "madurai",
+      "bio": "",
+      "avatarColor": "#0F766E",
+      "preferredLanguage": "ta",
+      "_id": "64800d2d99bd7917b521ffe3",
+      "rating": {
+        "total": 0,
+        "count": 0
+      },
+      "createdAt": "2026-06-08T11:44:08.047Z",
+      "updatedAt": "2026-06-08T11:44:08.048Z",
+      "avgRating": 0
     }
   ],
   "HelpRequest": [
@@ -45,6 +67,31 @@
       "acceptedHelper": "b2997076522731a58378052e",
       "acceptedAt": "2026-06-08T10:32:01.536Z",
       "resolvedAt": "2026-06-08T10:35:09.732Z"
+    },
+    {
+      "seeker": "64800d2d99bd7917b521ffe3",
+      "title": "need A+ blood",
+      "description": "i need A+ blood group within today",
+      "category": "Other",
+      "urgency": "flexible",
+      "location": "madurai",
+      "matchedHelpers": [
+        {
+          "userId": "b2997076522731a58378052e",
+          "score": 10,
+          "reason": "Matches category skill: Other"
+        }
+      ],
+      "status": "active",
+      "aiTitle": "need A+ blood",
+      "originalLanguage": "en",
+      "safetyChecked": true,
+      "safetyCategory": "safe",
+      "_id": "f7e36a7c430524fa23f0a7cd",
+      "createdAt": "2026-06-08T11:45:59.168Z",
+      "updatedAt": "2026-06-08T11:45:59.170Z",
+      "acceptedHelper": "b2997076522731a58378052e",
+      "acceptedAt": "2026-06-08T11:46:09.292Z"
     }
   ],
   "Chat": [
@@ -157,6 +204,41 @@
       "seekerRating": 4,
       "seekerFeedback": "",
       "resolvedAt": "2026-06-08T10:35:09.726Z"
+    },
+    {
+      "request": "f7e36a7c430524fa23f0a7cd",
+      "seeker": "64800d2d99bd7917b521ffe3",
+      "helper": "b2997076522731a58378052e",
+      "messages": [
+        {
+          "_id": "6a26d2b5e7b056f4c77ac6e7",
+          "sender": "64800d2d99bd7917b521ffe3",
+          "text": "hello",
+          "createdAt": "2026-06-08T14:33:25.627Z",
+          "readBy": [
+            "64800d2d99bd7917b521ffe3"
+          ],
+          "originalText": "hello",
+          "originalLanguage": "ta",
+          "translations": {}
+        },
+        {
+          "_id": "6a26e0e83652e150cbbe9902",
+          "sender": "64800d2d99bd7917b521ffe3",
+          "text": "hello",
+          "createdAt": "2026-06-08T15:34:00.896Z",
+          "readBy": [
+            "64800d2d99bd7917b521ffe3"
+          ],
+          "originalText": "hello",
+          "originalLanguage": "ta",
+          "translations": {}
+        }
+      ],
+      "status": "active",
+      "_id": "21e286005c386ac170e765e7",
+      "createdAt": "2026-06-08T11:46:09.295Z",
+      "updatedAt": "2026-06-08T15:34:00.897Z"
     }
   ],
   "Notification": [
@@ -303,6 +385,69 @@
       "createdAt": "2026-06-08T10:35:09.741Z",
       "updatedAt": "2026-06-08T10:44:31.233Z",
       "read": true
+    },
+    {
+      "recipient": "b2997076522731a58378052e",
+      "type": "new_match",
+      "title": "Someone needs your help!",
+      "body": "user1 needs help with Other near madurai",
+      "meta": {
+        "requestId": "f7e36a7c430524fa23f0a7cd",
+        "aiTitle": "need A+ blood",
+        "category": "Other",
+        "urgency": "flexible",
+        "seekerName": "user1",
+        "seekerAvatar": "",
+        "location": "madurai",
+        "description": "i need A+ blood group within today",
+        "originalLanguage": "en"
+      },
+      "_id": "9457f637c21e24bd7234b200",
+      "createdAt": "2026-06-08T11:45:59.183Z",
+      "updatedAt": "2026-06-09T08:06:46.276Z",
+      "read": true
+    },
+    {
+      "recipient": "64800d2d99bd7917b521ffe3",
+      "type": "request_accepted",
+      "title": "Help is on the way!",
+      "body": "sk accepted your request!",
+      "meta": {
+        "chatId": "21e286005c386ac170e765e7",
+        "helperId": "b2997076522731a58378052e"
+      },
+      "_id": "5e339e1fade5ccd2d6eab709",
+      "createdAt": "2026-06-08T11:46:09.297Z",
+      "updatedAt": "2026-06-08T14:33:14.515Z",
+      "read": true
+    },
+    {
+      "recipient": "b2997076522731a58378052e",
+      "type": "message",
+      "title": "New message from user1",
+      "body": "hello",
+      "meta": {
+        "chatId": "21e286005c386ac170e765e7",
+        "messageId": "6a26d2b5e7b056f4c77ac6e7",
+        "senderName": "user1"
+      },
+      "_id": "95ee2be80d06a5db10d9d240",
+      "createdAt": "2026-06-08T14:33:25.629Z",
+      "updatedAt": "2026-06-08T14:33:25.629Z"
+    },
+    {
+      "recipient": "b2997076522731a58378052e",
+      "type": "message",
+      "title": "New message from user1",
+      "body": "hello",
+      "meta": {
+        "chatId": "21e286005c386ac170e765e7",
+        "messageId": "6a26e0e83652e150cbbe9902",
+        "senderName": "user1"
+      },
+      "_id": "1d6f10da8b8055283cfb5bd8",
+      "createdAt": "2026-06-08T15:34:00.899Z",
+      "updatedAt": "2026-06-08T15:34:00.900Z"
     }
   ]
 }

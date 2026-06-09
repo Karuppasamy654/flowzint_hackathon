@@ -11,6 +11,7 @@ const UpdateProfileSchema = z.object({
   location: z.string().min(1, 'Location is required').optional(),
   skills: z.array(z.enum(SKILL_CATEGORIES as [string, ...string[]])).max(5, 'Pick up to 5 skills').optional(),
   avatarUrl: z.string().url('Invalid avatar URL').optional().or(z.string().length(0)),
+  preferredLanguage: z.string().optional(),
 });
 
 export async function GET(
@@ -74,7 +75,7 @@ export async function PATCH(
       );
     }
 
-    const { name, bio, location, skills, avatarUrl } = parseResult.data;
+    const { name, bio, location, skills, avatarUrl, preferredLanguage } = parseResult.data;
 
     const user = await User.findById(params.id);
     if (!user) {
@@ -89,6 +90,7 @@ export async function PATCH(
     if (location !== undefined) user.location = location;
     if (skills !== undefined) user.skills = skills;
     if (avatarUrl !== undefined) user.avatarUrl = avatarUrl || undefined;
+    if (preferredLanguage !== undefined) user.preferredLanguage = preferredLanguage;
 
     await user.save();
 

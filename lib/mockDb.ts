@@ -80,15 +80,63 @@ function matchQuery(doc: any, query: any): boolean {
         const opVal = val[op];
         if (op === '$in') {
           const list = Array.isArray(opVal) ? opVal : [];
-          const stringList = list.map(x => x.toString());
+          const stringList = list.map((x: any) => x.toString());
           if (!docVal) return false;
           if (Array.isArray(docVal)) {
-            if (!docVal.some(x => stringList.includes(x.toString()))) return false;
+            if (!docVal.some((x: any) => stringList.includes(x.toString()))) return false;
           } else {
             if (!stringList.includes(docVal.toString())) return false;
           }
+        } else if (op === '$nin') {
+          const list = Array.isArray(opVal) ? opVal : [];
+          const stringList = list.map((x: any) => x.toString());
+          if (Array.isArray(docVal)) {
+            if (docVal.some((x: any) => stringList.includes(x.toString()))) return false;
+          } else if (docVal && stringList.includes(docVal.toString())) {
+            return false;
+          }
         } else if (op === '$ne') {
           if (docVal && docVal.toString() === opVal.toString()) return false;
+        } else if (op === '$exists') {
+          const fieldExists = docVal !== undefined && docVal !== null;
+          if (opVal && !fieldExists) return false;
+          if (!opVal && fieldExists) return false;
+        } else if (op === '$gte') {
+          if (docVal == null) return false;
+          const a = docVal instanceof Date ? docVal : new Date(docVal);
+          const b = opVal instanceof Date ? opVal : new Date(opVal);
+          if (!isNaN(a.getTime()) && !isNaN(b.getTime())) {
+            if (a < b) return false;
+          } else if (Number(docVal) < Number(opVal)) {
+            return false;
+          }
+        } else if (op === '$gt') {
+          if (docVal == null) return false;
+          const a = docVal instanceof Date ? docVal : new Date(docVal);
+          const b = opVal instanceof Date ? opVal : new Date(opVal);
+          if (!isNaN(a.getTime()) && !isNaN(b.getTime())) {
+            if (a <= b) return false;
+          } else if (Number(docVal) <= Number(opVal)) {
+            return false;
+          }
+        } else if (op === '$lte') {
+          if (docVal == null) return false;
+          const a = docVal instanceof Date ? docVal : new Date(docVal);
+          const b = opVal instanceof Date ? opVal : new Date(opVal);
+          if (!isNaN(a.getTime()) && !isNaN(b.getTime())) {
+            if (a > b) return false;
+          } else if (Number(docVal) > Number(opVal)) {
+            return false;
+          }
+        } else if (op === '$lt') {
+          if (docVal == null) return false;
+          const a = docVal instanceof Date ? docVal : new Date(docVal);
+          const b = opVal instanceof Date ? opVal : new Date(opVal);
+          if (!isNaN(a.getTime()) && !isNaN(b.getTime())) {
+            if (a >= b) return false;
+          } else if (Number(docVal) >= Number(opVal)) {
+            return false;
+          }
         } else if (op === '$regex') {
           if (!docVal) return false;
           const options = val['$options'] || '';
@@ -446,6 +494,98 @@ export function getMockModel(modelName: string) {
           return { modifiedCount: updatedCount };
         })
       );
+    }
+
+    static countDocuments(query: any = {}) {
+      return readDbFile().then((dbData) => {
+        const list = dbData[modelName] || [];
+        return list.filter((x: any) => matchQuery(x, query)).length;
+      });
+    }
+
+    // Minimal aggregate pipeline support: $match, $group ($sum, $avg), $sort, $limit
+    static aggregate(pipeline: any[] = []) {
+      return readDbFile().then((dbData) => {
+        let docs: any[] = (dbData[modelName] || []).map((x: any) => ({ ...x }));
+
+        for (const stage of pipeline) {
+          if (stage.$match) {
+            docs = docs.filter((d) => matchQuery(d, stage.$match));
+          } else if (stage.$group) {
+            const groupSpec = stage.$group;
+            const idField = groupSpec._id; // e.g. '$category' or null
+            const groups: Record<string, any> = {};
+
+            for (const doc of docs) {
+              const keyRaw = idField && typeof idField === 'string' && idField.startsWith('$')
+                ? doc[idField.slice(1)]
+                : idField;
+              const key = keyRaw == null ? '__null__' : String(keyRaw);
+
+              if (!groups[key]) {
+                groups[key] = { _id: keyRaw == null ? null : keyRaw };
+              }
+
+              for (const [outField, expr] of Object.entries(groupSpec)) {
+                if (outField === '_id') continue;
+                const exprObj = expr as any;
+                if (exprObj.$sum !== undefined) {
+                  const val = exprObj.$sum === 1
+                    ? 1
+                    : (typeof exprObj.$sum === 'string' && exprObj.$sum.startsWith('$')
+                        ? (doc[exprObj.$sum.slice(1)] || 0)
+                        : exprObj.$sum);
+                  groups[key][outField] = (groups[key][outField] || 0) + val;
+                } else if (exprObj.$avg !== undefined) {
+                  const fieldName = typeof exprObj.$avg === 'string' && exprObj.$avg.startsWith('$')
+                    ? exprObj.$avg.slice(1) : null;
+                  if (fieldName) {
+                    if (!groups[key][`__avg_${outField}_sum`]) {
+                      groups[key][`__avg_${outField}_sum`] = 0;
+                      groups[key][`__avg_${outField}_cnt`] = 0;
+                    }
+                    const v = doc[fieldName];
+                    if (v != null) {
+                      groups[key][`__avg_${outField}_sum`] += v;
+                      groups[key][`__avg_${outField}_cnt`] += 1;
+                    }
+                  }
+                }
+              }
+            }
+
+            // Finalise averages
+            docs = Object.values(groups).map((g) => {
+              const out: any = { ...g };
+              for (const key of Object.keys(out)) {
+                if (key.startsWith('__avg_') && key.endsWith('_sum')) {
+                  const field = key.slice(6, -4);
+                  const cnt = out[`__avg_${field}_cnt`] || 0;
+                  out[field] = cnt > 0 ? out[key] / cnt : 0;
+                  delete out[`__avg_${field}_sum`];
+                  delete out[`__avg_${field}_cnt`];
+                }
+              }
+              return out;
+            });
+          } else if (stage.$sort) {
+            const sortKeys = Object.entries(stage.$sort) as [string, number][];
+            docs.sort((a, b) => {
+              for (const [k, dir] of sortKeys) {
+                const va = a[k] ?? '';
+                const vb = b[k] ?? '';
+                if (va < vb) return -1 * dir;
+                if (va > vb) return 1 * dir;
+              }
+              return 0;
+            });
+          } else if (stage.$limit) {
+            docs = docs.slice(0, stage.$limit);
+          }
+        }
+
+        return docs;
+      });
     }
   };
 }

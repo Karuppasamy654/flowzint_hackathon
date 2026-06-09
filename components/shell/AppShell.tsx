@@ -5,10 +5,12 @@ import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useLanguage } from '@/lib/LanguageContext';
 import { Avatar } from '../ui/avatar';
 import { TopBar } from './TopBar';
 import { TabBar } from './TabBar';
-import { HelpCircle, MessageSquare, Bell, User, LogOut, Bot } from 'lucide-react';
+import { LanguageSwitcher } from '../ui/LanguageSwitcher';
+import { HelpCircle, MessageSquare, Bell, User, LogOut, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AppShellProps {
@@ -25,6 +27,7 @@ interface AppShellProps {
 export function AppShell({ user, children }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { t } = useLanguage();
   
   // Realtime notification subscriptions
   const { unreadCount: notificationsCount } = useNotifications(user?.id);
@@ -63,35 +66,35 @@ export function AppShell({ user, children }: AppShellProps) {
   // Desktop navigation items list
   const navItems = [
     {
-      label: 'Request Help',
+      label: t('nav.requestHelp'),
       href: '/request',
       icon: HelpCircle,
       active: pathname.startsWith('/request'),
       badge: 0,
     },
     {
-      label: 'Help Assistant',
-      href: '/chatbot',
-      icon: Bot,
-      active: pathname.startsWith('/chatbot'),
+      label: t('nav.insights'),
+      href: '/insights',
+      icon: BarChart3,
+      active: pathname.startsWith('/insights'),
       badge: 0,
     },
     {
-      label: 'Conversations',
+      label: t('nav.conversations'),
       href: '/messages',
       icon: MessageSquare,
       active: pathname.startsWith('/messages'),
       badge: unreadChats,
     },
     {
-      label: 'Notifications',
+      label: t('nav.notifications'),
       href: '/notifications',
       icon: Bell,
       active: pathname.startsWith('/notifications'),
       badge: notificationsCount,
     },
     {
-      label: 'My Profile',
+      label: t('nav.myProfile'),
       href: '/profile',
       icon: User,
       active: pathname.startsWith('/profile'),
@@ -146,30 +149,35 @@ export function AppShell({ user, children }: AppShellProps) {
           </nav>
 
           {/* User profile card & logout block */}
-          <div className="border-t border-white/5 p-4 flex items-center justify-between">
-            <Link href="/profile" className="flex items-center gap-3 max-w-[150px] group">
-              <Avatar
-                src={user.avatarUrl}
-                name={user.name || 'User'}
-                color={(user as any).avatarColor}
-                size="sm"
-                className="group-hover:scale-105 transition-transform"
-              />
-              <div className="truncate text-left">
-                <p className="text-sm font-semibold text-slate-200 truncate leading-none">
-                  {user.name}
-                </p>
-                <p className="text-xs text-slate-500 truncate mt-0.5">View profile</p>
-              </div>
-            </Link>
+          <div className="border-t border-white/5 p-4 space-y-2">
+            {/* Language Switcher */}
+            <LanguageSwitcher variant="sidebar" />
 
-            <button
-              onClick={() => signOut()}
-              title="Log out"
-              className="text-slate-500 hover:text-red-400 p-1.5 rounded-md hover:bg-red-500/10 transition-colors"
-            >
-              <LogOut className="h-5 w-5" />
-            </button>
+            <div className="flex items-center justify-between">
+              <Link href="/profile" className="flex items-center gap-3 max-w-[150px] group">
+                <Avatar
+                  src={user.avatarUrl}
+                  name={user.name || 'User'}
+                  color={(user as any).avatarColor}
+                  size="sm"
+                  className="group-hover:scale-105 transition-transform"
+                />
+                <div className="truncate text-left">
+                  <p className="text-sm font-semibold text-slate-200 truncate leading-none">
+                    {user.name}
+                  </p>
+                  <p className="text-xs text-slate-500 truncate mt-0.5">{t('common.viewProfile')}</p>
+                </div>
+              </Link>
+
+              <button
+                onClick={() => signOut()}
+                title={t('common.signOut')}
+                className="text-slate-500 hover:text-red-400 p-1.5 rounded-md hover:bg-red-500/10 transition-colors"
+              >
+                <LogOut className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         </aside>
 

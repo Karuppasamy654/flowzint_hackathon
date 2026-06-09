@@ -9,6 +9,7 @@ import { toast } from '@/components/ui/toast';
 import { SKILL_CATEGORIES } from '@/lib/constants';
 import { Camera, Loader2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AISkillSuggester } from './AISkillSuggester';
 
 interface EditProfileModalProps {
   open: boolean;
@@ -260,6 +261,18 @@ export function EditProfileModal({ open, onOpenChange, user, onSuccess }: EditPr
                 );
               })}
             </div>
+
+          {/* AI Skill Suggester */}
+          <AISkillSuggester
+            bio={bio}
+            name={name}
+            currentSkills={skills}
+            onAddSkill={(skill) => {
+              if (!skills.includes(skill) && skills.length < 5) {
+                setSkills([...skills, skill]);
+              }
+            }}
+          />
           </div>
 
           {/* Buttons */}

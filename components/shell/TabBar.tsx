@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { HelpCircle, MessageSquare, Bell, User, Bot } from 'lucide-react';
+import { HelpCircle, MessageSquare, Bell, User, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TabBarProps {
@@ -20,10 +20,10 @@ export function TabBar({ unreadChats, unreadNotifications }: TabBarProps) {
       badge: 0,
     },
     {
-      label: 'Assistant',
-      href: '/chatbot',
-      icon: Bot,
-      active: pathname.startsWith('/chatbot'),
+      label: 'Insights',
+      href: '/insights',
+      icon: BarChart3,
+      active: pathname.startsWith('/insights'),
       badge: 0,
     },
     {

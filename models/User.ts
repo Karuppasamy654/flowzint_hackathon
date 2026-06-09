@@ -15,6 +15,8 @@ export interface IUser extends Document {
     count: number;
   };
   avgRating: number;
+  isBot: boolean;
+  isDemo: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,6 +40,8 @@ const UserSchema: Schema<IUser> = new Schema(
       total: { type: Number, default: 0 },
       count: { type: Number, default: 0 },
     },
+    isBot: { type: Boolean, default: false },
+    isDemo: { type: Boolean, default: false },
   },
   {
     timestamps: true,

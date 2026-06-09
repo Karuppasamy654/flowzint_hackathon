@@ -6,6 +6,7 @@ import { Button } from '../ui/button';
 import { toast } from '@/components/ui/toast';
 import { Loader2, SendHorizontal, Star, Sparkles, MapPin, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { createBrowserClient } from '@/lib/supabase';
 
 interface WaitingStateProps {
   requestId: string;
@@ -19,7 +20,6 @@ export function WaitingState({ requestId, onCancel }: WaitingStateProps) {
   const [isCancelling, setIsCancelling] = React.useState(false);
   
   const [elapsed, setElapsed] = React.useState(0);
-  const [hasTriggeredAccept, setHasTriggeredAccept] = React.useState(false);
 
   // Fetch initial request details
   React.useEffect(() => {
@@ -39,14 +39,17 @@ export function WaitingState({ requestId, onCancel }: WaitingStateProps) {
     loadRequest();
   }, [requestId]);
 
-  // Start 5-second matcher timer
+  const [isAccepted, setIsAccepted] = React.useState(false);
+  const [acceptedChatId, setAcceptedChatId] = React.useState<string | null>(null);
+
+  // Start matching UI timer
   React.useEffect(() => {
     if (!requestDetails) return;
     const interval = setInterval(() => {
       setElapsed((prev) => {
-        if (prev >= 6.0) {
+        if (prev >= 4.5) {
           clearInterval(interval);
-          return 6.0;
+          return 4.5;
         }
         return prev + 0.1;
       });
@@ -54,10 +57,33 @@ export function WaitingState({ requestId, onCancel }: WaitingStateProps) {
     return () => clearInterval(interval);
   }, [requestDetails]);
 
+  // Listen for real acceptance via Supabase
+  React.useEffect(() => {
+    if (!requestId) return;
+    const supabase = createBrowserClient();
+    const channel = supabase.channel(`request:${requestId}`);
+
+    channel
+      .on('broadcast', { event: 'request_accepted' }, (payload: any) => {
+        setIsAccepted(true);
+        toast.success('Helper found!', {
+          description: 'Coordinates locked. Live chat channel is now open.',
+        });
+        setTimeout(() => {
+          setAcceptedChatId(payload.payload.chatId);
+        }, 1500);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [requestId]);
+
   // Stages
   const stage = elapsed < 2.0 ? 'analyzing' :
-                elapsed < 4.5 ? 'matching' :
-                elapsed < 5.5 ? 'accepted' : 'redirecting';
+                !isAccepted ? 'matching' :
+                !acceptedChatId ? 'accepted' : 'redirecting';
 
   const getUrgencyPercentage = (urgency: string) => {
     if (urgency === 'urgent') return 95;
@@ -67,67 +93,12 @@ export function WaitingState({ requestId, onCancel }: WaitingStateProps) {
 
   const urgencyPercentage = requestDetails ? getUrgencyPercentage(requestDetails.urgency) : 50;
 
-  const checkChatAndRedirect = React.useCallback(async () => {
-    try {
-      const chatRes = await fetch('/api/chats');
-      const chatResult = await chatRes.json();
-      if (chatResult.success) {
-        const matchingChat = chatResult.data.find(
-          (c: any) => c.request?._id === requestId || c.request === requestId
-        );
-        if (matchingChat) {
-          toast.success('Helper found!', {
-            description: 'Coordinates locked. Live chat channel is now open.',
-          });
-          router.push(`/messages/${matchingChat._id}`);
-          return true;
-        }
-      }
-    } catch (e) {
-      console.error('Error finding chat for redirect:', e);
-    }
-    return false;
-  }, [requestId, router]);
-
-  // Trigger background auto-acceptance in demo mode
+  // Redirect seeker to chat
   React.useEffect(() => {
-    if (!requestDetails || requestDetails.status !== 'pending') return;
-
-    if (elapsed >= 4.0 && !hasTriggeredAccept) {
-      setHasTriggeredAccept(true);
-
-      const matchedHelpersList = requestDetails.matchedHelpers || [];
-      const helperId = matchedHelpersList[0]?.userId?._id || 'b2997076522731a58378052e';
-
-      if (helperId) {
-        fetch(`/api/requests/${requestId}/accept`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ helperId })
-        })
-        .then(res => res.json())
-        .then(result => {
-          if (result.success) {
-            console.log('Automated match acceptance completed.');
-          }
-        })
-        .catch(err => {
-          console.error('Auto accept error:', err);
-        });
-      }
+    if (acceptedChatId) {
+      router.push(`/messages/${acceptedChatId}`);
     }
-  }, [elapsed, requestDetails, requestId, hasTriggeredAccept]);
-
-  // Redirect seeker to chat at 5.5s
-  React.useEffect(() => {
-    if (elapsed >= 5.5) {
-      checkChatAndRedirect().then((redirected) => {
-        if (!redirected) {
-          router.push('/messages');
-        }
-      });
-    }
-  }, [elapsed, checkChatAndRedirect, router]);
+  }, [acceptedChatId, router]);
 
   const handleCancelRequest = async () => {
     setIsCancelling(true);
@@ -180,21 +151,7 @@ export function WaitingState({ requestId, onCancel }: WaitingStateProps) {
 
   const matchedHelpers = requestDetails.matchedHelpers?.length > 0
     ? requestDetails.matchedHelpers
-    : [
-        {
-          userId: {
-            _id: 'b2997076522731a58378052e',
-            name: 'Santhosh Kumar (sk)',
-            avatarColor: '#0F766E',
-            rating: { total: 5, count: 1 },
-            avgRating: 5.0,
-            location: requestDetails.location,
-            skills: [requestDetails.category, 'Design', 'Web Dev']
-          },
-          score: 9,
-          reason: `Highly matching skills for category '${requestDetails.category}' and located nearby.`
-        }
-      ];
+    : [];
 
   const currentUrgency = Math.min(Math.round((elapsed / 2.0) * urgencyPercentage), urgencyPercentage);
 
@@ -304,7 +261,12 @@ export function WaitingState({ requestId, onCancel }: WaitingStateProps) {
             </div>
 
             <div className="space-y-3">
-              {matchedHelpers.map((candidate: any, idx: number) => {
+              {matchedHelpers.length === 0 ? (
+                <div className="flex items-center gap-3 bg-[#131B2E]/20 p-3.5 rounded-md border border-dashed border-white/5 text-slate-500 text-xs animate-pulse">
+                  <Loader2 className="h-4 w-4 animate-spin text-slate-600" />
+                  <span>Scanning community for matching helpers...</span>
+                </div>
+              ) : matchedHelpers.map((candidate: any, idx: number) => {
                 const helper = candidate.userId;
                 if (!helper) return null;
 

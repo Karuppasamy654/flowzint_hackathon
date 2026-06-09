@@ -2,21 +2,11 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { toast } from '@/components/ui/toast';
+import { useLanguage } from '@/lib/LanguageContext';
 import { formatDistanceToNow } from 'date-fns';
-import {
-  HelpCircle,
-  MessageSquare,
-  CheckCircle,
-  Star,
-  Clock,
-  Check,
-  ChevronRight,
-  Hand,
-  Loader2,
-} from 'lucide-react';
+import { HelpCircle, MessageSquare, CheckCircle, Star, Clock, Check, Hand, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface NotificationItem {
@@ -37,6 +27,7 @@ interface NotificationCardProps {
 
 export function NotificationCard({ notification, onMarkRead }: NotificationCardProps) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [isActing, setIsActing] = React.useState(false);
 
   const relativeTime = React.useMemo(() => {
@@ -92,38 +83,13 @@ export function NotificationCard({ notification, onMarkRead }: NotificationCardP
     }
   };
 
-  // Icon configurations
-  const config = {
-    new_match: {
-      icon: Hand,
-      bgColor: 'bg-blue-50 text-blue-600 border-blue-100',
-      actionLabel: 'Accept Request',
-    },
-    request_accepted: {
-      icon: CheckCircle,
-      bgColor: 'bg-emerald-50 text-emerald-600 border-emerald-100',
-      actionLabel: 'Open Chat',
-    },
-    message: {
-      icon: MessageSquare,
-      bgColor: 'bg-purple-50 text-purple-600 border-purple-100',
-      actionLabel: 'Reply',
-    },
-    rating_received: {
-      icon: Star,
-      bgColor: 'bg-amber-50 text-amber-600 border-amber-100',
-      actionLabel: 'View Ratings',
-    },
-    request_expired: {
-      icon: Clock,
-      bgColor: 'bg-gray-50 text-gray-500 border-gray-100',
-      actionLabel: 'Request Again',
-    },
-  }[notification.type] || {
-    icon: HelpCircle,
-    bgColor: 'bg-gray-50 text-gray-500 border-gray-100',
-    actionLabel: 'View details',
-  };
+  const config = ({
+    new_match:        { icon: Hand,         actionLabel: t('notifications.acceptRequest') },
+    request_accepted: { icon: CheckCircle,  actionLabel: t('notifications.openChat') },
+    message:          { icon: MessageSquare,actionLabel: t('notifications.reply') },
+    rating_received:  { icon: Star,         actionLabel: t('notifications.viewRatings') },
+    request_expired:  { icon: Clock,        actionLabel: t('notifications.requestAgain') },
+  } as Record<string, { icon: any; actionLabel: string }>)[notification.type] ?? { icon: HelpCircle, actionLabel: 'View' };
 
   const IconComponent = config.icon;
 
@@ -131,36 +97,42 @@ export function NotificationCard({ notification, onMarkRead }: NotificationCardP
     <div
       onClick={handleMarkRead}
       className={cn(
-        'flex flex-col sm:flex-row items-start gap-4 p-4 rounded-lg border transition-all duration-150 relative cursor-pointer',
+        'flex flex-col sm:flex-row items-start gap-4 p-4 rounded-lg border transition-all duration-150 relative cursor-pointer backdrop-blur-md',
         notification.read
-          ? 'bg-white border-border/60 hover:bg-gray-50/40'
-          : 'bg-blue-50/20 border-primary/20 shadow-xs hover:bg-blue-50/30'
+          ? 'bg-[#131B2E]/40 border-white/5 hover:bg-[#131B2E]/60'
+          : 'bg-indigo-500/5 border-indigo-500/20 hover:bg-indigo-500/10'
       )}
     >
       {/* Read indicator dot */}
       {!notification.read && (
-        <span className="absolute top-4 left-4 h-2 w-2 bg-primary rounded-full animate-pulse" />
+        <span className="absolute top-4 left-4 h-2 w-2 bg-indigo-400 rounded-full animate-pulse" />
       )}
 
       {/* Main Content Layout */}
       <div className={cn("flex gap-3 items-start w-full", !notification.read ? "pl-4" : "")}>
         {/* Rounded Icon */}
-        <div className={cn('p-2.5 rounded-md border shrink-0', config.bgColor)}>
+        <div className={cn('p-2.5 rounded-md border shrink-0', {
+          'new_match': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+          'request_accepted': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+          'message': 'bg-violet-500/10 text-violet-400 border-violet-500/20',
+          'rating_received': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+          'request_expired': 'bg-slate-500/10 text-slate-400 border-slate-500/20',
+        }[notification.type] || 'bg-slate-500/10 text-slate-400 border-slate-500/20')}>
           <IconComponent className="h-5 w-5" />
         </div>
 
         {/* Content details */}
         <div className="flex-1 min-w-0 text-left">
           <div className="flex items-center justify-between mb-0.5">
-            <h4 className="text-sm font-bold text-gray-800 leading-tight">
+            <h4 className="text-sm font-bold text-white leading-tight">
               {notification.title}
             </h4>
-            <span className="text-[10px] text-gray-400 font-medium whitespace-nowrap ml-2">
+            <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap ml-2">
               {relativeTime}
             </span>
           </div>
 
-          <p className="text-xs text-gray-500 leading-relaxed pr-6">{notification.body}</p>
+          <p className="text-xs text-slate-400 leading-relaxed pr-6">{notification.body}</p>
 
           {/* Rating stars inline showcase for rating_received notifications */}
           {notification.type === 'rating_received' && notification.meta?.rating && (
@@ -172,7 +144,7 @@ export function NotificationCard({ notification, onMarkRead }: NotificationCardP
                     'h-3.5 w-3.5',
                     i < notification.meta.rating
                       ? 'fill-amber-400 text-amber-400'
-                      : 'text-gray-200'
+                      : 'text-slate-700'
                   )}
                 />
               ))}
@@ -188,14 +160,14 @@ export function NotificationCard({ notification, onMarkRead }: NotificationCardP
               className={cn(
                 'h-8 px-4 rounded-md font-semibold text-xs transition-colors flex items-center justify-center',
                 notification.type === 'new_match'
-                  ? 'bg-primary text-white hover:bg-primary-hover border border-transparent'
-                  : 'bg-white hover:bg-gray-50 border border-gray-200 text-gray-700'
+                  ? 'bg-indigo-600 text-white hover:bg-indigo-700 border border-transparent'
+                  : 'bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300'
               )}
             >
               {isActing ? (
                 <>
                   <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
-                  Accepting...
+                  {t('common.loading')}
                 </>
               ) : (
                 config.actionLabel
@@ -203,14 +175,10 @@ export function NotificationCard({ notification, onMarkRead }: NotificationCardP
             </Button>
 
             {!notification.read && (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleMarkRead}
-                className="h-8 px-3 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100/60 font-semibold text-xs flex items-center gap-1"
-              >
+              <Button size="sm" variant="ghost" onClick={handleMarkRead}
+                className="h-8 px-3 rounded-md text-slate-500 hover:text-slate-300 hover:bg-white/5 font-semibold text-xs flex items-center gap-1">
                 <Check className="h-3.5 w-3.5" />
-                Mark read
+                {t('notifications.markRead')}
               </Button>
             )}
           </div>

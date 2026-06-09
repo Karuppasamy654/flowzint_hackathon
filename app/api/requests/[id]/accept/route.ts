@@ -22,6 +22,20 @@ export async function POST(
     const currentUserId = session.user.id;
     const requestId = params.id;
 
+    const user = await User.findById(currentUserId);
+    if (!user || user.isBot || user.isDemo) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const request = await HelpRequest.findById(requestId);
+    if (!request) {
+      return NextResponse.json({ success: false, error: 'Request not found' }, { status: 404 });
+    }
+
+    if (request.seeker.toString() === currentUserId) {
+      return NextResponse.json({ success: false, error: 'You cannot accept your own request.' }, { status: 403 });
+    }
+
     let helperId = currentUserId;
     if (process.env.USE_MOCK_DB === 'true') {
       try {

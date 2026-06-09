@@ -2,7 +2,6 @@ import * as React from 'react';
 import { format } from 'date-fns';
 import { Avatar } from '../ui/avatar';
 import { Check, CheckCheck } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { TranslationToggle } from './TranslationToggle';
 
 export interface BubbleMessage {
@@ -45,8 +44,7 @@ export function MessageBubble({
 
   const messageTime = React.useMemo(() => {
     try {
-      const date = new Date(message.createdAt);
-      return format(date, 'h:mm a');
+      return format(new Date(message.createdAt), 'HH:mm');
     } catch (e) {
       return '';
     }
@@ -54,85 +52,104 @@ export function MessageBubble({
 
   const isRead = message.readBy.length > 1;
 
-  // Determine translation availability
   const hasTranslation = !isMe && message.translations && message.translations[preferredLanguage];
-  const displayText = (hasTranslation && showTranslation)
+  const displayText = hasTranslation && showTranslation
     ? message.translations?.[preferredLanguage]
     : message.text;
 
+  // WhatsApp border-radius
+  const myRadius = isFirstInGroup && isLastInGroup ? '8px 8px 0 8px'
+    : isFirstInGroup ? '8px 8px 0 8px'
+    : isLastInGroup ? '8px 8px 0 8px'
+    : '8px 8px 0 8px';
+
+  const theirRadius = isFirstInGroup && isLastInGroup ? '0 8px 8px 8px'
+    : isFirstInGroup ? '0 8px 8px 8px'
+    : isLastInGroup ? '0 8px 8px 8px'
+    : '0 8px 8px 8px';
+
+  const verticalGap = isLastInGroup ? 8 : 2;
+
   return (
-    <div 
-      className={cn(
-        'flex items-end gap-2 max-w-[85%] sm:max-w-[70%] animate-in fade-in slide-in-from-bottom-2 duration-300 transition-all',
-        isMe ? 'self-end flex-row-reverse' : 'self-start',
-        isLastInGroup ? 'mb-3' : 'mb-1'
-      )}
+    <div
+      style={{
+        display: 'flex',
+        padding: `2px 16px`,
+        marginBottom: verticalGap,
+        justifyContent: isMe ? 'flex-end' : 'flex-start',
+        alignItems: 'flex-end',
+        gap: isMe ? 0 : 6,
+      }}
     >
-      {/* Avatar column placeholder or display */}
+      {/* Avatar for other user */}
       {!isMe && (
-        <div className="w-8 shrink-0 flex justify-center">
+        <div style={{ width: 32, flexShrink: 0, alignSelf: 'flex-end' }}>
           {showAvatar ? (
             <Avatar
               src={message.sender.avatarUrl}
               name={message.sender.name}
               color={message.sender.avatarColor}
               size="sm"
-              className="border border-white/10 shadow-sm"
             />
           ) : (
-            <div className="w-8" /> // Spacer to keep bubbles aligned
+            <div style={{ width: 32 }} />
           )}
         </div>
       )}
 
-      <div className="flex flex-col space-y-0.5 max-w-full">
-        {/* Sender Name (other party only, first message in consecutive group) */}
+      <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '65%' }}>
+        {/* Sender name (other user, first in group) */}
         {!isMe && showName && (
-          <span className="text-[10px] font-semibold text-slate-400 pl-1 mb-0.5">
+          <span style={{ fontSize: 11, fontWeight: 600, color: '#1B6CA8', paddingLeft: 4, marginBottom: 2 }}>
             {message.sender.name}
           </span>
         )}
 
-        {/* Text bubble */}
+        {/* Bubble */}
         <div
-          className={cn(
-            'px-4 py-2 text-sm shadow-xl break-words border transition-all duration-200',
-            isMe
-              ? 'bg-indigo-600 text-white border-indigo-500/20'
-              : 'bg-[#131B2E]/60 text-slate-100 border-white/5 backdrop-blur-xs',
-            // WhatsApp style corner radiuses
-            isMe
-              ? (isFirstInGroup && isLastInGroup ? 'rounded-2xl rounded-tr-none' :
-                 isFirstInGroup ? 'rounded-2xl rounded-tr-none rounded-br-sm' :
-                 isLastInGroup ? 'rounded-2xl rounded-tr-sm rounded-br-none' :
-                 'rounded-2xl rounded-r-sm')
-              : (isFirstInGroup && isLastInGroup ? 'rounded-2xl rounded-tl-none' :
-                 isFirstInGroup ? 'rounded-2xl rounded-tl-none rounded-bl-sm' :
-                 isLastInGroup ? 'rounded-2xl rounded-tl-sm rounded-bl-none' :
-                 'rounded-2xl rounded-l-sm')
-          )}
+          style={{
+            background: isMe ? '#DCF8C6' : '#FFFFFF',
+            color: '#111B21',
+            borderRadius: isMe ? myRadius : theirRadius,
+            padding: '8px 12px',
+            boxShadow: '0 1px 0.5px rgba(0,0,0,0.13)',
+            display: 'inline-block',
+            position: 'relative',
+            wordBreak: 'break-word',
+          }}
         >
-          <p className="whitespace-pre-line leading-relaxed text-left">{displayText}</p>
-          
-          <div className="flex items-center justify-end gap-1 mt-1 select-none">
-            <span className={cn('text-[9px] font-medium leading-none block', isMe ? 'text-indigo-200/70' : 'text-slate-400')}>
-              {messageTime}
-            </span>
+          {/* Message text */}
+          <p style={{ fontSize: 15, lineHeight: 1.4, whiteSpace: 'pre-wrap', margin: 0, color: '#111B21' }}>
+            {displayText}
+          </p>
+
+          {/* Time & read receipt — float right inside bubble */}
+          <div style={{
+            float: 'right',
+            marginLeft: 8,
+            marginTop: 4,
+            fontSize: 11,
+            color: 'rgba(0,0,0,0.45)',
+            whiteSpace: 'nowrap',
+            lineHeight: 1,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 3,
+          }}>
+            <span>{messageTime}</span>
             {isMe && (
-              <span className="text-indigo-200">
-                {isRead ? (
-                  <CheckCheck className="h-3.5 w-3.5 text-emerald-400" />
-                ) : (
-                  <Check className="h-3.5 w-3.5 text-indigo-300" />
-                )}
-              </span>
+              isRead
+                ? <CheckCheck style={{ width: 14, height: 14, color: '#53BDEB' }} />
+                : <Check style={{ width: 14, height: 14, color: 'rgba(0,0,0,0.45)' }} />
             )}
           </div>
+          {/* Clearfix so float doesn't overflow */}
+          <div style={{ clear: 'both' }} />
         </div>
 
-        {/* Translation Toggle Link */}
+        {/* Translation Toggle */}
         {hasTranslation && (
-          <div className={cn(isMe ? 'self-end' : 'self-start', "px-1")}>
+          <div style={{ paddingLeft: isMe ? 0 : 4, alignSelf: isMe ? 'flex-end' : 'flex-start' }}>
             <TranslationToggle
               originalText={message.originalText}
               originalLanguage={message.originalLanguage}

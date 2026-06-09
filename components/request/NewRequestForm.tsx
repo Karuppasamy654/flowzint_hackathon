@@ -9,7 +9,7 @@ import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
 import { SKILL_CATEGORIES } from '@/lib/constants';
 import { toast } from '@/components/ui/toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Sparkles, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const CreateRequestSchema = z.object({
@@ -30,6 +30,12 @@ interface NewRequestFormProps {
 export function NewRequestForm({ userLocation, onRequestCreated }: NewRequestFormProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+  const [isEnhancing, setIsEnhancing] = React.useState(false);
+  const [enhancement, setEnhancement] = React.useState<{
+    enhanced: string;
+    improvements: string[];
+    clarityGain: number;
+  } | null>(null);
   const [analysis, setAnalysis] = React.useState<{
     title?: string;
     category?: string;
@@ -120,6 +126,45 @@ export function NewRequestForm({ userLocation, onRequestCreated }: NewRequestFor
     return () => clearTimeout(delayDebounceFn);
   }, [watchDescription, watchTitle, setValue]);
 
+  const handleEnhance = async () => {
+    const desc = watchDescription?.trim();
+    if (!desc || desc.length < 10) {
+      toast.warning('Please write a description first.');
+      return;
+    }
+    setIsEnhancing(true);
+    setEnhancement(null);
+    try {
+      const res = await fetch('/api/ai/enhance-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          description: desc,
+          title: watchTitle || '',
+          category: watch('category') || '',
+        }),
+      });
+      const result = await res.json();
+      if (result.success && result.data) {
+        setEnhancement(result.data);
+      } else {
+        toast.error('Could not enhance request. Try again.');
+      }
+    } catch (e) {
+      toast.error('AI enhancement failed.');
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
+  const acceptEnhancement = () => {
+    if (enhancement) {
+      setValue('description', enhancement.enhanced);
+      setEnhancement(null);
+      toast.success('Description enhanced by AI! ✨');
+    }
+  };
+
   const handleChipClick = (info: string) => {
     const currentText = watchDescription || '';
     const spacer = currentText ? (currentText.endsWith(' ') ? '' : ' ') : '';
@@ -164,7 +209,7 @@ export function NewRequestForm({ userLocation, onRequestCreated }: NewRequestFor
     }
   };
 
-  const isClarityTooLow = analysis ? analysis.clarityScore <= 3 : false;
+  const isClarityTooLow = analysis ? analysis.clarityScore < 5 : false;
   const isUnsafe = safety ? !safety.safe : false;
   const disableSubmit = isSubmitting || isAnalyzing || isClarityTooLow || isUnsafe;
 
@@ -280,9 +325,25 @@ export function NewRequestForm({ userLocation, onRequestCreated }: NewRequestFor
 
       {/* Description */}
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
-          Describe what you need
-        </label>
+        <div className="flex items-center justify-between mb-1">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
+            Describe what you need
+          </label>
+          <button
+            type="button"
+            onClick={handleEnhance}
+            disabled={isEnhancing || !watchDescription || watchDescription.trim().length < 10}
+            className={cn(
+              "flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full border transition-all",
+              isEnhancing
+                ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20 cursor-wait"
+                : "bg-violet-500/10 text-violet-300 border-violet-500/20 hover:bg-violet-500/20 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            )}
+          >
+            {isEnhancing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+            {isEnhancing ? 'Enhancing...' : '✨ Enhance with AI'}
+          </button>
+        </div>
         <Textarea
           id="description-textarea"
           placeholder="Describe the issue, what tools might be needed, and relevant details..."
@@ -296,6 +357,45 @@ export function NewRequestForm({ userLocation, onRequestCreated }: NewRequestFor
         />
         {errors.description && (
           <p className="mt-1 text-xs text-red-400 font-medium">{errors.description.message}</p>
+        )}
+
+        {/* AI Enhancement Preview */}
+        {enhancement && (
+          <div className="mt-3 p-4 rounded-lg bg-violet-900/30 border border-violet-500/30 space-y-3 animate-in slide-in-from-bottom-2 duration-300">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-violet-400" />
+              <span className="text-xs font-bold text-violet-300 uppercase tracking-wider">AI Enhanced Version</span>
+              <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded font-bold">+{enhancement.clarityGain} clarity</span>
+            </div>
+            <p className="text-sm text-slate-200 leading-relaxed bg-black/30 p-3 rounded-md border border-white/5 font-medium">
+              {enhancement.enhanced}
+            </p>
+            {enhancement.improvements.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {enhancement.improvements.map((imp, i) => (
+                  <span key={i} className="text-[11px] text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">✓ {imp}</span>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2 pt-1">
+              <button
+                type="button"
+                onClick={acceptEnhancement}
+                className="flex items-center gap-1.5 text-xs font-semibold bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-md transition-colors"
+              >
+                <Check className="h-3.5 w-3.5" />
+                Use this version
+              </button>
+              <button
+                type="button"
+                onClick={() => setEnhancement(null)}
+                className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white px-3 py-1.5 rounded-md hover:bg-white/5 transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+                Keep original
+              </button>
+            </div>
+          </div>
         )}
       </div>
 
