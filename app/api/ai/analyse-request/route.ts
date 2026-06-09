@@ -200,7 +200,7 @@ function analyseWithHeuristics(description: string) {
         }
       }
     }
-    return [...new Set(parts)].join(' ');
+    return Array.from(new Set(parts)).join(' ');
   }).join(' ');
 
   // ── Detect gibberish ──
@@ -262,11 +262,11 @@ function analyseWithHeuristics(description: string) {
 
   // ── Keywords extraction ──
   const stopWords = new Set(['the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'shall', 'to', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 'from', 'as', 'into', 'about', 'but', 'or', 'and', 'not', 'no', 'so', 'if', 'it', 'its', 'my', 'me', 'i', 'we', 'our', 'you', 'your', 'he', 'she', 'they', 'them', 'this', 'that', 'these', 'those', 'what', 'which', 'who', 'how', 'when', 'where', 'why', 'need', 'help', 'want', 'please', 'get', 'got', 'very', 'really', 'just', 'also', 'add', 'detail']);
-  const keywords = [...new Set(
-    words
-      .map((w) => w.toLowerCase().replace(/[^a-z0-9]/g, ''))
-      .filter((w) => w.length > 2 && !stopWords.has(w))
-  )].slice(0, 5);
+  const keywords = Array.from(new Set(
+      words
+        .map((w) => w.toLowerCase().replace(/[^a-z0-9]/g, ''))
+        .filter((w) => w.length > 2 && !stopWords.has(w))
+    )).slice(0, 5);
   if (keywords.length === 0) keywords.push('help');
 
   // ── Title ──

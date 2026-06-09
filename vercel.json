@@ -1,13 +1,17 @@
 {
   "functions": {
-    "api/ai/**.ts": {
-      "runtime": "nodejs18"
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
+    },
+    "api/**/*.ts": {
+      "runtime": "nodejs18.x"
     }
   },
   "crons": [
     {
       "path": "/api/cron/expire-requests",
-      "schedule": "0 * * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
+
