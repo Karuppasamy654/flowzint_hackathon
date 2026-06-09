@@ -92,6 +92,75 @@
       "updatedAt": "2026-06-08T11:45:59.170Z",
       "acceptedHelper": "b2997076522731a58378052e",
       "acceptedAt": "2026-06-08T11:46:09.292Z"
+    },
+    {
+      "seeker": "b2997076522731a58378052e",
+      "title": "i need a web developer",
+      "description": "i need a good web developer within today , i want to create an application so i need a web developer ",
+      "category": "Web Dev",
+      "urgency": "today",
+      "location": "chennai",
+      "matchedHelpers": [
+        {
+          "userId": "64800d2d99bd7917b521ffe3",
+          "score": 10,
+          "reason": "Matches category skill: Web Dev"
+        }
+      ],
+      "status": "cancelled",
+      "aiTitle": "i need a web developer",
+      "originalLanguage": "en",
+      "safetyChecked": true,
+      "safetyCategory": "safe",
+      "_id": "fe046f81ab7e2c787d27d76e",
+      "createdAt": "2026-06-09T10:11:51.001Z",
+      "updatedAt": "2026-06-09T10:14:35.052Z"
+    },
+    {
+      "seeker": "b2997076522731a58378052e",
+      "title": "i need a web developer",
+      "description": "i need a web developer as my team mate for my project , so i need a good web developer  in a week",
+      "category": "Web Dev",
+      "urgency": "flexible",
+      "location": "delhi",
+      "matchedHelpers": [
+        {
+          "userId": "64800d2d99bd7917b521ffe3",
+          "score": 10,
+          "reason": "Matches category skill: Web Dev"
+        }
+      ],
+      "status": "cancelled",
+      "aiTitle": "i need a web developer",
+      "originalLanguage": "en",
+      "safetyChecked": true,
+      "safetyCategory": "safe",
+      "_id": "1a163e2f0b141be82b609b7b",
+      "createdAt": "2026-06-09T10:16:00.948Z",
+      "updatedAt": "2026-06-09T10:16:24.918Z"
+    },
+    {
+      "seeker": "b2997076522731a58378052e",
+      "title": "i need a web developer",
+      "description": "i need a good web developer ,i already do a one project i want team mate for this project ",
+      "category": "Web Dev",
+      "urgency": "flexible",
+      "location": "chennai",
+      "matchedHelpers": [
+        {
+          "userId": "64800d2d99bd7917b521ffe3",
+          "score": 10,
+          "reason": "Matches category skill: Web Dev"
+        }
+      ],
+      "status": "cancelled",
+      "aiTitle": "i need a web developer",
+      "originalLanguage": "en",
+      "safetyChecked": true,
+      "safetyCategory": "safe",
+      "_id": "98693f01f0a263c877ad2295",
+      "createdAt": "2026-06-09T10:28:21.030Z",
+      "updatedAt": "2026-06-09T13:30:13.361Z"
     }
   ],
   "Chat": [
@@ -216,7 +285,8 @@
           "text": "hello",
           "createdAt": "2026-06-08T14:33:25.627Z",
           "readBy": [
-            "64800d2d99bd7917b521ffe3"
+            "64800d2d99bd7917b521ffe3",
+            "b2997076522731a58378052e"
           ],
           "originalText": "hello",
           "originalLanguage": "ta",
@@ -228,9 +298,22 @@
           "text": "hello",
           "createdAt": "2026-06-08T15:34:00.896Z",
           "readBy": [
-            "64800d2d99bd7917b521ffe3"
+            "64800d2d99bd7917b521ffe3",
+            "b2997076522731a58378052e"
           ],
           "originalText": "hello",
+          "originalLanguage": "ta",
+          "translations": {}
+        },
+        {
+          "_id": "6a27e8630ecbc26dbb823c17",
+          "sender": "b2997076522731a58378052e",
+          "text": "hi",
+          "createdAt": "2026-06-09T10:18:11.287Z",
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
+          "originalText": "hi",
           "originalLanguage": "ta",
           "translations": {}
         }
@@ -238,7 +321,7 @@
       "status": "active",
       "_id": "21e286005c386ac170e765e7",
       "createdAt": "2026-06-08T11:46:09.295Z",
-      "updatedAt": "2026-06-08T15:34:00.897Z"
+      "updatedAt": "2026-06-09T10:18:11.288Z"
     }
   ],
   "Notification": [
@@ -404,7 +487,7 @@
       },
       "_id": "9457f637c21e24bd7234b200",
       "createdAt": "2026-06-08T11:45:59.183Z",
-      "updatedAt": "2026-06-09T08:06:46.276Z",
+      "updatedAt": "2026-06-09T10:17:55.568Z",
       "read": true
     },
     {
@@ -433,7 +516,8 @@
       },
       "_id": "95ee2be80d06a5db10d9d240",
       "createdAt": "2026-06-08T14:33:25.629Z",
-      "updatedAt": "2026-06-08T14:33:25.629Z"
+      "updatedAt": "2026-06-09T10:18:01.825Z",
+      "read": true
     },
     {
       "recipient": "b2997076522731a58378052e",
@@ -447,7 +531,82 @@
       },
       "_id": "1d6f10da8b8055283cfb5bd8",
       "createdAt": "2026-06-08T15:34:00.899Z",
-      "updatedAt": "2026-06-08T15:34:00.900Z"
+      "updatedAt": "2026-06-09T10:31:25.664Z",
+      "read": true
+    },
+    {
+      "recipient": "64800d2d99bd7917b521ffe3",
+      "type": "new_match",
+      "title": "Someone needs your help!",
+      "body": "sk needs help with Web Dev near chennai",
+      "meta": {
+        "requestId": "fe046f81ab7e2c787d27d76e",
+        "aiTitle": "i need a web developer",
+        "category": "Web Dev",
+        "urgency": "today",
+        "seekerName": "sk",
+        "seekerAvatar": "",
+        "location": "chennai",
+        "description": "i need a good web developer within today , i want to create an application so i need a web developer ",
+        "originalLanguage": "en"
+      },
+      "_id": "094807c2a4c350169b12c902",
+      "createdAt": "2026-06-09T10:11:51.007Z",
+      "updatedAt": "2026-06-09T10:11:51.007Z"
+    },
+    {
+      "recipient": "64800d2d99bd7917b521ffe3",
+      "type": "new_match",
+      "title": "Someone needs your help!",
+      "body": "sk needs help with Web Dev near delhi",
+      "meta": {
+        "requestId": "1a163e2f0b141be82b609b7b",
+        "aiTitle": "i need a web developer",
+        "category": "Web Dev",
+        "urgency": "flexible",
+        "seekerName": "sk",
+        "seekerAvatar": "",
+        "location": "delhi",
+        "description": "i need a web developer as my team mate for my project , so i need a good web developer  in a week",
+        "originalLanguage": "en"
+      },
+      "_id": "ac38d71fb782537fa611fb11",
+      "createdAt": "2026-06-09T10:16:00.955Z",
+      "updatedAt": "2026-06-09T10:16:00.956Z"
+    },
+    {
+      "recipient": "64800d2d99bd7917b521ffe3",
+      "type": "message",
+      "title": "New message from sk",
+      "body": "hi",
+      "meta": {
+        "chatId": "21e286005c386ac170e765e7",
+        "messageId": "6a27e8630ecbc26dbb823c17",
+        "senderName": "sk"
+      },
+      "_id": "1b68f8ceaa2faae4e5a8a61d",
+      "createdAt": "2026-06-09T10:18:11.289Z",
+      "updatedAt": "2026-06-09T10:18:11.290Z"
+    },
+    {
+      "recipient": "64800d2d99bd7917b521ffe3",
+      "type": "new_match",
+      "title": "Someone needs your help!",
+      "body": "sk needs help with Web Dev near chennai",
+      "meta": {
+        "requestId": "98693f01f0a263c877ad2295",
+        "aiTitle": "i need a web developer",
+        "category": "Web Dev",
+        "urgency": "flexible",
+        "seekerName": "sk",
+        "seekerAvatar": "",
+        "location": "chennai",
+        "description": "i need a good web developer ,i already do a one project i want team mate for this project ",
+        "originalLanguage": "en"
+      },
+      "_id": "a7985f2b1fa28322b28acde8",
+      "createdAt": "2026-06-09T10:28:21.035Z",
+      "updatedAt": "2026-06-09T10:28:21.038Z"
     }
   ]
 }

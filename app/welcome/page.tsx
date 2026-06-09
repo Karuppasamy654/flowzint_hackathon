@@ -145,7 +145,7 @@ export default function WelcomePage() {
 
         {/* Single friendly welcoming sentence */}
         <p className="text-slate-300 text-base sm:text-lg font-normal max-w-lg mb-10 leading-relaxed">
-          Your neighborhood workspace is ready — let&apos;s build a stronger, more connected community together.
+          Your neighborhood workspace is ready - let's build a stronger, more connected community together.
         </p>
 
         {/* Elegant glassmorphic CTA button to skip timer */}
@@ -161,7 +161,7 @@ export default function WelcomePage() {
             </>
           ) : (
             <>
-              Let&apos;s Get Started
+              Let's Get Started
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </>
           )}
