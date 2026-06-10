@@ -1,46 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 /**
- * Lightweight middleware – only guards API routes.
+ * Pure pass-through middleware.
  *
- * Page-level auth is handled server-side in app/(app)/layout.tsx via
- * auth() from lib/auth.ts (same NextAuth instance that signed the JWT).
- * Using a separate Edge NextAuth instance here caused JWT key-derivation
- * mismatches that invalidated sessions on every hard reload.
+ * Auth is enforced at two points that are both more reliable than the Edge:
+ *   • Page routes  → app/(app)/layout.tsx calls auth() (Node.js runtime, same
+ *                    NextAuth instance that signed the JWT)
+ *   • API routes   → each route handler calls auth() before touching data
+ *
+ * A cookie-name–based check here was blocking /api/chats, /api/notifications
+ * etc. with 401s because NextAuth v5's cookie name varies with NEXTAUTH_URL
+ * and the Edge middleware was checking the wrong name.
  */
-export function middleware(req: NextRequest) {
-  const { nextUrl } = req;
-
-  const isApiRoute = nextUrl.pathname.startsWith("/api");
-  const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
-  const isSignupApiRoute =
-    nextUrl.pathname === "/api/users" && req.method === "POST";
-  const isCronApiRoute = nextUrl.pathname.startsWith("/api/cron");
-
-  // Protect API routes – but allow auth, signup, and cron endpoints
-  if (isApiRoute) {
-    if (isApiAuthRoute || isSignupApiRoute || isCronApiRoute) {
-      return NextResponse.next();
-    }
-
-    // Check for session cookie (any of the NextAuth v5 cookie names)
-    const sessionCookie =
-      req.cookies.get("__Secure-authjs.session-token") ??
-      req.cookies.get("authjs.session-token") ??
-      req.cookies.get("next-auth.session-token") ??
-      req.cookies.get("__Secure-next-auth.session-token");
-
-    if (!sessionCookie) {
-      return new NextResponse(
-        JSON.stringify({ success: false, error: "Unauthorized" }),
-        {
-          status: 401,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    }
-  }
-
+export function middleware(_req: NextRequest) {
   return NextResponse.next();
 }
 
