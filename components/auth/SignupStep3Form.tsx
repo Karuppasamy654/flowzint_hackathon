@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import { Input } from '../ui/input';
+import { LocationAutocomplete } from '../ui/LocationAutocomplete';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
 import { toast } from '@/components/ui/toast';
@@ -215,11 +215,10 @@ export function SignupStep3Form() {
         <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500">
           Your Location (Neighborhood / City)
         </label>
-        <Input
-          type="text"
+        <LocationAutocomplete
           placeholder="e.g. Koramangala, Bengaluru"
           value={location}
-          onChange={(e) => setLocation(e.target.value)}
+          onChange={setLocation}
           required
           disabled={isSubmitting}
         />
