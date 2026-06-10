@@ -60,16 +60,27 @@ export async function POST(req: NextRequest) {
     const passwordHash = await bcrypt.hash(password, 12);
 
     // Save user
-    const user = await User.create({
-      name,
-      email: normalizedEmail,
-      passwordHash,
-      skills,
-      location,
-      bio,
-      avatarColor,
-      preferredLanguage: preferredLanguage || 'en',
-    });
+    let user;
+    try {
+      user = await User.create({
+        name,
+        email: normalizedEmail,
+        passwordHash,
+        skills,
+        location,
+        bio,
+        avatarColor,
+        preferredLanguage: preferredLanguage || 'en',
+      });
+    } catch (createErr: any) {
+      if (createErr.name === 'ValidationError') {
+        return NextResponse.json({
+          success: false,
+          error: createErr.message || 'Validation error',
+        }, { status: 422 });
+      }
+      throw createErr; // rethrow for outer catch
+    }
 
     const userResponse = {
       id: user._id.toString(),
