@@ -35,4 +35,4 @@ const options: NextAuthConfig = {
 };
 
 // Export request handlers directly from NextAuth (App Router compatible)
-export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth(options);
+export const { handlers: { GET, POST } } = NextAuth(options);
