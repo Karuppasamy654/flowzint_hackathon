@@ -4,7 +4,7 @@ export const authConfig = {
   providers: [], // Empty providers array on the Edge; overridden on the Node server
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days session expiry
+    maxAge: 365 * 24 * 60 * 60, // 1 year session expiry
   },
   pages: {
     signIn: '/login',

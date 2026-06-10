@@ -28,6 +28,10 @@ export interface IHelpRequest extends Document {
   acceptedAt?: Date;
   resolvedAt?: Date;
   expiresAt: Date;
+  aiMatchScore?: number;
+  aiMatchExplanation?: string;
+  aiTags?: string[];
+  isUrgent?: boolean;
 }
 
 const HelpRequestSchema: Schema<IHelpRequest> = new Schema(
@@ -71,6 +75,7 @@ const HelpRequestSchema: Schema<IHelpRequest> = new Schema(
 
 // Index: { status, category, location } for matching queries
 HelpRequestSchema.index({ status: 1, category: 1, location: 1 });
+HelpRequestSchema.index({ isUrgent: 1, location: '2dsphere' });
 
 import { getMockModel } from '@/lib/mockDb';
 

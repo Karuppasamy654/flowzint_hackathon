@@ -45,6 +45,29 @@
       "createdAt": "2026-06-08T11:44:08.047Z",
       "updatedAt": "2026-06-08T11:44:08.048Z",
       "avgRating": 0
+    },
+    {
+      "name": "demo",
+      "email": "demo@gmail.com",
+      "passwordHash": "$2b$12$wC1K.dNmNH3AOVHjzNXfQe1edOF963dpDWtQuy/vnbjqhBfKNCELS",
+      "skills": [
+        "Web Dev",
+        "Teaching",
+        "Cooking",
+        "Language Translation"
+      ],
+      "location": "chennai",
+      "bio": "",
+      "avatarColor": "#1A7F5A",
+      "preferredLanguage": "en",
+      "_id": "8f1188df6d54232a27d462a4",
+      "rating": {
+        "total": 0,
+        "count": 0
+      },
+      "createdAt": "2026-06-10T04:00:29.518Z",
+      "updatedAt": "2026-06-10T04:00:29.519Z",
+      "avgRating": 0
     }
   ],
   "HelpRequest": [
