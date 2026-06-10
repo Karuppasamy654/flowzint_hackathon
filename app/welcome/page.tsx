@@ -48,27 +48,32 @@ export default function WelcomePage() {
 
   return (
     <div className="min-h-screen w-full bg-slate-950 flex items-center justify-center overflow-hidden">
-      {/* ── Snake-door panels — always rendered, start closed ── */}
+      {/* ── Snake-door panels — each strip splits from the centre ── */}
       <div className="fixed inset-0 z-50 pointer-events-none select-none">
-        {STRIP_GRADIENTS.map((gradient, idx) => {
-          const slideLeft = idx % 2 === 0;
-          return (
+        {STRIP_GRADIENTS.map((gradient, idx) => (
+          <React.Fragment key={idx}>
+            {/* Left half — slides out to the left */}
             <div
-              key={idx}
-              className={`absolute left-0 w-full h-[10%] bg-gradient-to-r ${gradient}`}
+              className={`absolute left-0 w-1/2 h-[10%] bg-gradient-to-r ${gradient}`}
               style={{
                 top: `${idx * 10}%`,
-                transform: doorsOpen
-                  ? slideLeft
-                    ? "translateX(-102%)"
-                    : "translateX(102%)"
-                  : "translateX(0)",
-                transition: "transform 850ms cubic-bezier(0.77, 0, 0.18, 1)",
-                transitionDelay: `${idx * 65}ms`,
+                transform: doorsOpen ? "translateX(-102%)" : "translateX(0)",
+                transition: "transform 900ms cubic-bezier(0.77, 0, 0.18, 1)",
+                transitionDelay: `${idx * 60}ms`,
               }}
             />
-          );
-        })}
+            {/* Right half — slides out to the right */}
+            <div
+              className={`absolute right-0 w-1/2 h-[10%] bg-gradient-to-l ${gradient}`}
+              style={{
+                top: `${idx * 10}%`,
+                transform: doorsOpen ? "translateX(102%)" : "translateX(0)",
+                transition: "transform 900ms cubic-bezier(0.77, 0, 0.18, 1)",
+                transitionDelay: `${idx * 60}ms`,
+              }}
+            />
+          </React.Fragment>
+        ))}
       </div>
 
       {/* ── Welcome content — fades in after doors peel open ── */}
