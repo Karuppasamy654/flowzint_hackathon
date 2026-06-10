@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { SKILL_CATEGORIES } from '@/lib/matching';
 import { broadcastRealtimeEvent } from '@/lib/supabase';
 import { geminiFlash, callGeminiWithTimeout } from '@/lib/gemini';
-
+export const dynamic = 'force-dynamic';
 const CreateRequestSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required').max(300, 'Description is too long (max 300 characters)'),
