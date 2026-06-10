@@ -28,11 +28,20 @@ const SignupSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  console.log('DEBUG: Enter POST /api/users');
+  console.log('DEBUG MONGODB_URI (pre-connection):', process.env.MONGODB_URI);
   try {
     await dbConnect();
-    console.log('DEBUG: dbConnect completed');
-    console.log('DEBUG MONGODB_URI:', process.env.MONGODB_URI);
-    const body = await req.json();
+    console.log('DEBUG: dbConnect succeeded');
+  } catch (connErr) {
+    console.error('DEBUG: dbConnect failed', connErr);
+    return NextResponse.json({
+      success: false,
+      error: 'Database connection failed',
+      details: connErr.message || String(connErr),
+    }, { status: 500 });
+  }
+  const body = await req.json();
 
     // Validate body
     const parseResult = SignupSchema.safeParse(body);
