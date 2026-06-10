@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
-import Link from 'next/link';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/toast';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = React.useState(false);
@@ -20,7 +20,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) {
-      setError('Please fill in all fields.');
+      setError("Please fill in all fields.");
       return;
     }
 
@@ -28,24 +28,23 @@ export default function LoginPage() {
     setIsLoggingIn(true);
 
     try {
-      const res = await signIn('credentials', {
+      const res = await signIn("credentials", {
         email: email.toLowerCase(),
         password,
         redirect: false,
       });
 
       if (res?.error) {
-        setError('Invalid email or password.');
+        setError("Invalid email or password.");
       } else {
-        toast.success('Signed in successfully!', {
-          description: 'Welcome back to HelpNet.',
+        toast.success("Signed in successfully!", {
+          description: "Welcome back to HelpNet.",
         });
-        router.push('/welcome');
-        router.refresh();
+        window.location.href = "/welcome";
       }
     } catch (err) {
       console.error(err);
-      setError('An unexpected error occurred. Please try again.');
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoggingIn(false);
     }
@@ -53,16 +52,20 @@ export default function LoginPage() {
 
   const handleForgotPassword = (e: React.MouseEvent) => {
     e.preventDefault();
-    toast.info('Password reset coming soon — contact support.', {
-      description: 'Support channel: support@helpnet.org',
+    toast.info("Password reset coming soon — contact support.", {
+      description: "Support channel: support@helpnet.org",
     });
   };
 
   return (
     <div className="space-y-6 text-left">
       <div className="space-y-1 text-center">
-        <h2 className="text-2xl font-display font-semibold text-gray-900">Welcome back</h2>
-        <p className="text-xs text-gray-400">Sign in to request help or respond to matches</p>
+        <h2 className="text-2xl font-display font-semibold text-gray-900">
+          Welcome back
+        </h2>
+        <p className="text-xs text-gray-400">
+          Sign in to request help or respond to matches
+        </p>
       </div>
 
       {/* Error banner */}
@@ -101,10 +104,10 @@ export default function LoginPage() {
               Forgot password?
             </button>
           </div>
-          
+
           <div className="relative">
             <Input
-              type={showPassword ? 'text' : 'password'}
+              type={showPassword ? "text" : "password"}
               placeholder="••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -117,7 +120,11 @@ export default function LoginPage() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
             >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
             </button>
           </div>
         </div>
@@ -133,7 +140,7 @@ export default function LoginPage() {
               Signing in...
             </>
           ) : (
-            'Sign in'
+            "Sign in"
           )}
         </Button>
       </form>
@@ -141,7 +148,7 @@ export default function LoginPage() {
       {/* Link to signup */}
       <div className="text-center pt-2 border-t border-gray-100">
         <p className="text-xs text-gray-400">
-          Don&apos;t have an account?{' '}
+          Don&apos;t have an account?{" "}
           <Link
             href="/signup/step1"
             className="font-bold text-primary hover:text-primary-hover transition-colors"

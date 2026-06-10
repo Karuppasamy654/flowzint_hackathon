@@ -1,34 +1,34 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
-import { Button } from '../ui/button';
-import { toast } from '@/components/ui/toast';
-import { Camera, ChevronLeft, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { SUPPORTED_LANGUAGES } from '@/lib/languages';
-import { LocationAutocomplete } from '@/components/ui/LocationAutocomplete';
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
+import { toast } from "@/components/ui/toast";
+import { Camera, ChevronLeft, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { SUPPORTED_LANGUAGES } from "@/lib/languages";
+import { LocationAutocomplete } from "@/components/ui/LocationAutocomplete";
 
 const PALETTE = [
-  '#7C3AED',
-  '#0F766E',
-  '#B45309',
-  '#1D4ED8',
-  '#9D174D',
-  '#065F46',
-  '#C2410C',
-  '#1A7F5A',
+  "#7C3AED",
+  "#0F766E",
+  "#B45309",
+  "#1D4ED8",
+  "#9D174D",
+  "#065F46",
+  "#C2410C",
+  "#1A7F5A",
 ];
 
 export function SignupStep3Form() {
   const router = useRouter();
-  const [avatarColor, setAvatarColor] = React.useState('#7C3AED');
-  const [location, setLocation] = React.useState('');
-  const [bio, setBio] = React.useState('');
-  const [preferredLanguage, setPreferredLanguage] = React.useState('en');
+  const [avatarColor, setAvatarColor] = React.useState("#7C3AED");
+  const [location, setLocation] = React.useState("");
+  const [bio, setBio] = React.useState("");
+  const [preferredLanguage, setPreferredLanguage] = React.useState("en");
   const [file, setFile] = React.useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -42,12 +42,12 @@ export function SignupStep3Form() {
     const randColor = PALETTE[Math.floor(Math.random() * PALETTE.length)];
     setAvatarColor(randColor);
 
-    const s1 = sessionStorage.getItem('signup_step1');
-    const s2 = sessionStorage.getItem('signup_step2');
-    
+    const s1 = sessionStorage.getItem("signup_step1");
+    const s2 = sessionStorage.getItem("signup_step2");
+
     if (!s1 || !s2) {
-      toast.error('Signup session lost. Please start over.');
-      router.push('/signup/step1');
+      toast.error("Signup session lost. Please start over.");
+      router.push("/signup/step1");
       return;
     }
 
@@ -56,7 +56,7 @@ export function SignupStep3Form() {
       setStep2Data(JSON.parse(s2));
     } catch (e) {
       console.error(e);
-      router.push('/signup/step1');
+      router.push("/signup/step1");
     }
   }, [router]);
 
@@ -74,33 +74,33 @@ export function SignupStep3Form() {
   };
 
   const handleBack = () => {
-    router.push('/signup/step2');
+    router.push("/signup/step2");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!location.trim()) {
-      toast.warning('Please enter your location.');
+      toast.warning("Please enter your location.");
       return;
     }
 
     setIsSubmitting(true);
-    let avatarUrl = '';
+    let avatarUrl = "";
 
     try {
       // 1. Upload photo to Cloudinary if selected
       if (file) {
         const uploadFormData = new FormData();
-        uploadFormData.append('file', file);
-        const uploadRes = await fetch('/api/upload', {
-          method: 'POST',
+        uploadFormData.append("file", file);
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
           body: uploadFormData,
         });
         const uploadResult = await uploadRes.json();
         if (uploadResult.url) {
           avatarUrl = uploadResult.url;
         } else {
-          console.warn('Avatar upload failed, continuing with fallback');
+          console.warn("Avatar upload failed, continuing with fallback");
         }
       }
 
@@ -117,46 +117,43 @@ export function SignupStep3Form() {
         preferredLanguage,
       };
 
-      const signupRes = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const signupRes = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
       });
 
       const signupResult = await signupRes.json();
       if (!signupResult.success) {
-        toast.error(signupResult.error || 'Registration failed');
+        toast.error(signupResult.error || "Registration failed");
         setIsSubmitting(false);
         return;
       }
 
       // 3. Initiate credentials sign in
-      const signinResult = await signIn('credentials', {
+      const signinResult = await signIn("credentials", {
         email: step1Data.email,
         password: step1Data.password,
         redirect: false,
       });
 
       if (signinResult?.error) {
-        toast.error('Account created, but automatic login failed. Please sign in manually.');
-        router.push('/login');
+        toast.error(
+          "Account created, but automatic login failed. Please sign in manually.",
+        );
+        window.location.href = "/login";
         return;
       }
 
       // Clear session values
-      sessionStorage.removeItem('signup_step1');
-      sessionStorage.removeItem('signup_step2');
+      sessionStorage.removeItem("signup_step1");
+      sessionStorage.removeItem("signup_step2");
 
-      // 4. Redirect and trigger welcome toast
-      toast.success(`Welcome to HelpNet, ${step1Data.name}!`, {
-        description: 'Your community workspace is ready.',
-      });
-      
-      router.push('/welcome');
-      router.refresh();
+      // 4. Hard-redirect so the session cookie is picked up cleanly
+      window.location.href = "/welcome";
     } catch (err: any) {
       console.error(err);
-      toast.error('An unexpected error occurred during signup.');
+      toast.error("An unexpected error occurred during signup.");
       setIsSubmitting(false);
     }
   };
@@ -167,9 +164,9 @@ export function SignupStep3Form() {
         .split(/\s+/)
         .map((n: string) => n[0])
         .slice(0, 2)
-        .join('')
+        .join("")
         .toUpperCase()
-    : 'U';
+    : "U";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -179,13 +176,17 @@ export function SignupStep3Form() {
           onClick={triggerFileSelect}
           style={{ backgroundColor: previewUrl ? undefined : avatarColor }}
           className={cn(
-            'w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold cursor-pointer relative group overflow-hidden shadow-md',
-            previewUrl ? 'bg-transparent' : ''
+            "w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold cursor-pointer relative group overflow-hidden shadow-md",
+            previewUrl ? "bg-transparent" : "",
           )}
         >
           {previewUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={previewUrl} alt="Avatar Preview" className="w-full h-full object-cover" />
+            <img
+              src={previewUrl}
+              alt="Avatar Preview"
+              className="w-full h-full object-cover"
+            />
           ) : (
             <span>{nameInitials}</span>
           )}
@@ -287,7 +288,7 @@ export function SignupStep3Form() {
               Completing setup...
             </>
           ) : (
-            'Complete setup'
+            "Complete setup"
           )}
         </Button>
       </div>
