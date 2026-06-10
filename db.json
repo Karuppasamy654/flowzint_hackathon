@@ -4,13 +4,7 @@
       "name": "sk",
       "email": "sk@gmail.com",
       "passwordHash": "$2b$12$kpGE7VVqidNlXEf2rM5jzeyJ6rhVdguoBe9SAo7i56paadLb7ECZS",
-      "skills": [
-        "Design",
-        "Web Dev",
-        "Teaching",
-        "Medical",
-        "Mental Health"
-      ],
+      "skills": ["Design", "Web Dev", "Teaching", "Medical", "Mental Health"],
       "location": "chennai",
       "bio": "web developer\n",
       "avatarColor": "#0F766E",
@@ -28,11 +22,7 @@
       "name": "user1",
       "email": "user1@gmail.com",
       "passwordHash": "$2b$12$xgb5Zcf4upVnF8C2pViIN.u7Bw6.EZcED8jdfkw9yBate1ft5co7K",
-      "skills": [
-        "Cooking",
-        "Medical",
-        "Teaching"
-      ],
+      "skills": ["Cooking", "Medical", "Teaching"],
       "location": "madurai",
       "bio": "",
       "avatarColor": "#0F766E",
@@ -50,12 +40,7 @@
       "name": "demo",
       "email": "demo@gmail.com",
       "passwordHash": "$2b$12$wC1K.dNmNH3AOVHjzNXfQe1edOF963dpDWtQuy/vnbjqhBfKNCELS",
-      "skills": [
-        "Web Dev",
-        "Teaching",
-        "Cooking",
-        "Language Translation"
-      ],
+      "skills": ["Web Dev", "Teaching", "Cooking", "Language Translation"],
       "location": "chennai",
       "bio": "",
       "avatarColor": "#1A7F5A",
@@ -67,6 +52,24 @@
       },
       "createdAt": "2026-06-10T04:00:29.518Z",
       "updatedAt": "2026-06-10T04:00:29.519Z",
+      "avgRating": 0
+    },
+    {
+      "name": "sample1",
+      "email": "sample1@gmail.com",
+      "passwordHash": "$2b$12$05ASLBjksz6NbYC0W7hJguLq0K6YkQXYLFsaLQDNu3P4mxAKRztM6",
+      "skills": ["Teaching", "Medical", "Music"],
+      "location": "Madurai, Madurai South, India",
+      "bio": "",
+      "avatarColor": "#065F46",
+      "preferredLanguage": "en",
+      "_id": "7fceeb91c1fa0a09ac546e38",
+      "rating": {
+        "total": 0,
+        "count": 0
+      },
+      "createdAt": "2026-06-10T13:37:32.881Z",
+      "updatedAt": "2026-06-10T13:37:32.882Z",
       "avgRating": 0
     }
   ],
@@ -197,9 +200,7 @@
           "sender": "b2997076522731a58378052e",
           "text": "hi",
           "createdAt": "2026-06-08T10:33:18.815Z",
-          "readBy": [
-            "b2997076522731a58378052e"
-          ],
+          "readBy": ["b2997076522731a58378052e"],
           "originalText": "hi",
           "originalLanguage": "ta",
           "translations": {}
@@ -209,9 +210,7 @@
           "sender": "b2997076522731a58378052e",
           "text": "Understood! I am on it and will coordinate with you as soon as I arrive.",
           "createdAt": "2026-06-08T10:33:22.012Z",
-          "readBy": [
-            "b2997076522731a58378052e"
-          ],
+          "readBy": ["b2997076522731a58378052e"],
           "originalText": "Understood! I am on it and will coordinate with you as soon as I arrive.",
           "originalLanguage": "ta",
           "translations": {}
@@ -221,9 +220,7 @@
           "sender": "b2997076522731a58378052e",
           "text": "hi",
           "createdAt": "2026-06-08T10:33:27.918Z",
-          "readBy": [
-            "b2997076522731a58378052e"
-          ],
+          "readBy": ["b2997076522731a58378052e"],
           "originalText": "hi",
           "originalLanguage": "ta",
           "translations": {}
@@ -233,9 +230,7 @@
           "sender": "b2997076522731a58378052e",
           "text": "Got your message. I am packing up and should be there in about 5 to 10 minutes.",
           "createdAt": "2026-06-08T10:33:31.146Z",
-          "readBy": [
-            "b2997076522731a58378052e"
-          ],
+          "readBy": ["b2997076522731a58378052e"],
           "originalText": "Got your message. I am packing up and should be there in about 5 to 10 minutes.",
           "originalLanguage": "ta",
           "translations": {}
@@ -245,9 +240,7 @@
           "sender": "b2997076522731a58378052e",
           "text": "hello",
           "createdAt": "2026-06-08T10:33:40.347Z",
-          "readBy": [
-            "b2997076522731a58378052e"
-          ],
+          "readBy": ["b2997076522731a58378052e"],
           "originalText": "hello",
           "originalLanguage": "ta",
           "translations": {}
@@ -257,9 +250,7 @@
           "sender": "b2997076522731a58378052e",
           "text": "I am heading over to help you now. Let me know if there are any specific entry instructions!",
           "createdAt": "2026-06-08T10:33:43.522Z",
-          "readBy": [
-            "b2997076522731a58378052e"
-          ],
+          "readBy": ["b2997076522731a58378052e"],
           "originalText": "I am heading over to help you now. Let me know if there are any specific entry instructions!",
           "originalLanguage": "ta",
           "translations": {}
@@ -269,9 +260,7 @@
           "sender": "b2997076522731a58378052e",
           "text": "ok",
           "createdAt": "2026-06-08T10:34:50.989Z",
-          "readBy": [
-            "b2997076522731a58378052e"
-          ],
+          "readBy": ["b2997076522731a58378052e"],
           "originalText": "ok",
           "originalLanguage": "ta",
           "translations": {}
@@ -281,9 +270,7 @@
           "sender": "b2997076522731a58378052e",
           "text": "I am heading over to help you now. Let me know if there are any specific entry instructions!",
           "createdAt": "2026-06-08T10:34:54.234Z",
-          "readBy": [
-            "b2997076522731a58378052e"
-          ],
+          "readBy": ["b2997076522731a58378052e"],
           "originalText": "I am heading over to help you now. Let me know if there are any specific entry instructions!",
           "originalLanguage": "ta",
           "translations": {}
@@ -307,10 +294,7 @@
           "sender": "64800d2d99bd7917b521ffe3",
           "text": "hello",
           "createdAt": "2026-06-08T14:33:25.627Z",
-          "readBy": [
-            "64800d2d99bd7917b521ffe3",
-            "b2997076522731a58378052e"
-          ],
+          "readBy": ["64800d2d99bd7917b521ffe3", "b2997076522731a58378052e"],
           "originalText": "hello",
           "originalLanguage": "ta",
           "translations": {}
@@ -320,10 +304,7 @@
           "sender": "64800d2d99bd7917b521ffe3",
           "text": "hello",
           "createdAt": "2026-06-08T15:34:00.896Z",
-          "readBy": [
-            "64800d2d99bd7917b521ffe3",
-            "b2997076522731a58378052e"
-          ],
+          "readBy": ["64800d2d99bd7917b521ffe3", "b2997076522731a58378052e"],
           "originalText": "hello",
           "originalLanguage": "ta",
           "translations": {}
@@ -333,9 +314,7 @@
           "sender": "b2997076522731a58378052e",
           "text": "hi",
           "createdAt": "2026-06-09T10:18:11.287Z",
-          "readBy": [
-            "b2997076522731a58378052e"
-          ],
+          "readBy": ["b2997076522731a58378052e"],
           "originalText": "hi",
           "originalLanguage": "ta",
           "translations": {}
