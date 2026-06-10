@@ -28,8 +28,7 @@ const SignupSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  console.log('DEBUG: Enter POST /api/users');
-  console.log('DEBUG MONGODB_URI (pre-connection):', process.env.MONGODB_URI);
+
 
   try {
     await dbConnect();

@@ -10,6 +10,7 @@ import { toast } from '@/components/ui/toast';
 import { Camera, ChevronLeft, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SUPPORTED_LANGUAGES } from '@/lib/languages';
+import { LocationAutocomplete } from '@/components/ui/LocationAutocomplete';
 
 const PALETTE = [
   '#7C3AED',
@@ -213,18 +214,16 @@ export function SignupStep3Form() {
       {/* Location field */}
       <div className="space-y-2">
         <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500">
-          Your Location (Neighborhood / City)
+          Your Location <span className="text-red-400">*</span>
         </label>
-        <Input
-          type="text"
-          placeholder="e.g. Koramangala, Bengaluru"
+        <LocationAutocomplete
           value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          required
+          onChange={setLocation}
           disabled={isSubmitting}
+          placeholder="Type your city or neighbourhood..."
         />
         <div className="text-xs text-gray-400 select-none">
-          Enter your neighbourhood or area name.
+          Type to search — select your real location from the list.
         </div>
       </div>
 

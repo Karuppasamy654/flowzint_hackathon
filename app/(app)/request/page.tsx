@@ -178,7 +178,7 @@ export default function RequestPage() {
         </TabsContent>
 
         {/* ── Help Others Tab ── */}
-        <TabsContent value="offer-help" className="space-y-4">
+        <TabsContent value="offer-help" className="space-y-6">
           {isLoadingHelper ? (
             <div className="flex justify-center py-12">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -188,59 +188,99 @@ export default function RequestPage() {
               <AlertCircle className="h-10 w-10 text-slate-600 mx-auto" />
               <p className="text-sm font-semibold text-slate-300">{t('common.noneYet')}</p>
               <p className="text-xs leading-normal max-w-xs mx-auto text-slate-500">
-                We couldn&apos;t find any pending help requests right now. Check back later!
+                We couldn&apos;t find any pending help requests near your location right now. Check back later!
               </p>
             </div>
-          ) : (
-            <div className="space-y-3 max-w-3xl animate-in fade-in duration-300">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 pl-1">
-                {t('request.pendingRequests')} ({communityRequests.length})
-              </h4>
-              <div className="space-y-3">
-                {communityRequests.map((req) => {
-                  const colorClass = SKILL_COLORS[req.category] || 'bg-gray-800 text-slate-300 border-gray-700';
-                  const isUrgent = req.urgency === 'urgent';
-                  return (
-                    <div
-                      key={req._id}
-                      className={cn(
-                        'bg-[#131B2E]/45 border p-5 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-left backdrop-blur-md transition-all',
-                        isUrgent ? 'border-red-500/40 hover:border-red-500/60' : 'border-white/10 hover:border-indigo-500/20'
-                      )}
-                    >
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h4 className="text-base font-bold text-white truncate pr-2">{req.title}</h4>
-                          <span className={`text-[10px] font-bold border rounded-sm px-2 py-0.5 capitalize ${colorClass}`}>{req.category}</span>
-                          <span className={cn('text-[10px] font-bold border rounded-sm px-2 py-0.5 capitalize',
-                            isUrgent ? 'bg-red-500/20 text-red-300 border-red-500/30 animate-pulse' : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                          )}>{req.urgency}</span>
-                        </div>
-                        <p className="text-xs text-slate-300 leading-relaxed max-w-xl">{req.description}</p>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-400 font-medium">
-                          <span>Seeker: {req.seeker?.name || 'Neighbor'}</span>
-                          <span className="flex items-center gap-0.5"><MapPin className="h-3 w-3" />{req.location}</span>
-                          <span className="flex items-center gap-0.5"><Clock className="h-3 w-3" />{formatDistanceToNow(new Date(req.createdAt), { addSuffix: true })}</span>
-                        </div>
-                      </div>
-                      <Button
-                        disabled={isAcceptingId === req._id}
-                        onClick={() => handleAcceptRequest(req._id)}
-                        className={cn('font-semibold text-xs h-9 px-5 rounded-md flex items-center justify-center shrink-0 w-full md:w-auto transition-colors',
-                          isUrgent ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                        )}
-                      >
-                        {isAcceptingId === req._id
-                          ? <><Loader2 className="h-3 w-3 animate-spin mr-1.5" />{t('common.loading')}</>
-                          : t('request.acceptChat')
-                        }
-                      </Button>
+          ) : (() => {
+            const exactMatch = communityRequests.filter((r: any) => r._skillRank === 1);
+            const related = communityRequests.filter((r: any) => r._skillRank === 2);
+            const others = communityRequests.filter((r: any) => r._skillRank === 3 || !r._skillRank);
+
+            const renderCard = (req: any) => {
+              const colorClass = SKILL_COLORS[req.category] || 'bg-gray-800 text-slate-300 border-gray-700';
+              const isUrgent = req.urgency === 'urgent';
+              return (
+                <div
+                  key={req._id}
+                  className={cn(
+                    'bg-[#131B2E]/45 border p-5 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-left backdrop-blur-md transition-all',
+                    isUrgent ? 'border-red-500/40 hover:border-red-500/60' : 'border-white/10 hover:border-indigo-500/20'
+                  )}
+                >
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="text-base font-bold text-white truncate pr-2">{req.title}</h4>
+                      <span className={`text-[10px] font-bold border rounded-sm px-2 py-0.5 capitalize ${colorClass}`}>{req.category}</span>
+                      <span className={cn('text-[10px] font-bold border rounded-sm px-2 py-0.5 capitalize',
+                        isUrgent ? 'bg-red-500/20 text-red-300 border-red-500/30 animate-pulse' : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                      )}>{req.urgency}</span>
                     </div>
-                  );
-                })}
+                    <p className="text-xs text-slate-300 leading-relaxed max-w-xl">{req.description}</p>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-400 font-medium">
+                      <span>Seeker: {req.seeker?.name || 'Neighbor'}</span>
+                      <span className="flex items-center gap-0.5"><MapPin className="h-3 w-3" />{req.location}</span>
+                      <span className="flex items-center gap-0.5"><Clock className="h-3 w-3" />{formatDistanceToNow(new Date(req.createdAt), { addSuffix: true })}</span>
+                    </div>
+                  </div>
+                  <Button
+                    disabled={isAcceptingId === req._id}
+                    onClick={() => handleAcceptRequest(req._id)}
+                    className={cn('font-semibold text-xs h-9 px-5 rounded-md flex items-center justify-center shrink-0 w-full md:w-auto transition-colors',
+                      isUrgent ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                    )}
+                  >
+                    {isAcceptingId === req._id
+                      ? <><Loader2 className="h-3 w-3 animate-spin mr-1.5" />{t('common.loading')}</>
+                      : t('request.acceptChat')
+                    }
+                  </Button>
+                </div>
+              );
+            };
+
+            return (
+              <div className="max-w-3xl space-y-8 animate-in fade-in duration-300">
+                {/* Exact skill match */}
+                {exactMatch.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                        Best Match — Your Skills ({exactMatch.length})
+                      </h4>
+                    </div>
+                    <div className="space-y-3">{exactMatch.map(renderCard)}</div>
+                  </div>
+                )}
+
+                {/* Related skills */}
+                {related.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-2 w-2 rounded-full bg-indigo-400" />
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-400">
+                        Related to Your Skills ({related.length})
+                      </h4>
+                    </div>
+                    <div className="space-y-3">{related.map(renderCard)}</div>
+                  </div>
+                )}
+
+                {/* All others */}
+                {others.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-2 w-2 rounded-full bg-slate-500" />
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                        Other Requests — Anyone Can Help ({others.length})
+                      </h4>
+                    </div>
+                    <div className="space-y-3">{others.map(renderCard)}</div>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            );
+          })()}
         </TabsContent>
       </Tabs>
     </div>

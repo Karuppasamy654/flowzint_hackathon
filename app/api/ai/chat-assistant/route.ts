@@ -108,18 +108,33 @@ async function gatherPlatformContext(messages: any[]): Promise<string> {
 
   try {
     // If user is searching for helpers or asking about people with skills
-    if (/helper|who can|find.*someone|search.*skill|someone.*help|expert|specialist|available/i.test(latestText)) {
-      const helpers = await User.find({ isBot: false }).sort({ createdAt: -1 }).limit(20);
+    if (/helper|who can|find.*someone|search.*skill|someone.*help|expert|specialist|available|skilled/i.test(latestText)) {
+      const helpers = await User.find({ isBot: false }).sort({ 'rating.total': -1 }).limit(20);
       if (helpers && helpers.length > 0) {
-        const helperList = helpers.map((h: any) =>
-          `- ${h.name} (${h.location || 'unknown location'}): Skills: [${(h.skills || []).join(', ') || 'none listed'}], Rating: ${h.rating?.count > 0 ? (h.rating.total / h.rating.count).toFixed(1) + '/5' : 'new member'}`
-        ).join('\n');
-        parts.push(`LIVE DATA — Community members:\n${helperList}`);
+        const helperList = helpers.map((h: any) => {
+          const rating = h.rating?.count > 0 ? `${(h.rating.total / h.rating.count).toFixed(1)}/5` : 'new';
+          return `- ${h.name} (${h.location || 'unknown location'}): Skills: [${(h.skills || []).join(', ') || 'none listed'}], Rating: ${rating}`;
+        }).join('\n');
+        parts.push(`LIVE DATA — Community members who can help:\n${helperList}`);
+      }
+    }
+
+    // If user is asking about a specific person by name
+    const nameMatch = latestText.match(/(?:tell me about|who is|find user|show me|info about|profile of|about)\s+([a-z][a-z\s]{1,30}?)(?:\?|$|,|\s+on helpnet)/i)
+      || latestText.match(/(?:is|does)\s+([a-z][a-z\s]{1,20}?)\s+(?:on|in|a member|registered|signed up)/i);
+    if (nameMatch) {
+      const searchName = nameMatch[1].trim();
+      const foundUser = await User.findOne({ name: { $regex: searchName, $options: 'i' } });
+      if (foundUser) {
+        const rating = foundUser.rating?.count > 0 ? `${(foundUser.rating.total / foundUser.rating.count).toFixed(1)}/5 from ${foundUser.rating.count} reviews` : 'no ratings yet';
+        parts.push(`LIVE DATA — User profile found:\nName: ${foundUser.name}\nLocation: ${foundUser.location || 'not set'}\nSkills: ${(foundUser.skills || []).join(', ') || 'none listed'}\nRating: ${rating}\nBio: ${foundUser.bio || 'no bio'}\nMember since: ${foundUser.createdAt ? new Date(foundUser.createdAt).toLocaleDateString() : 'unknown'}`);
+      } else {
+        parts.push(`LIVE DATA — No user found with name matching "${searchName}".`);
       }
     }
 
     // If user is asking about open/active requests
-    if (/request|open.*request|pending|need.*help|who needs|available.*task|browse|looking for/i.test(latestText)) {
+    if (/request|open.*request|pending|need.*help|who needs|available.*task|browse|looking for|wants help|people need/i.test(latestText)) {
       const openRequests = await HelpRequest.find({ status: { $in: ['pending', 'active'] } })
         .populate('seeker')
         .sort({ createdAt: -1 })
@@ -127,19 +142,21 @@ async function gatherPlatformContext(messages: any[]): Promise<string> {
       if (openRequests && openRequests.length > 0) {
         const reqList = openRequests.map((r: any) => {
           const seekerName = r.seeker?.name || 'Anonymous';
-          return `- "${r.title}" (${r.category}, ${r.urgency}) by ${seekerName} in ${r.location} — ${r.description?.substring(0, 80)}${r.description?.length > 80 ? '...' : ''}`;
+          const urgencyEmoji = r.urgency === 'urgent' ? '🔴' : r.urgency === 'today' ? '🟡' : '🟢';
+          return `${urgencyEmoji} "${r.title}" (${r.category}, ${r.urgency}) by ${seekerName} in ${r.location} — ${r.description?.substring(0, 80)}${r.description?.length > 80 ? '...' : ''}`;
         }).join('\n');
-        parts.push(`LIVE DATA — Open help requests:\n${reqList}`);
+        parts.push(`LIVE DATA — Open help requests (people who need help):\n${reqList}`);
       }
     }
 
     // General stats for any conversation
-    const [totalUsers, totalRequests, pendingRequests] = await Promise.all([
+    const [totalUsers, totalRequests, pendingRequests, completedRequests] = await Promise.all([
       User.countDocuments({ isBot: false }),
       HelpRequest.countDocuments({}),
       HelpRequest.countDocuments({ status: 'pending' }),
+      HelpRequest.countDocuments({ status: 'completed' }),
     ]);
-    parts.push(`Platform stats: ${totalUsers} members, ${totalRequests} total requests, ${pendingRequests} currently pending.`);
+    parts.push(`Platform stats: ${totalUsers} members, ${totalRequests} total requests, ${pendingRequests} currently pending, ${completedRequests} successfully completed.`);
   } catch (err) {
     console.error('Error gathering platform context:', err);
   }
@@ -185,7 +202,26 @@ async function getFallbackReply(userText: string, userName: string): Promise<str
     }
   }
 
-  // ── Search for open requests (for helpers looking to help) ──
+  // ── Look up a specific user by name ──
+  const userLookupMatch = lower.match(/(?:tell me about|who is|find user|show me|info about|profile of)\s+([a-z][a-z\s]{1,30}?)(?:\?|$|,)/i)
+    || lower.match(/(?:is|does)\s+([a-z][a-z\s]{1,20}?)\s+(?:on|in|a member|registered)/i);
+  if (userLookupMatch) {
+    const searchName = userLookupMatch[1].trim();
+    try {
+      const foundUser = await User.findOne({ name: { $regex: searchName, $options: 'i' } });
+      if (foundUser) {
+        const rating = foundUser.rating?.count > 0
+          ? `⭐ ${(foundUser.rating.total / foundUser.rating.count).toFixed(1)}/5 (${foundUser.rating.count} reviews)`
+          : '🆕 New member, no ratings yet';
+        return `Here's what I found about **${foundUser.name}**:\n\n📍 Location: ${foundUser.location || 'not set'}\n🛠️ Skills: ${(foundUser.skills || []).join(', ') || 'none listed'}\n${rating}\n📝 Bio: ${foundUser.bio || 'No bio yet'}\n📅 Member since: ${foundUser.createdAt ? new Date(foundUser.createdAt).toLocaleDateString() : 'unknown'}\n\nYou can connect with ${foundUser.name.split(' ')[0]} by posting a help request that matches their skills!`;
+      } else {
+        return `I couldn't find a user named "${searchName}" on HelpNet. They might not be registered yet, or the name might be spelled differently. Try the exact username or browse community members on the platform.`;
+      }
+    } catch (err) {
+      console.error('User lookup error:', err);
+    }
+  }
+
   if (/(?:open|pending|active|available).*request/i.test(lower)
     || /who needs help/i.test(lower)
     || /(?:browse|show|list|see).*request/i.test(lower)

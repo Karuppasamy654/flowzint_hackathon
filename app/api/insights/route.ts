@@ -24,6 +24,8 @@ export async function GET(req: NextRequest) {
       avgRatingResult,
       categoryBreakdown,
       recentResolutions,
+      requestsPerDay,
+      topHelpers,
     ] = await Promise.all([
       HelpRequest.countDocuments({}),
       HelpRequest.countDocuments({ status: 'completed' }),
@@ -44,6 +46,22 @@ export async function GET(req: NextRequest) {
         .populate('seeker', 'name avatarUrl avatarColor')
         .populate('helper', 'name avatarUrl avatarColor')
         .populate('request', 'title category'),
+      // Requests per day for last 30 days
+      HelpRequest.aggregate([
+        { $match: { createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } } },
+        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, count: { $sum: 1 } } },
+        { $sort: { _id: 1 } },
+      ]),
+      // Top helpers by resolved chats
+      Chat.aggregate([
+        { $match: { status: 'resolved' } },
+        { $group: { _id: '$helper', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 5 },
+        { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'helper' } },
+        { $unwind: '$helper' },
+        { $project: { _id: 0, id: '$helper._id', name: '$helper.name', avatarUrl: '$helper.avatarUrl', avatarColor: '$helper.avatarColor', count: 1 } },
+      ]),
     ]);
 
     const avgRating = avgRatingResult[0]?.avg || 0;

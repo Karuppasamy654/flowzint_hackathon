@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import Link from 'next/link';
@@ -112,12 +113,14 @@ export function AppShell({ user, children }: AppShellProps) {
         {/* Left Sidebar (Desktop only) */}
         <aside className="hidden md:flex w-60 flex-col border-r border-white/5 bg-[#0D1224]/80 backdrop-blur-md h-full shrink-0 select-none">
           {/* Logo Area */}
-          <div className="py-6 px-6 border-b border-white/5">
-            <Link href="/request" className="flex items-center">
-              <span className="text-2xl font-display font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Help</span>
-              <span className="text-2xl font-sans font-extrabold text-indigo-400">Net</span>
-            </Link>
-          </div>
+            <div className="py-5 px-6 border-b border-white/5 flex items-center justify-center">
+              <Link href="/" className="flex items-center gap-2.5 group">
+                <Image src="/assets/helpnet_logo.png" alt="HelpNet Logo" width={32} height={32} className="h-8 w-8 rounded-lg" unoptimized />
+                <span className="text-[15px] font-extrabold tracking-tight">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">Help</span><span className="text-white">Net</span>
+                </span>
+              </Link>
+            </div>
 
           {/* Navigation Links */}
           <nav className="flex-1 px-4 py-6 space-y-1">

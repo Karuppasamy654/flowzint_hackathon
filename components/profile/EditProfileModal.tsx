@@ -10,6 +10,8 @@ import { SKILL_CATEGORIES } from '@/lib/constants';
 import { Camera, Loader2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AISkillSuggester } from './AISkillSuggester';
+import { LocationAutocomplete } from '../ui/LocationAutocomplete';
+
 
 interface EditProfileModalProps {
   open: boolean;
@@ -194,18 +196,16 @@ export function EditProfileModal({ open, onOpenChange, user, onSuccess }: EditPr
           {/* Location */}
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">
-              Location
+              Location <span className="text-red-400">*</span>
             </label>
-            <Input
-              type="text"
+            <LocationAutocomplete
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="e.g. Koramangala, Bengaluru"
-              required
+              onChange={setLocation}
               disabled={isSubmitting}
+              placeholder="e.g. Koramangala, Bengaluru"
             />
             <div className="text-[11px] text-gray-400 mt-1 select-none">
-              Enter your neighbourhood or area name.
+              Type to search — select your real location from the list.
             </div>
           </div>
 

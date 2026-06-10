@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Check } from 'lucide-react';
@@ -24,8 +25,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <div className="min-h-screen w-full bg-surface flex flex-col items-center justify-center py-10 px-4">
       {/* Brand logo header */}
       <Link href="/" className="mb-6 flex items-center select-none">
-        <span className="text-3xl font-display font-semibold text-primary">Help</span>
-        <span className="text-3xl font-sans font-extrabold text-primary-hover">Net</span>
+        <Image src="/assets/vercel_logo.png" alt="Vercel Logo" width={32} height={32} className="h-8 w-8" unoptimized />
       </Link>
 
       {/* Main card box */}

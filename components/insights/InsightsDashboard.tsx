@@ -6,7 +6,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { CommunityDigest } from './CommunityDigest';
 import { useLanguage } from '@/lib/LanguageContext';
 import {
-  Users, CheckCircle, Clock, Star, TrendingUp,
+  Users, CheckCircle, Star, TrendingUp,
   Sparkles, Brain, Zap, Heart, BarChart3, Loader2
 } from 'lucide-react';
 
@@ -43,7 +43,7 @@ function AnimatedCounter({ target, duration = 1200 }: { target: number; duration
     const timer = setInterval(() => {
       const elapsed = Date.now() - start;
       const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
       setCount(Math.round(eased * target));
       if (progress >= 1) clearInterval(timer);
     }, 16);
@@ -61,7 +61,7 @@ function StarRow({ rating }: { rating: number }) {
           style={{
             width: 14, height: 14,
             fill: i <= Math.round(rating) ? '#FBBF24' : 'transparent',
-            color: i <= Math.round(rating) ? '#FBBF24' : '#D1D5DB',
+            color: i <= Math.round(rating) ? '#FBBF24' : '#475569',
           }}
         />
       ))}
@@ -136,9 +136,9 @@ export function InsightsDashboard() {
   const maxCategoryCount = Math.max(...data.categoryBreakdown.map(c => c.count), 1);
 
   return (
-    <div className="max-w-4xl mx-auto pb-10 space-y-8 text-left">
+    <div className="space-y-6 text-slate-100">
 
-      {/* Header */}
+      {/* ── Header ── */}
       <div className="space-y-1">
         <div className="flex items-center gap-2">
           <Brain className="w-6 h-6 text-indigo-400" />
@@ -147,9 +147,9 @@ export function InsightsDashboard() {
         <p className="text-sm text-slate-400">{t('insights.subtitle')}</p>
       </div>
 
-      {/* AI Summary Card */}
+      {/* ── AI Summary Card ── */}
       {data.aiSummary && (
-        <div className="bg-gradient-to-r from-indigo-500/10 to-violet-500/10 border border-indigo-500/20 rounded-xl p-5 flex gap-4 items-start">
+        <div className="bg-[#131B2E]/60 border border-white/10 rounded-xl p-5 backdrop-blur-md flex gap-4 items-start">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shrink-0">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
@@ -160,7 +160,7 @@ export function InsightsDashboard() {
         </div>
       )}
 
-      {/* Stats Grid */}
+      {/* ── Stats Grid ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {/* Total Users */}
         <div className="bg-[#131B2E]/60 border border-white/10 rounded-xl p-5 backdrop-blur-md">
@@ -210,7 +210,7 @@ export function InsightsDashboard() {
         {/* Avg Rating */}
         <div className="bg-[#131B2E]/60 border border-white/10 rounded-xl p-5 backdrop-blur-md">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-9 h-9 rounded-lg bg-orange-500/10 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center">
               <Star className="w-[18px] h-[18px] text-amber-400 fill-amber-400" />
             </div>
             <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wide">{t('insights.avgRating')}</span>
@@ -220,10 +220,10 @@ export function InsightsDashboard() {
         </div>
       </div>
 
-      {/* Community Digest */}
+      {/* ── Community Digest ── */}
       <CommunityDigest />
 
-      {/* Category Breakdown */}
+      {/* ── Category Breakdown ── */}
       {data.categoryBreakdown.length > 0 && (
         <div className="bg-[#131B2E]/60 border border-white/10 rounded-xl p-6 backdrop-blur-md">
           <div className="flex items-center gap-2 mb-5">
@@ -238,7 +238,10 @@ export function InsightsDashboard() {
                 <div key={cat._id} className="flex items-center gap-3">
                   <span className="w-32 text-sm font-medium text-slate-300 shrink-0">{cat._id}</span>
                   <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
-                    <div style={{ width: `${pct}%`, background: color, transition: 'width 1s ease-out' }} className="h-full rounded-full" />
+                    <div
+                      style={{ width: `${pct}%`, background: color, transition: 'width 1s ease-out' }}
+                      className="h-full rounded-full"
+                    />
                   </div>
                   <span className="w-8 text-sm font-bold text-white text-right shrink-0">{cat.count}</span>
                 </div>
@@ -248,7 +251,7 @@ export function InsightsDashboard() {
         </div>
       )}
 
-      {/* Recent Resolutions */}
+      {/* ── Recent Resolutions ── */}
       {data.recentResolutions.length > 0 && (
         <div className="bg-[#131B2E]/60 border border-white/10 rounded-xl p-6 backdrop-blur-md">
           <div className="flex items-center gap-2 mb-5">
@@ -276,7 +279,9 @@ export function InsightsDashboard() {
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   {r.rating && <StarRow rating={r.rating} />}
-                  {r.resolvedAt && <span className="text-[11px] text-slate-500">{format(new Date(r.resolvedAt), 'd MMM')}</span>}
+                  {r.resolvedAt && (
+                    <span className="text-[11px] text-slate-500">{format(new Date(r.resolvedAt), 'd MMM')}</span>
+                  )}
                 </div>
               </div>
             ))}
@@ -284,12 +289,14 @@ export function InsightsDashboard() {
         </div>
       )}
 
-      {/* AI Features Showcase */}
-      <div className="bg-gradient-to-br from-[#0F172A] to-[#1E1B4B] border border-indigo-500/20 rounded-xl p-7">
+      {/* ── AI Features Showcase ── */}
+      <div className="bg-[#131B2E]/60 border border-white/10 rounded-xl p-6 backdrop-blur-md">
         <div className="flex items-center gap-2 mb-5">
           <Brain className="w-5 h-5 text-indigo-300" />
           <h2 className="text-base font-bold text-white">Powered by Gemini AI</h2>
-          <span className="ml-auto text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-bold">10 AI Features</span>
+          <span className="ml-auto text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-bold">
+            10 AI Features
+          </span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
@@ -304,7 +311,10 @@ export function InsightsDashboard() {
             { icon: '🤝', label: 'Conflict Resolver', desc: 'AI suggests de-escalation if tension detected' },
             { icon: '📊', label: 'AI Digest', desc: 'AI-generated weekly community health summary' },
           ].map((feat) => (
-            <div key={feat.label} className="bg-white/5 border border-white/8 rounded-xl p-4">
+            <div
+              key={feat.label}
+              className="bg-white/5 border border-white/8 rounded-xl p-4 hover:bg-white/8 hover:border-indigo-500/20 transition-all duration-150"
+            >
               <p className="text-xl mb-1.5">{feat.icon}</p>
               <p className="text-xs font-bold text-indigo-200 mb-1">{feat.label}</p>
               <p className="text-[11px] text-slate-400 leading-relaxed">{feat.desc}</p>
@@ -312,6 +322,7 @@ export function InsightsDashboard() {
           ))}
         </div>
       </div>
+
     </div>
   );
 }

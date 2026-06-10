@@ -315,8 +315,8 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-    const role = searchParams.get('role'); // seeker | helper
-    const status = searchParams.get('status'); // pending | active | completed | cancelled | expired
+    const role = searchParams.get('role');
+    const status = searchParams.get('status');
 
     if (!role || (role !== 'seeker' && role !== 'helper')) {
       return NextResponse.json(
@@ -337,7 +337,6 @@ export async function GET(req: NextRequest) {
     if (role === 'seeker') {
       query.seeker = currentUserId;
     } else {
-      // helper role: show all pending requests in community (except helper's own)
       if (status === 'pending') {
         query.seeker = { $ne: currentUserId };
       } else {
@@ -362,6 +361,65 @@ export async function GET(req: NextRequest) {
       .populate('seeker', 'name email avatarUrl avatarColor rating location')
       .populate('acceptedHelper', 'name email avatarUrl avatarColor rating location')
       .sort({ createdAt: -1 });
+
+    // ── Skill-based ranking and location-filtering for helper view ──
+    if (role === 'helper' && status === 'pending') {
+      const currentUser = await User.findById(currentUserId).select('skills location');
+      const userSkills: string[] = currentUser?.skills || [];
+      const userLocation: string = currentUser?.location || '';
+
+      // Helper to check if a request location is "near by" user location
+      const isNearby = (reqLoc: string, userLoc: string) => {
+        if (!reqLoc || !userLoc) return true; // Default to true if not defined
+        const r = reqLoc.toLowerCase().trim();
+        const u = userLoc.toLowerCase().trim();
+        
+        // Exact match or direct inclusion
+        if (r === u || r.includes(u) || u.includes(r)) return true;
+        
+        // Word token overlap
+        const getTokens = (str: string) => {
+          return str
+            .split(/[\s,.\-\/]+/)
+            .map((t) => t.trim())
+            .filter((t) => t.length > 2 && !['india', 'usa', 'state', 'district', 'street', 'road', 'near', 'tamil', 'nadu', 'karnataka'].includes(t));
+        };
+        const rTokens = getTokens(r);
+        const uTokens = getTokens(u);
+        return rTokens.some((t) => uTokens.includes(t));
+      };
+
+      // Filter requests to only show nearby ones
+      const nearbyRequests = requests.filter((req: any) => isNearby(req.location || '', userLocation));
+
+      // Helper to check if two skill strings are related
+      const isRelated = (reqCategory: string, skills: string[]) => {
+        const cat = reqCategory.toLowerCase();
+        return skills.some((s) => {
+          const sk = s.toLowerCase();
+          return sk.includes(cat) || cat.includes(sk);
+        });
+      };
+
+      const ranked = [...nearbyRequests].map((req: any) => {
+        const reqCat = req.category || '';
+        if (userSkills.includes(reqCat)) {
+          return { ...req.toObject(), _skillRank: 1, _skillLabel: 'exact' };
+        } else if (isRelated(reqCat, userSkills) || userSkills.some((s) => reqCat.toLowerCase().includes(s.toLowerCase()))) {
+          return { ...req.toObject(), _skillRank: 2, _skillLabel: 'related' };
+        } else {
+          return { ...req.toObject(), _skillRank: 3, _skillLabel: 'other' };
+        }
+      });
+
+      // Sort: exact first, then related, then others; within same rank keep newest first
+      ranked.sort((a: any, b: any) => {
+        if (a._skillRank !== b._skillRank) return a._skillRank - b._skillRank;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+
+      return NextResponse.json({ success: true, data: ranked }, { status: 200 });
+    }
 
     return NextResponse.json({ success: true, data: requests }, { status: 200 });
   } catch (error: any) {
