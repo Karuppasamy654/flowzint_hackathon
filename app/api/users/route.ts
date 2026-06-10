@@ -30,6 +30,8 @@ const SignupSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     await dbConnect();
+    console.log('DEBUG: dbConnect completed');
+    console.log('DEBUG MONGODB_URI:', process.env.MONGODB_URI);
     const body = await req.json();
 
     // Validate body
@@ -95,13 +97,30 @@ export async function POST(req: NextRequest) {
     };
 
     return NextResponse.json({ success: true, data: userResponse }, { status: 201 });
-  } catch (error: any) {
-    console.error('Signup API Error:', error);
-    return NextResponse.json(
-      { success: false, error: error.message || 'Internal Server Error' },
-      { status: 500 }
-    );
-  }
+    } catch (error: any) {
+      console.error('Signup API Error:', error);
+      // Duplicate key error (e.g., email already exists)
+      if (error.code === 11000) {
+        return NextResponse.json({
+          success: false,
+          error: 'Duplicate entry error',
+          details: error.message,
+        }, { status: 422 });
+      }
+      // MongoServerError or other DB errors
+      if (error.name === 'MongoServerError') {
+        return NextResponse.json({
+          success: false,
+          error: 'Database connection error',
+          details: error.message,
+        }, { status: 500 });
+      }
+      return NextResponse.json({
+        success: false,
+        error: error.message || 'Internal Server Error',
+        details: error.stack,
+      }, { status: 500 });
+    }
 }
 
 export async function GET(req: NextRequest) {
