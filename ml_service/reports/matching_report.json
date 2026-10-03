@@ -1,0 +1,26 @@
+{
+  "dataset": "HelpNet Interaction Proxy Dataset (Synthetic Cold-Start Benchmark)",
+  "data_provenance_type": "Synthetic Proxy Benchmark (Not Live HelpNet Interactions)",
+  "training_samples": 800,
+  "test_samples": 200,
+  "ml_ranking_model": {
+    "type": "Supervised Pairwise Logistic Regression (Trained via SGD)",
+    "benchmark_accuracy": 0.885,
+    "weights": [
+      2.5847455366967482,
+      1.6186025808198243,
+      0.31258991021280186,
+      0.18999620183806173
+    ],
+    "bias": -1.5991647645580809
+  },
+  "baseline_model": {
+    "type": "Heuristic Rule-Based Matcher",
+    "benchmark_accuracy": 1.0
+  },
+  "metrics_comparison": {
+    "precision_at_1": 0.885,
+    "hit_rate_at_3": 0.92,
+    "mrr": 0.905
+  }
+}

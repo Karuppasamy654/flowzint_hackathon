@@ -1,0 +1,111 @@
+{
+  "model_version": "1.0.0",
+  "trained_at": "2026-10-03T15:45:00Z",
+  "category_classification": {
+    "dataset": "CLINC150 Intent Benchmark (Mapped to HelpNet Categories)",
+    "training_samples": 15000,
+    "validation_samples": 3000,
+    "test_samples": 4500,
+    "test_accuracy": 0.8256,
+    "classes": [
+      "Cooking",
+      "Finance",
+      "Language Translation",
+      "Music",
+      "Other",
+      "Teaching",
+      "Web Dev"
+    ],
+    "confusion_matrix": [
+      [
+        71,
+        1,
+        1,
+        0,
+        13,
+        4,
+        0
+      ],
+      [
+        1,
+        161,
+        0,
+        0,
+        17,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        59,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        24,
+        3,
+        0,
+        3
+      ],
+      [
+        134,
+        246,
+        146,
+        63,
+        3290,
+        48,
+        93
+      ],
+      [
+        0,
+        0,
+        2,
+        0,
+        3,
+        25,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        5,
+        0,
+        85
+      ]
+    ],
+    "model_type": "TF-IDF + Softmax Centroid Classifier"
+  },
+  "helper_matching": {
+    "dataset": "HelpNet Interaction Dataset (Cold-Start Benchmark)",
+    "training_samples": 800,
+    "test_samples": 200,
+    "ml_ranking_model": {
+      "type": "Supervised Pairwise Logistic Regression",
+      "accuracy": 0.965,
+      "weights": [
+        3.250757256959962,
+        2.3842831271808507,
+        1.206679881323062,
+        0.7338478067400326
+      ],
+      "bias": -2.941920186530472
+    },
+    "baseline_model": {
+      "type": "Heuristic Rule-Based Matcher",
+      "accuracy": 1.0
+    },
+    "metrics_comparison": {
+      "precision_at_1": 0.965,
+      "hit_rate_at_3": 1.0,
+      "mrr": 1.0
+    }
+  }
+}

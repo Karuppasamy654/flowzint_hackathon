@@ -1,116 +1,132 @@
-# HelpNet 🤝
+# HelpNet AI 🤝
 
-HelpNet is a community-powered peer-to-peer assistance platform. Residents can post local help requests, which are matched with skilled helpers in their neighborhood. Once a helper accepts, a secure real-time chat room opens up to coordinate details, and the seeker can review the assistance once complete.
+> **Subtitle**: Intelligent Community Assistance and ML-Based Human-Need Matching Platform  
+> **Tagline**: *"Describe your need. Understand the request. Find the right person."*
 
-## Key Features
-
-- **Progressive Signup Flow**: Multi-step register forms to set up account details, select matching skills, locate neighborhoods, and upload profile pictures.
-- **Dynamic Helper Matching**: Scans user profiles matching requested categories, excluding seekers, sorted by average rating, and alerts them in real-time.
-- **Supabase Real-time Event Streaming**: Immediate browser alerts (toasters) and active chat message updates using Supabase's high-speed WebSocket broadcast channels.
-- **Mongoose / MongoDB Atlas Data Hub**: Full database consistency with indexes for performance optimization.
-- **NextAuth.js v5 Credentials Authentication**: Fast, secure login utilizing the Credentials provider and JWT session management.
-- **Unsigned Cloudinary Avatar Uploader**: Handles avatar image file uploads via a secure server-side REST API proxy, with a generated-initials fallback if Cloudinary is not configured.
-- **Request Expiration sweeps**: Automatic cron job that expires pending requests older than 24 hours.
+HelpNet AI transforms community assistance by coupling modern peer-to-peer web infrastructure with a **genuine, end-to-end Machine Learning & AI pipeline**.
 
 ---
 
-## Tech Stack
+## 🌟 Core Features
 
-- **Framework**: [Next.js 14 (App Router)](https://nextjs.org)
-- **Database**: [MongoDB Atlas](https://www.mongodb.com/atlas/database) via [Mongoose](https://mongoosejs.com)
-- **Auth**: [NextAuth.js v5 (Auth.js)](https://authjs.dev)
-- **Real-time WebSockets**: [Supabase Realtime (Broadcast)](https://supabase.com/docs/guides/realtime)
-- **File Storage**: [Cloudinary](https://cloudinary.com) (Server-side REST uploader)
-- **Styling**: Tailwind CSS & Vanilla CSS
+- **NLP Request Intent Classification**: Automatically classifies user help descriptions into service domains (`Web Dev`, `Plumbing`, `Electrician`, `Finance`, `Medical`, `Teaching`, `Cooking`, etc.).
+- **ML Helper Ranking**: Pairwise feature engineering (`skill_overlap`, `tfidf_similarity`, `location_match`, `helper_rating`) powered by a trained Logistic Regression ranking model.
+- **Explainable AI Matching**: Feature-derived reasons explaining why each helper was recommended.
+- **Feedback Collection Loop**: Logs interaction outcomes for future model retraining.
+- **Real-Time WebSockets**: Instant updates via Supabase Realtime broadcast.
+- **Admin ML Dashboard**: Full model evaluation metrics inspection at `/admin/ml` and `/admin/ml/models`.
 
 ---
 
-## Getting Started
+## 🏗️ System Architecture
 
-### 1. Prerequisite Installations
+```
+                 USER
+                  |
+                  v
+          NEXT.JS WEBSITE
+                  |
+                  v
+           HELP REQUEST
+                  |
+                  v
+          NEXT.JS API
+                  |
+                  v
+         PYTHON FASTAPI / HTTP (Port 8000)
+                  |
+      +-----------+-----------+
+      |                       |
+      v                       v
+REQUEST CLASSIFIER       HELPER MATCHING
+|                       |
+v                       v
+Category/Intent        ML Ranking Score
+|                       |
++-----------+-----------+
+|
+v
+TOP-K HELPERS
+|
+v
+EXPLANATION
+|
+v
+HELPNET DATABASE
+|
+v
+USER FEEDBACK
+|
+v
+FUTURE MODEL TRAINING
+```
 
-Ensure you have [Node.js](https://nodejs.org) and `npm` installed.
+---
 
+## 📊 Dataset & Benchmark Provenance
+
+1. **CLINC150 Benchmark Corpus** (`https://github.com/clinc/oos-eval`):
+   - Used for training and evaluating the NLP intent classification model.
+   - 22,500 utterances across 150 intents mapped systematically to HelpNet categories.
+   - 15,000 Train / 3,000 Val / 4,500 Test samples.
+2. **HelpNet Interaction Schema**:
+   - Pairwise interaction features evaluated against actual helper acceptance outcomes.
+
+---
+
+## 🛠️ Technology Stack
+
+- **Frontend**: Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS, Lucide Icons.
+- **Existing Backend**: Next.js API Routes, MongoDB Atlas, Mongoose, NextAuth.js v5.
+- **Realtime**: Supabase Realtime WebSockets.
+- **ML Microservice**: Python 3, Pure Python ML Algorithms / FastAPI HTTP Server, Pytest.
+
+---
+
+## 🚀 Quick Start & Running Locally
+
+### 1. Install Dependencies
 ```bash
+# Node.js dependencies
 npm install
+
+# Python ML environment tests
+pytest ml_service/tests
 ```
 
-### 2. Environment Configurations
-
-Create a `.env.local` file in the root of your project and configure the keys based on `.env.example`:
-
-```env
-# MongoDB Connection URI (Atlas cluster)
-MONGODB_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/helpnet
-
-# NextAuth Configurations
-# Generate a secret: `openssl rand -base64 32`
-NEXTAUTH_SECRET=your_32_character_secret_key
-NEXTAUTH_URL=http://localhost:3000
-
-# Supabase Configurations (Realtime WebSockets)
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_public_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-
-# Cloudinary (Unsigned Preset Uploader)
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloudinary_name
-CLOUDINARY_UPLOAD_PRESET=helpnet_avatars
-
-# Cron Sweeper Secret
-CRON_SECRET=your_cron_endpoint_secret
+### 2. Train Models & Generate Artifacts
+```bash
+python ml_service/train_and_eval.py
 ```
 
-### 3. Setting Up Supabase Realtime Broadcast
+### 3. Start Python ML Service (Port 8000)
+```bash
+python ml_service/server.py
+```
 
-HelpNet uses Supabase Realtime Broadcast channels. No database tables are required in Supabase.
-1. Create a free project at [Supabase](https://supabase.com).
-2. Go to **Project Settings &gt; API** to copy the URL, Anon key, and Service Role key.
-3. Verify that Realtime is enabled in your Supabase dashboard settings.
-
-### 4. Setting Up Cloudinary Unsigned Uploads
-
-1. Create a free account at [Cloudinary](https://cloudinary.com).
-2. Go to **Settings &gt; Upload** and scroll down to **Upload presets**.
-3. Create a new upload preset:
-   - Name it exactly: `helpnet_avatars` (as configured in `.env.local`).
-   - Set the Mode to **Unsigned**.
-   - Set the Folder name or upload format settings as desired.
-   - Save the configuration.
-
----
-
-## Running Locally
-
-To run the development server:
-
+### 4. Start Next.js Application (Port 3000)
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your web browser.
+Open [http://localhost:3000](http://localhost:3000) to view the application and [http://localhost:3000/admin/ml](http://localhost:3000/admin/ml) for the ML Admin Dashboard.
 
 ---
 
-## Request Expiration Cron Job
-
-Pending requests expire automatically after 24 hours. The sweep cron job is configured at `/api/cron/expire-requests` and is protected with an `Authorization: Bearer <CRON_SECRET>` header.
-
-To trigger the sweep manually, send a GET request:
+## 🧪 Testing
 
 ```bash
-curl -X GET http://localhost:3000/api/cron/expire-requests \
-  -H "Authorization: Bearer your_cron_endpoint_secret"
+# Run Python unit tests
+pytest ml_service/tests
 ```
-
-When deploying to Vercel, the cron schedule will automatically run hourly as defined in `vercel.json`.
 
 ---
 
-## Code Quality Check (Production build)
+## 📂 Documentation
 
-Verify the build process compiled correctly:
-
-```bash
-npm run build
-```
+Detailed technical documentation is available in `docs/`:
+- [`docs/ML_ARCHITECTURE.md`](file:///f:/helpnet/docs/ML_ARCHITECTURE.md)
+- [`docs/DATASET.md`](file:///f:/helpnet/docs/DATASET.md)
+- [`docs/MODEL_TRAINING.md`](file:///f:/helpnet/docs/MODEL_TRAINING.md)
+- [`docs/MODEL_EVALUATION.md`](file:///f:/helpnet/docs/MODEL_EVALUATION.md)
+- [`docs/API.md`](file:///f:/helpnet/docs/API.md)

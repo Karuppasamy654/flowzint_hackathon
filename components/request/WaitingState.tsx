@@ -335,7 +335,7 @@ export function WaitingState({ requestId, onCancel }: WaitingStateProps) {
                     <div className="flex flex-col items-start md:items-end gap-1 w-full md:w-auto shrink-0 bg-indigo-500/5 border border-indigo-500/10 p-3 rounded-lg md:text-right">
                       <div className="flex items-center gap-1 text-xs font-bold text-indigo-300 uppercase tracking-wide">
                         <Sparkles className="h-3.5 w-3.5 fill-indigo-300/35" />
-                        <span>AI Match: {candidate.score || 9}/10</span>
+                        <span>AI Match: {candidate.score ? `${candidate.score}%` : '90%'}</span>
                       </div>
                       {candidate.reason && (
                         <p className="text-[11px] text-slate-300 italic max-w-xs leading-normal mt-0.5 font-medium">

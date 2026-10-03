@@ -11,7 +11,7 @@ import { Avatar } from '../ui/avatar';
 import { TopBar } from './TopBar';
 import { TabBar } from './TabBar';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
-import { HelpCircle, MessageSquare, Bell, User, LogOut, BarChart3 } from 'lucide-react';
+import { HelpCircle, MessageSquare, Bell, User, LogOut, BarChart3, Brain } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AppShellProps {
@@ -78,6 +78,13 @@ export function AppShell({ user, children }: AppShellProps) {
       href: '/insights',
       icon: BarChart3,
       active: pathname.startsWith('/insights'),
+      badge: 0,
+    },
+    {
+      label: 'ML Admin',
+      href: '/admin/ml',
+      icon: Brain,
+      active: pathname.startsWith('/admin/ml'),
       badge: 0,
     },
     {

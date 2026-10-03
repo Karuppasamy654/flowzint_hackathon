@@ -9,6 +9,7 @@ import { z } from "zod";
 import { SKILL_CATEGORIES } from "@/lib/matching";
 import { broadcastRealtimeEvent } from "@/lib/supabase";
 import { geminiFlash, callGeminiWithTimeout } from "@/lib/gemini";
+import { rankHelpersWithML } from "@/lib/mlClient";
 export const dynamic = "force-dynamic";
 const CreateRequestSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -140,84 +141,43 @@ Do NOT flag:
       $or: [{ skills: category }, { bio: { $exists: true, $ne: "" } }],
     });
 
-    // --- STEP 3: Gemini Matching & Ranking ---
-    let matchedHelpersData: { userId: any; score: number; reason: string }[] =
-      [];
-    if (helpers.length === 0) {
-      // No candidates
-      matchedHelpersData = [];
-    } else if (helpers.length <= 5) {
-      // Use all 5 or fewer candidates directly
-      matchedHelpersData = helpers.map((h: any) => ({
-        userId: h._id,
-        score: 10,
-        reason: `Matches category skill: ${category}`,
+    // --- STEP 3: Real ML Helper Ranking via FastAPI ---
+    let matchedHelpersData: { userId: any; score: number; reason: string }[] = [];
+
+    if (helpers.length > 0) {
+      const helperCandidates = helpers.map((h: any) => ({
+        id: h._id.toString(),
+        skills: h.skills || [],
+        bio: h.bio || "",
+        location: h.location || "",
+        rating: h.avgRating || 0,
       }));
-    } else {
-      try {
-        const rankingPrompt = `You are matching a help request to the most suitable helpers.
 
-Help request:
-Title: "${aiTitle || title}"
-Description: "${description}"
-Category: "${category}"
-Keywords: ${(keywords || []).join(", ")}
+      const mlMatchResult = await rankHelpersWithML(
+        { title: aiTitle || title, description, category, location, urgency },
+        helperCandidates
+      );
 
-Helpers:
-${JSON.stringify(
-  helpers.map((h: any) => ({
-    id: h._id.toString(),
-    skills: h.skills,
-    bio: h.bio || "",
-    location: h.location,
-    rating: h.avgRating || 0,
-  })),
-)}
-
-Return ONLY a JSON array of objects sorted best to worst match:
-[{ "id": "helperId", "score": 8, "reason": "One sentence why they match" }]
-
-Only include genuinely relevant helpers. Raw JSON array only, no markdown.`;
-
-        const response = await callGeminiWithTimeout(
-          geminiFlash.generateContent(rankingPrompt),
-        );
-        const text = response.response.text();
-        let cleaned = text.trim();
-        if (cleaned.startsWith("```")) {
-          cleaned = cleaned.replace(/^```[a-zA-Z]*\n/, "");
-          cleaned = cleaned.replace(/\n```$/, "");
-        }
-        cleaned = cleaned.trim();
-
-        const ranked: { id: string; score: number; reason: string }[] =
-          JSON.parse(cleaned);
-
-        matchedHelpersData = ranked
-          .map((r: any) => {
-            const helperDoc = helpers.find(
-              (h: any) => h._id.toString() === r.id,
-            );
+      if (mlMatchResult && mlMatchResult.results && mlMatchResult.results.length > 0) {
+        matchedHelpersData = mlMatchResult.results
+          .map((r) => {
+            const helperDoc = helpers.find((h: any) => h._id.toString() === r.helper_id);
             if (!helperDoc) return null;
             return {
               userId: helperDoc._id,
-              score: Number(r.score),
-              reason: r.reason,
+              score: Math.round(r.score * 100), // Percentile score
+              reason: r.reasons.join(". ") || `Matched category skill: ${category}`,
             };
           })
           .filter(Boolean) as any[];
-      } catch (geminiError) {
-        console.error(
-          "Gemini helper ranking failed, using skills fallback:",
-          geminiError,
-        );
-        // Fallback: skill-tag matching only, no scores
+      } else {
+        // Fallback: skill-tag baseline
         matchedHelpersData = helpers
-          .filter((h: any) => h.skills.includes(category))
+          .filter((h: any) => (h.skills || []).includes(category))
           .map((h: any) => ({
             userId: h._id,
-            score: 7,
-            reason: `Helper is skilled in ${category}.`,
+            score: 70,
+            reason: `Baseline skill match in ${category}`,
           }));
       }
     }
