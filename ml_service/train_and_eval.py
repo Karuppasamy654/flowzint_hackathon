@@ -234,11 +234,21 @@ def train_and_evaluate_all():
     with open(os.path.join(MODELS_DIR, "category_vectorizer.json"), "w") as f:
         json.dump(vec_data, f, indent=2)
 
-    cat_data = {
-        "selected_model": selected_name,
-        "classes": centroid_clf.classes_,
-        "class_centroids": centroid_clf.class_centroids
-    }
+    if val_acc_nb > val_acc_c:
+        cat_data = {
+            "selected_model": selected_name,
+            "model_type": "multinomial_naive_bayes",
+            "classes": nb_clf.classes_,
+            "class_priors": nb_clf.class_priors,
+            "feature_log_probs": {c: {str(k): v for k, v in feats.items()} for c, feats in nb_clf.feature_log_probs.items()}
+        }
+    else:
+        cat_data = {
+            "selected_model": selected_name,
+            "model_type": "softmax_centroid",
+            "classes": centroid_clf.classes_,
+            "class_centroids": {c: {str(k): v for k, v in cent.items()} for c, cent in centroid_clf.class_centroids.items()}
+        }
     with open(os.path.join(MODELS_DIR, "category_model.json"), "w") as f:
         json.dump(cat_data, f, indent=2)
 

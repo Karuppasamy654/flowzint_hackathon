@@ -166,7 +166,7 @@ class PureNaiveBayesClassifier:
                 count = class_word_counts[c].get(idx, 0.0)
                 self.feature_log_probs[c][idx] = math.log((count + 1.0) / denom)
 
-    def predict(self, raw_document: str) -> tuple:
+    def predict_proba(self, raw_document: str) -> dict:
         vec = self.vectorizer.transform_doc(raw_document)
         log_scores = {}
         for c in self.classes_:
@@ -175,8 +175,17 @@ class PureNaiveBayesClassifier:
                 score += val * self.feature_log_probs[c].get(idx, -10.0)
             log_scores[c] = score
 
-        best_cat = max(log_scores.items(), key=lambda x: x[1])
-        return best_cat[0], round(math.exp(max(-10, min(0, best_cat[1]))), 4)
+        max_log = max(log_scores.values()) if log_scores else 0.0
+        exp_scores = {c: math.exp(score - max_log) for c, score in log_scores.items()}
+        total_exp = sum(exp_scores.values())
+        if total_exp == 0:
+            return {c: round(1.0 / len(self.classes_), 4) for c in self.classes_}
+        return {c: round(val / total_exp, 4) for c, val in exp_scores.items()}
+
+    def predict(self, raw_document: str) -> tuple:
+        probas = self.predict_proba(raw_document)
+        best_cat = max(probas.items(), key=lambda x: x[1])
+        return best_cat[0], best_cat[1]
 
 # ----------------------------------------------------
 # 4. Pair Feature Extraction
