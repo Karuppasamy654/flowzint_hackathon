@@ -11,7 +11,12 @@
   - Validation: 3,000 samples
   - Test: 4,500 samples (Untouched during vectorizer fitting and model selection)
 - **Mapping File**: `ml_service/datasets/clinc150_mapping.json`
-- **Mapping Methodology**: All 150 CLINC150 intents are mapped deterministically to 7 active HelpNet domain service categories (`Cooking`, `Finance`, `Language Translation`, `Music`, `Teaching`, `Web Dev`, and `Other` for remaining general intents). No categories or samples were silently discarded.
+- **Mapping Methodology & Audit Findings**:
+  - The CLINC150 dataset contains exactly 150 unique in-domain intents (30 test examples each = 4,500 test samples).
+  - `clinc150_mapping.json` lists 63 intent entries. Forensic audit revealed that **17 of these entries** (e.g. `medical_advice`, `symptoms`, `mood`, `wellness`) do not exist in the official CLINC150 corpus, resulting in zero samples for `Medical` and `Mental Health`.
+  - **46 entries** validly match official CLINC150 intents across 7 categories: `Other` (15 intents), `Finance` (12 intents), `Web Dev` (8 intents), `Cooking` (6 intents), `Language Translation` (2 intents), `Teaching` (2 intents), and `Music` (1 intent).
+  - The remaining **104 CLINC150 intents** are unlisted in `clinc150_mapping.json` and default to `"Other"` via `INTENT_TO_HELPNET_CATEGORY.get(intent, "Other")`.
+  - Consequently, the test split contains $450 + 3,120 = \mathbf{3,570}$ samples in `Other` (79.33%), while the 6 specific domains contain 930 samples (20.67%).
 - **Zero-Leakage Assurance**: The TF-IDF vectorizer and both candidate classifiers are fitted exclusively on the training split. Model selection is performed exclusively on the validation split. The 4,500-sample test set remains untouched until final evaluation.
 
 ---

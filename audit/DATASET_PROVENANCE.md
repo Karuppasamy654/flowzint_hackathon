@@ -35,7 +35,28 @@ Exact Match Status:     TRUE (100% Byte-for-byte exact match)
 - **In-Domain Training**: 15,000 samples (100 per intent × 150 intents)
 - **In-Domain Validation**: 3,000 samples (20 per intent × 150 intents)
 - **In-Domain Testing**: 4,500 samples (30 per intent × 150 intents)
-- **Out-of-Scope (OOS)**: 100 train / 100 val / 1,000 test
+- **Out-of-Scope (OOS)**: 100 train / 100 val / 1,000 test.
+  *Audit Note*: OOS samples (`data['oos_test']`) are **NOT** merged into the in-domain test split. The 4,500 test samples are strictly the in-domain split of CLINC150.
+
+### Forensic Intent Mapping Analysis (`clinc150_mapping.json`)
+- **Total entries in file**: 63 intents
+- **Valid intents matching official CLINC150 corpus**: **46 intents**
+- **Non-existent / hallucinated entries in mapping file**: **17 intents** (`medical_advice`, `health_warning`, `symptoms`, `wellness`, `worry`, `mood`, `ping_device`, `wifi`, `spend_history`, `ingredients`, `song`, `audiobook`, `music`, `artist`, `math`, `dictionary`, `oil_change`).
+  - *Impact*: Because `medical_advice`, `symptoms`, `mood`, etc. do not exist in CLINC150, zero samples were mapped to `Medical` or `Mental Health`. These two categories never materialized in the training or evaluation data.
+- **Valid Category Intent Allocations**:
+  - `Other`: 15 intents ($15 \times 30 = \mathbf{450}$ test samples)
+  - `Finance`: 12 intents ($12 \times 30 = \mathbf{360}$ test samples)
+  - `Web Dev`: 8 intents ($8 \times 30 = \mathbf{240}$ test samples)
+  - `Cooking`: 6 intents ($6 \times 30 = \mathbf{180}$ test samples)
+  - `Language Translation`: 2 intents ($2 \times 30 = \mathbf{60}$ test samples)
+  - `Teaching`: 2 intents ($2 \times 30 = \mathbf{60}$ test samples)
+  - `Music`: 1 intent (`play_music`) ($1 \times 30 = \mathbf{30}$ test samples)
+- **Unmapped Intents Fallback**:
+  - $150 - 46 = \mathbf{104}$ official CLINC150 intents are not present in the mapping dictionary.
+  - In `ml_service/datasets/loader.py`, `INTENT_TO_HELPNET_CATEGORY.get(intent, "Other")` defaults all unmapped intents to `"Other"`.
+  - $104 \text{ intents} \times 30 \text{ samples} = \mathbf{3,120}$ test samples assigned to `"Other"`.
+- **Total Test Samples in Other**:
+  $$\mathbf{450} \text{ (from mapped intents)} + \mathbf{3,120} \text{ (from unmapped intents)} = \mathbf{3,570} \text{ samples (79.33\%)}$$
 
 ### Category Distribution Under HelpNet Domain Mapping
 
