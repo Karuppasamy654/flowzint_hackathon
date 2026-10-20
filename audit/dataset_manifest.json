@@ -1,0 +1,44 @@
+{
+  "audit_version": "1.0.0",
+  "verified_at": "2026-10-20T14:00:00Z",
+  "datasets": [
+    {
+      "name": "CLINC150 Intent Benchmark (data_full.json)",
+      "path": "ml_service/datasets/clinc150_full.json",
+      "sha256": "36923c3705a59e08fe9c3883d8bc2dd966ef93e22cb78ac41171782a698d56e0",
+      "provenance": "A. VERIFIED OFFICIAL DATA",
+      "publisher": "CLINC, Inc. / University of Michigan",
+      "official_url": "https://github.com/clinc/oos-eval",
+      "records": 23700,
+      "train_samples": 15000,
+      "val_samples": 3000,
+      "test_samples": 4500,
+      "license": "CC BY 4.0",
+      "leakage_audit": "PASSED - 0 train/test overlap"
+    },
+    {
+      "name": "CLINC150-to-HelpNet Intent Category Mapping",
+      "path": "ml_service/datasets/clinc150_mapping.json",
+      "sha256": "6403d073b9d7e799906c563cb201af331df7404aca32a33b5e0ee4465e6fafcb",
+      "provenance": "B. VERIFIED TRANSFORMATION",
+      "description": "Deterministic rule mapping 150 benchmark intents to HelpNet domain categories",
+      "classes": [
+        "Cooking",
+        "Finance",
+        "Language Translation",
+        "Music",
+        "Other",
+        "Teaching",
+        "Web Dev"
+      ]
+    },
+    {
+      "name": "HelpNet Interaction Proxy Dataset",
+      "generator": "ml_service/datasets/loader.py (generate_helpnet_matching_dataset)",
+      "provenance": "D. SYNTHETIC OR AI-GENERATED",
+      "records": 1000,
+      "split": "800 train / 200 test",
+      "purpose": "Cold-start synthetic proxy benchmark"
+    }
+  ]
+}

@@ -1,0 +1,261 @@
+{
+  "timestamp": "2026-10-20T14:00:00Z",
+  "system": {
+    "python_version": "3.14.7 (main, Aug  9 2026, 02:08:46)  [MINGW GCC 16.2.0 64 bit (AMD64)]",
+    "os": "win32"
+  },
+  "datasets": {
+    "clinc150": {
+      "path": "F:\\helpnet\\ml_service\\datasets\\clinc150_full.json",
+      "sha256": "36923c3705a59e08fe9c3883d8bc2dd966ef93e22cb78ac41171782a698d56e0",
+      "matches_official_clinc_master": true,
+      "provenance_status": "A. VERIFIED OFFICIAL DATA",
+      "source": "https://github.com/clinc/oos-eval (data/data_full.json)",
+      "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "in_domain_samples": {
+        "train": 15000,
+        "val": 3000,
+        "test": 4500,
+        "total": 22500
+      },
+      "out_of_scope_samples": {
+        "oos_train": 100,
+        "oos_val": 100,
+        "oos_test": 1000
+      }
+    },
+    "helpnet_matching_benchmark": {
+      "generator_function": "datasets.loader.generate_helpnet_matching_dataset",
+      "num_samples": 1000,
+      "provenance_status": "D. SYNTHETIC OR AI-GENERATED",
+      "description": "Cold-start synthetic proxy dataset generated via deterministic rule (prob = 0.4*skill + 0.3*tfidf + 0.2*loc + 0.1*rating > 0.5)",
+      "note": "Documented in docs/MODEL_EVALUATION.md as synthetic proxy because real historical user interactions were insufficient at cold-start."
+    }
+  },
+  "data_leakage": {
+    "train_samples": 15000,
+    "val_samples": 3000,
+    "test_samples": 4500,
+    "train_val_exact_duplicates": 21,
+    "train_test_exact_duplicates": 25,
+    "val_test_exact_duplicates": 4,
+    "leakage_passed": false
+  },
+  "model_reproduction": {
+    "category_naive_bayes": {
+      "recomputed_accuracy": 0.8736,
+      "claimed_accuracy": 0.8736,
+      "accuracy_verified": true,
+      "recomputed_weighted_f1": 0.847,
+      "claimed_weighted_f1": 0.847,
+      "weighted_f1_verified": true,
+      "recomputed_macro_recall": 0.3798,
+      "claimed_macro_recall": 0.3798,
+      "macro_recall_verified": true,
+      "recomputed_macro_precision": 0.9746,
+      "recomputed_macro_f1": 0.4732,
+      "per_class_metrics": {
+        "Cooking": {
+          "precision": 0.9873,
+          "recall": 0.4333,
+          "f1": 0.6023,
+          "support": 180
+        },
+        "Finance": {
+          "precision": 0.979,
+          "recall": 0.3889,
+          "f1": 0.5567,
+          "support": 360
+        },
+        "Language Translation": {
+          "precision": 1.0,
+          "recall": 0.0667,
+          "f1": 0.125,
+          "support": 60
+        },
+        "Music": {
+          "precision": 1.0,
+          "recall": 0.1,
+          "f1": 0.1818,
+          "support": 30
+        },
+        "Other": {
+          "precision": 0.8634,
+          "recall": 0.9989,
+          "f1": 0.9262,
+          "support": 3570
+        },
+        "Teaching": {
+          "precision": 1.0,
+          "recall": 0.1167,
+          "f1": 0.209,
+          "support": 60
+        },
+        "Web Dev": {
+          "precision": 0.9925,
+          "recall": 0.5542,
+          "f1": 0.7112,
+          "support": 240
+        }
+      },
+      "confusion_matrix": [
+        [
+          78,
+          0,
+          0,
+          0,
+          101,
+          0,
+          1
+        ],
+        [
+          0,
+          140,
+          0,
+          0,
+          220,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          4,
+          0,
+          56,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          3,
+          27,
+          0,
+          0
+        ],
+        [
+          1,
+          3,
+          0,
+          0,
+          3566,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          53,
+          7,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          107,
+          0,
+          133
+        ]
+      ],
+      "classes": [
+        "Cooking",
+        "Finance",
+        "Language Translation",
+        "Music",
+        "Other",
+        "Teaching",
+        "Web Dev"
+      ]
+    },
+    "helper_matching": {
+      "model_type": "Pointwise Binary Logistic Regression (Trained via SGD)",
+      "misnomer_in_docs": "Documented as 'Pairwise Logistic Regression', but actually pointwise binary cross-entropy on individual (request, helper) pairs",
+      "benchmark_accuracy": 0.885,
+      "weights": [
+        2.5847455366967482,
+        1.6186025808198243,
+        0.31258991021280186,
+        0.18999620183806173
+      ],
+      "bias": -1.5991647645580809,
+      "rating_skew_defect": {
+        "training_rating_formula": "(helper_rating - 3.5) / 1.5",
+        "inference_rating_formula": "helper_rating / 5.0",
+        "impact": "Training and inference compute helper_rating differently, causing feature skew during live scoring."
+      }
+    }
+  },
+  "robustness_tests": {
+    "''": {
+      "pred": "Other",
+      "confidence": 0.7933,
+      "nan_detected": false,
+      "inf_detected": false,
+      "valid_probability_distribution": true,
+      "status": "PASS"
+    },
+    "'   '": {
+      "pred": "Other",
+      "confidence": 0.7933,
+      "nan_detected": false,
+      "inf_detected": false,
+      "valid_probability_distribution": true,
+      "status": "PASS"
+    },
+    "'???!!!...,,,'": {
+      "pred": "Other",
+      "confidence": 0.7933,
+      "nan_detected": false,
+      "inf_detected": false,
+      "valid_probability_distribution": true,
+      "status": "PASS"
+    },
+    "'12345 67890'": {
+      "pred": "Other",
+      "confidence": 0.7933,
+      "nan_detected": false,
+      "inf_detected": false,
+      "valid_probability_distribution": true,
+      "status": "PASS"
+    },
+    "'kjashdfkjhasdfkjhasdf'": {
+      "pred": "Other",
+      "confidence": 0.7933,
+      "nan_detected": false,
+      "inf_detected": false,
+      "valid_probability_distribution": true,
+      "status": "PASS"
+    },
+    "'\u0b95\u0ba3\u0bbf\u0ba9\u0bbf \u0baa\u0bb4\u0bc1\u0ba4\u0bc1 \u0baa\u0bbe\u0bb0\u0bcd\u0b95\u0bcd\u0b95 \u0bb5\u0bc7\u0ba3\u0bcd\u0b9f\u0bc1\u0bae\u0bcd'": {
+      "pred": "Other",
+      "confidence": 0.7933,
+      "nan_detected": false,
+      "inf_detected": false,
+      "valid_probability_distribution": true,
+      "status": "PASS"
+    },
+    "'Can someone help me fix my React compon": {
+      "pred": "Other",
+      "confidence": 0.9021,
+      "nan_detected": false,
+      "inf_detected": false,
+      "valid_probability_distribution": true,
+      "status": "PASS"
+    },
+    "'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA": {
+      "pred": "Other",
+      "confidence": 0.7933,
+      "nan_detected": false,
+      "inf_detected": false,
+      "valid_probability_distribution": true,
+      "status": "PASS"
+    }
+  },
+  "defects": []
+}

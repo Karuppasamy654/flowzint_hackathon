@@ -158,7 +158,7 @@ def train_and_evaluate_all():
             float(row["skill_overlap"]),
             float(row["tfidf_similarity"]),
             float(row["location_match"]),
-            float((row["helper_rating"] - 3.5) / 1.5)
+            float(row["helper_rating"] / 5.0)
         ]
         X_feats.append(feat)
         y_labels.append(int(row["accepted"]))

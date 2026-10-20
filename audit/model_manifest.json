@@ -1,0 +1,75 @@
+{
+  "audit_version": "1.0.0",
+  "verified_at": "2026-10-20T14:00:00Z",
+  "models": [
+    {
+      "name": "Sublinear N-Gram TF-IDF Vectorizer",
+      "class": "ml.pure_ml.PureTfidfVectorizer",
+      "artifact": "ml_service/models/category_vectorizer.json",
+      "sha256": "6eeb691b842ca6783c45a3ce2f0240c446e3377bf7cde47f7cc25613b5b55fe0",
+      "status": "VERIFIED WORKING",
+      "vocabulary_size": 12112,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "sublinear_tf": true
+    },
+    {
+      "name": "Multinomial Naive Bayes Intent Classifier",
+      "class": "ml.pure_ml.PureNaiveBayesClassifier",
+      "artifact": "ml_service/models/category_model.json",
+      "sha256": "47602ba194a2c6b35d173efae9343fa1d85578c4de5d261f8a609b3cda6177b4",
+      "status": "VERIFIED WORKING",
+      "test_accuracy": 0.8736,
+      "weighted_f1": 0.847,
+      "macro_recall": 0.3798,
+      "selection": "Selected on validation set (87.20% vs Centroid 76.30%)"
+    },
+    {
+      "name": "Softmax Centroid Intent Classifier",
+      "class": "ml.pure_ml.PureCategoryClassifier",
+      "status": "VERIFIED WORKING",
+      "validation_accuracy": 0.763,
+      "role": "Candidate model evaluated during model selection (not selected for production)"
+    },
+    {
+      "name": "Pointwise Logistic Regression Helper Ranker",
+      "class": "ml.pure_ml.PureMatchingModel",
+      "artifact": "ml_service/models/matching_model.json",
+      "sha256": "87b7d03af0b88ba1e31ab5b686d8839bcb320359094a085eff87a3af2159fe30",
+      "status": "WORKING WITH ISSUES",
+      "issues": [
+        "Pointwise binary classification misnamed as 'Pairwise'",
+        "Trained on synthetic proxy dataset",
+        "Rating normalization skew: training used (rating-3.5)/1.5, inference used rating/5.0"
+      ],
+      "weights": [
+        2.5847455366967482,
+        1.6186025808198243,
+        0.31258991021280186,
+        0.18999620183806173
+      ],
+      "bias": -1.5991647645580809
+    },
+    {
+      "name": "Heuristic Rule-Based Helper Matcher",
+      "class": "ml.pure_ml.PureBaselineMatcher",
+      "status": "VERIFIED WORKING",
+      "formula": "0.4*skill + 0.3*tfidf + 0.2*loc + 0.1*rating",
+      "role": "Baseline benchmark comparator"
+    },
+    {
+      "name": "Explainable AI Match Reason Generator",
+      "function": "ml.pure_ml.generate_match_reasons",
+      "status": "VERIFIED WORKING",
+      "role": "Feature-derived deterministic human-readable explanations"
+    },
+    {
+      "name": "Google Gemini 1.5 Flash Foundation LLM",
+      "integration": "lib/gemini.ts, app/api/ai/*",
+      "status": "VERIFIED WORKING",
+      "role": "Generative translation, request enhancement, safety moderation"
+    }
+  ]
+}

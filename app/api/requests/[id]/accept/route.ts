@@ -7,6 +7,7 @@ import Notification from '@/models/Notification';
 import User from '@/models/User';
 import { auth } from '@/lib/auth';
 import { broadcastRealtimeEvent } from '@/lib/supabase';
+import { recordMLFeedback } from '@/lib/mlClient';
 
 export async function POST(
   req: NextRequest,
@@ -61,6 +62,18 @@ export async function POST(
         { status: 409 }
       );
     }
+
+    // Record ML feedback for model refinement loop
+    const matchedHelperEntry = updated.matchedHelpers?.find(
+      (mh: any) => (mh.userId || mh).toString() === helperId
+    );
+    const predictedScore = matchedHelperEntry ? Number(matchedHelperEntry.score) : 70;
+    recordMLFeedback({
+      request_id: requestId,
+      helper_id: helperId,
+      predicted_score: predictedScore,
+      accepted: true,
+    }).catch(() => {});
 
     // Create Chat document
     const chat = await Chat.create({

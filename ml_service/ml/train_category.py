@@ -1,8 +1,11 @@
 import os
+import sys
 import json
 import joblib
 import pandas as pd
 import numpy as np
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -20,8 +23,13 @@ os.makedirs(MODELS_DIR, exist_ok=True)
 os.makedirs(REPORTS_DIR, exist_ok=True)
 
 def train_and_evaluate_category_models():
-    print("--- Phase 4: Training & Evaluating Request Category Classifier ---")
-    df = load_or_download_clinc150()
+    """
+    Experimental scikit-learn baseline training script.
+    (Production uses train_and_eval.py with pure_ml.py zero-dependency engine).
+    """
+    print("--- Phase 4: Training & Evaluating Request Category Classifier (Scikit-Learn Baseline) ---")
+    raw_dataset = load_or_download_clinc150()
+    df = pd.DataFrame(raw_dataset.rows)
     
     # Preprocess text
     df["clean_text"] = df["text"].apply(clean_text)

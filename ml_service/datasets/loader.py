@@ -117,7 +117,7 @@ def generate_helpnet_matching_dataset(num_samples=1000):
         loc_match = 1.0 if req_loc == helper_loc else 0.2
         helper_rating = round(random.uniform(3.5, 5.0), 1)
         
-        prob = 0.4 * skill_overlap + 0.3 * tfidf_sim + 0.2 * loc_match + 0.1 * ((helper_rating - 3.5) / 1.5)
+        prob = 0.4 * skill_overlap + 0.3 * tfidf_sim + 0.2 * loc_match + 0.1 * (helper_rating / 5.0)
         accepted = 1 if prob > 0.5 else 0
 
         rows.append({

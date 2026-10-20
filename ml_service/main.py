@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from ml.pure_ml import (
-    PureTfidfVectorizer, PureCategoryClassifier, PureMatchingModel,
+    PureTfidfVectorizer, PureCategoryClassifier, PureNaiveBayesClassifier, PureMatchingModel,
     PureBaselineMatcher, compute_pair_features, generate_match_reasons, clean_text
 )
 
@@ -62,11 +62,24 @@ def load_models_on_startup():
         if os.path.exists(cat_path):
             with open(cat_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                category_classifier.classes_ = data["classes"]
-                category_classifier.class_centroids = {
-                    c: {int(k): float(v) for k, v in cent.items()}
-                    for c, cent in data["class_centroids"].items()
-                }
+                mtype = data.get("model_type", "")
+                if mtype == "multinomial_naive_bayes" or "class_priors" in data:
+                    nb_instance = PureNaiveBayesClassifier(vectorizer)
+                    nb_instance.classes_ = data["classes"]
+                    nb_instance.class_priors = {c: float(v) for c, v in data["class_priors"].items()}
+                    nb_instance.feature_log_probs = {
+                        c: {int(k): float(v) for k, v in feats.items()}
+                        for c, feats in data["feature_log_probs"].items()
+                    }
+                    category_classifier = nb_instance
+                else:
+                    cat_instance = PureCategoryClassifier(vectorizer)
+                    cat_instance.classes_ = data["classes"]
+                    cat_instance.class_centroids = {
+                        c: {int(k): float(v) for k, v in cent.items()}
+                        for c, cent in data["class_centroids"].items()
+                    }
+                    category_classifier = cat_instance
 
         # Load Matching Model
         match_path = os.path.join(MODELS_DIR, "matching_model.json")
@@ -92,7 +105,7 @@ def load_models_on_startup():
             with open(mreport_path, "r", encoding="utf-8") as f:
                 matching_report = json.load(f)
 
-        print("✅ Models, Metadata, and Reports loaded successfully into FastAPI service.")
+        print("[OK] Models, Metadata, and Reports loaded successfully into FastAPI service.")
     except Exception as e:
         print(f"Error loading models on startup: {e}")
 
