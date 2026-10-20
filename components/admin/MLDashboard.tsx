@@ -18,8 +18,8 @@ export function MLDashboard() {
     setError(null);
     try {
       const [metricsRes, healthRes] = await Promise.all([
-        fetch('http://localhost:8000/metrics'),
-        fetch('http://localhost:8000/health')
+        fetch('/api/ml/metrics'),
+        fetch('/api/ml/health')
       ]);
 
       if (metricsRes.ok && healthRes.ok) {
@@ -28,10 +28,10 @@ export function MLDashboard() {
         setMetrics(mData);
         setHealth(hData);
       } else {
-        setError('FastAPI ML Service returned non-200 status.');
+        setError('ML Service endpoint returned non-200 status.');
       }
     } catch (err) {
-      setError('AI ML Service is currently offline at http://localhost:8000');
+      setError('Unable to load ML service metrics.');
     } finally {
       setLoading(false);
     }
@@ -95,13 +95,15 @@ export function MLDashboard() {
         <div className="bg-[#131B2E]/60 border border-white/10 rounded-xl p-4 backdrop-blur-md">
           <div className="flex items-center gap-2 mb-2">
             <Server className="w-4 h-4 text-emerald-400" />
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">FastAPI Status</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">ML Engine Status</span>
           </div>
           <p className="text-lg font-extrabold text-emerald-400 flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
             {health?.status || 'Online'}
           </p>
-          <p className="text-[11px] text-slate-400 mt-1">HTTP Port 8000</p>
+          <p className="text-[11px] text-slate-400 mt-1">
+            {health?.mode === 'external_microservice' ? 'External Microservice' : 'Integrated / Production'}
+          </p>
         </div>
 
         <div className="bg-[#131B2E]/60 border border-white/10 rounded-xl p-4 backdrop-blur-md">

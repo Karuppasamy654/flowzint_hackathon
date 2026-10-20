@@ -13,7 +13,7 @@ export function ModelInspectionView() {
   React.useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('http://localhost:8000/model/info');
+        const res = await fetch('/api/ml/info');
         if (res.ok) {
           const data = await res.json();
           setModelInfo(data);

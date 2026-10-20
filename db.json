@@ -4,7 +4,13 @@
       "name": "sk",
       "email": "sk@gmail.com",
       "passwordHash": "$2b$12$kpGE7VVqidNlXEf2rM5jzeyJ6rhVdguoBe9SAo7i56paadLb7ECZS",
-      "skills": ["Design", "Web Dev", "Teaching", "Medical", "Mental Health"],
+      "skills": [
+        "Design",
+        "Web Dev",
+        "Teaching",
+        "Medical",
+        "Mental Health"
+      ],
       "location": "chennai",
       "bio": "web developer\n",
       "avatarColor": "#0F766E",
@@ -22,7 +28,11 @@
       "name": "user1",
       "email": "user1@gmail.com",
       "passwordHash": "$2b$12$xgb5Zcf4upVnF8C2pViIN.u7Bw6.EZcED8jdfkw9yBate1ft5co7K",
-      "skills": ["Cooking", "Medical", "Teaching"],
+      "skills": [
+        "Cooking",
+        "Medical",
+        "Teaching"
+      ],
       "location": "madurai",
       "bio": "",
       "avatarColor": "#0F766E",
@@ -40,7 +50,12 @@
       "name": "demo",
       "email": "demo@gmail.com",
       "passwordHash": "$2b$12$wC1K.dNmNH3AOVHjzNXfQe1edOF963dpDWtQuy/vnbjqhBfKNCELS",
-      "skills": ["Web Dev", "Teaching", "Cooking", "Language Translation"],
+      "skills": [
+        "Web Dev",
+        "Teaching",
+        "Cooking",
+        "Language Translation"
+      ],
       "location": "chennai",
       "bio": "",
       "avatarColor": "#1A7F5A",
@@ -58,7 +73,11 @@
       "name": "sample1",
       "email": "sample1@gmail.com",
       "passwordHash": "$2b$12$05ASLBjksz6NbYC0W7hJguLq0K6YkQXYLFsaLQDNu3P4mxAKRztM6",
-      "skills": ["Teaching", "Medical", "Music"],
+      "skills": [
+        "Teaching",
+        "Medical",
+        "Music"
+      ],
       "location": "Madurai, Madurai South, India",
       "bio": "",
       "avatarColor": "#065F46",
@@ -70,6 +89,28 @@
       },
       "createdAt": "2026-06-10T13:37:32.881Z",
       "updatedAt": "2026-06-10T13:37:32.882Z",
+      "avgRating": 0
+    },
+    {
+      "name": "Arun",
+      "email": "arun@gmail.com",
+      "passwordHash": "$2b$12$/qnnBQXTpBDacdVA7J6P.uaaZ7RO9s4ZKqCkdH.8bhSEfZ4KcaDCe",
+      "skills": [
+        "Web Dev",
+        "Design",
+        "Teaching"
+      ],
+      "location": "Hyderabad, Bahadurpura mandal, India",
+      "bio": "",
+      "avatarColor": "#C2410C",
+      "preferredLanguage": "en",
+      "_id": "bd22846728a1629a2d2a3345",
+      "rating": {
+        "total": 0,
+        "count": 0
+      },
+      "createdAt": "2026-10-05T08:37:34.423Z",
+      "updatedAt": "2026-10-05T08:37:34.425Z",
       "avgRating": 0
     }
   ],
@@ -187,6 +228,46 @@
       "_id": "98693f01f0a263c877ad2295",
       "createdAt": "2026-06-09T10:28:21.030Z",
       "updatedAt": "2026-06-09T13:30:13.361Z"
+    },
+    {
+      "seeker": "6ac35c35163bd33ca350cb7c",
+      "title": "web developer",
+      "description": "i need a web developer for building projects i want to submit this project within this week so i need a developer this week ",
+      "category": "Web Dev",
+      "urgency": "flexible",
+      "location": "Hyderabad, Bahadurpura mandal, India",
+      "matchedHelpers": [
+        {
+          "userId": "b2997076522731a58378052e",
+          "score": 77,
+          "reason": "Direct skill match in Web Dev. Excellent community helper rating"
+        },
+        {
+          "userId": "8f1188df6d54232a27d462a4",
+          "score": 74,
+          "reason": "Direct skill match in Web Dev"
+        },
+        {
+          "userId": "7fceeb91c1fa0a09ac546e38",
+          "score": 21,
+          "reason": "Located in or near your neighborhood"
+        },
+        {
+          "userId": "64800d2d99bd7917b521ffe3",
+          "score": 18,
+          "reason": "Available helper in community directory"
+        }
+      ],
+      "status": "active",
+      "aiTitle": "web developer",
+      "originalLanguage": "en",
+      "safetyChecked": true,
+      "safetyCategory": "safe",
+      "_id": "f22e1796e1b82bab0ab67dd0",
+      "createdAt": "2026-10-05T08:33:47.379Z",
+      "updatedAt": "2026-10-05T08:33:47.384Z",
+      "acceptedHelper": "bd22846728a1629a2d2a3345",
+      "acceptedAt": "2026-10-05T08:37:53.053Z"
     }
   ],
   "Chat": [
@@ -200,7 +281,9 @@
           "sender": "b2997076522731a58378052e",
           "text": "hi",
           "createdAt": "2026-06-08T10:33:18.815Z",
-          "readBy": ["b2997076522731a58378052e"],
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
           "originalText": "hi",
           "originalLanguage": "ta",
           "translations": {}
@@ -210,7 +293,9 @@
           "sender": "b2997076522731a58378052e",
           "text": "Understood! I am on it and will coordinate with you as soon as I arrive.",
           "createdAt": "2026-06-08T10:33:22.012Z",
-          "readBy": ["b2997076522731a58378052e"],
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
           "originalText": "Understood! I am on it and will coordinate with you as soon as I arrive.",
           "originalLanguage": "ta",
           "translations": {}
@@ -220,7 +305,9 @@
           "sender": "b2997076522731a58378052e",
           "text": "hi",
           "createdAt": "2026-06-08T10:33:27.918Z",
-          "readBy": ["b2997076522731a58378052e"],
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
           "originalText": "hi",
           "originalLanguage": "ta",
           "translations": {}
@@ -230,7 +317,9 @@
           "sender": "b2997076522731a58378052e",
           "text": "Got your message. I am packing up and should be there in about 5 to 10 minutes.",
           "createdAt": "2026-06-08T10:33:31.146Z",
-          "readBy": ["b2997076522731a58378052e"],
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
           "originalText": "Got your message. I am packing up and should be there in about 5 to 10 minutes.",
           "originalLanguage": "ta",
           "translations": {}
@@ -240,7 +329,9 @@
           "sender": "b2997076522731a58378052e",
           "text": "hello",
           "createdAt": "2026-06-08T10:33:40.347Z",
-          "readBy": ["b2997076522731a58378052e"],
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
           "originalText": "hello",
           "originalLanguage": "ta",
           "translations": {}
@@ -250,7 +341,9 @@
           "sender": "b2997076522731a58378052e",
           "text": "I am heading over to help you now. Let me know if there are any specific entry instructions!",
           "createdAt": "2026-06-08T10:33:43.522Z",
-          "readBy": ["b2997076522731a58378052e"],
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
           "originalText": "I am heading over to help you now. Let me know if there are any specific entry instructions!",
           "originalLanguage": "ta",
           "translations": {}
@@ -260,7 +353,9 @@
           "sender": "b2997076522731a58378052e",
           "text": "ok",
           "createdAt": "2026-06-08T10:34:50.989Z",
-          "readBy": ["b2997076522731a58378052e"],
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
           "originalText": "ok",
           "originalLanguage": "ta",
           "translations": {}
@@ -270,7 +365,9 @@
           "sender": "b2997076522731a58378052e",
           "text": "I am heading over to help you now. Let me know if there are any specific entry instructions!",
           "createdAt": "2026-06-08T10:34:54.234Z",
-          "readBy": ["b2997076522731a58378052e"],
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
           "originalText": "I am heading over to help you now. Let me know if there are any specific entry instructions!",
           "originalLanguage": "ta",
           "translations": {}
@@ -294,7 +391,10 @@
           "sender": "64800d2d99bd7917b521ffe3",
           "text": "hello",
           "createdAt": "2026-06-08T14:33:25.627Z",
-          "readBy": ["64800d2d99bd7917b521ffe3", "b2997076522731a58378052e"],
+          "readBy": [
+            "64800d2d99bd7917b521ffe3",
+            "b2997076522731a58378052e"
+          ],
           "originalText": "hello",
           "originalLanguage": "ta",
           "translations": {}
@@ -304,7 +404,10 @@
           "sender": "64800d2d99bd7917b521ffe3",
           "text": "hello",
           "createdAt": "2026-06-08T15:34:00.896Z",
-          "readBy": ["64800d2d99bd7917b521ffe3", "b2997076522731a58378052e"],
+          "readBy": [
+            "64800d2d99bd7917b521ffe3",
+            "b2997076522731a58378052e"
+          ],
           "originalText": "hello",
           "originalLanguage": "ta",
           "translations": {}
@@ -314,7 +417,9 @@
           "sender": "b2997076522731a58378052e",
           "text": "hi",
           "createdAt": "2026-06-09T10:18:11.287Z",
-          "readBy": ["b2997076522731a58378052e"],
+          "readBy": [
+            "b2997076522731a58378052e"
+          ],
           "originalText": "hi",
           "originalLanguage": "ta",
           "translations": {}
@@ -324,6 +429,16 @@
       "_id": "21e286005c386ac170e765e7",
       "createdAt": "2026-06-08T11:46:09.295Z",
       "updatedAt": "2026-06-09T10:18:11.288Z"
+    },
+    {
+      "request": "f22e1796e1b82bab0ab67dd0",
+      "seeker": "6ac35c35163bd33ca350cb7c",
+      "helper": "bd22846728a1629a2d2a3345",
+      "messages": [],
+      "status": "active",
+      "_id": "06d82f1d7d4aa763aaefbfbd",
+      "createdAt": "2026-10-05T08:37:53.058Z",
+      "updatedAt": "2026-10-05T08:37:53.065Z"
     }
   ],
   "Notification": [
@@ -609,6 +724,52 @@
       "_id": "a7985f2b1fa28322b28acde8",
       "createdAt": "2026-06-09T10:28:21.035Z",
       "updatedAt": "2026-06-09T10:28:21.038Z"
+    },
+    {
+      "recipient": "64800d2d99bd7917b521ffe3",
+      "type": "new_match",
+      "title": "Someone needs your help!",
+      "body": "Someone needs help with Web Dev near Hyderabad, Bahadurpura mandal, India",
+      "meta": {
+        "requestId": "f22e1796e1b82bab0ab67dd0",
+        "aiTitle": "web developer",
+        "category": "Web Dev",
+        "urgency": "flexible",
+        "seekerName": "Someone",
+        "seekerAvatar": "",
+        "location": "Hyderabad, Bahadurpura mandal, India",
+        "description": "i need a web developer for building projects i want to submit this project within this week so i need a developer this week ",
+        "originalLanguage": "en"
+      },
+      "_id": "54b7f08be071368e68a846ee",
+      "createdAt": "2026-10-05T08:33:47.453Z",
+      "updatedAt": "2026-10-05T08:33:47.474Z"
+    },
+    {
+      "recipient": "6ac35c35163bd33ca350cb7c",
+      "type": "request_accepted",
+      "title": "Help is on the way!",
+      "body": "Arun accepted your request!",
+      "meta": {
+        "chatId": "06d82f1d7d4aa763aaefbfbd",
+        "helperId": "bd22846728a1629a2d2a3345"
+      },
+      "_id": "882c9a3dcfb537d292c948ee",
+      "createdAt": "2026-10-05T08:37:53.071Z",
+      "updatedAt": "2026-10-05T08:39:16.250Z",
+      "read": true
+    },
+    {
+      "recipient": "64800d2d99bd7917b521ffe3",
+      "type": "request_taken",
+      "title": "Request taken",
+      "body": "The request you matched for has been accepted by someone else.",
+      "meta": {
+        "requestId": "f22e1796e1b82bab0ab67dd0"
+      },
+      "_id": "346b9960b499f555430ff5f6",
+      "createdAt": "2026-10-05T08:37:53.092Z",
+      "updatedAt": "2026-10-05T08:37:53.098Z"
     }
   ]
 }
